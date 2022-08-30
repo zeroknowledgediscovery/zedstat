@@ -78,7 +78,7 @@ class istat(object):
         return #self.df
 
 
-    def smoothAndSample(self,STEP=0.0001,interpolate=True):
+    def smooth(self,STEP=0.0001,interpolate=True):
         self.df=self.raw_df.copy()
         VAR=self.fprcol
         df_=self.df.reset_index()
@@ -149,7 +149,7 @@ class istat(object):
         return #self.df
 
     
-    def make_regular(self,precision=3):
+    def usample(self,precision=3):
         step=10**(-precision)
         fpr=[np.round(x,precision) for x in np.arange(0,1+step,step)]
         fpr_=[x for x in fpr if x not in self.df.index]
@@ -215,3 +215,78 @@ class istat(object):
         self.df_lim[direction]=df__
         self._auc[direction]=auc(df__.index.values,df__.tpr.values)
         return 
+
+
+
+    def auc_cb2(self,
+                total_samples=None,
+                positive_samples=None,
+                alpha=None):
+        
+        if total_samples is None:
+            total_samples=self.total_samples
+        if positive_samples is None:
+            positive_samples = self.positive_samples
+        if alpha is None:
+            alpha=self.alpha
+            n=total_samples
+            n_pos=positive_samples
+
+    
+        import scipy.stats as stats
+        auc=self._auc['nominal']
+        z=stats. norm. ppf(1 - (alpha/2))
+        #P=self.df.copy()
+        #P['fpr']=z*np.sqrt((self.df.reset_index().fpr*(1-self.df.reset_index().fpr))/n)
+        #P.tpr=z*np.sqrt((self.df.tpr*(1-self.df.tpr))/n_pos)
+
+        eta=1+(n_pos/(z*z))
+        b=(auc-.5)/eta
+        auc_U=auc+b+ (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
+        auc_L=auc+b- (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
+
+        self._auc['auc_L']=auc_L
+        self._auc['auc_U']=auc_U
+
+        return
+
+    def operating_zone(self,n=1,LRplus=10,LRminus=0.6):
+        wf=self.df
+        
+        opf=pd.concat([wf[(wf['LR+']>LRplus)
+                          & (wf['LR-']<LRminus) ]\
+                       .sort_values('ppv',ascending=False).head(n),
+                       wf[(wf['LR+']>LRplus)
+                          & (wf['LR-']<LRminus) ]\
+                       .sort_values('tpr',ascending=False).head(n)])
+
+        if opf.empty:
+            self._operating_zone=opf
+            return self._operating_zone
+        self._operating_zone=opf.reset_index()
+        self._operating_zone.index=['high precision']*n + ['high sensitivity']*n
+        return self._operating_zone
+
+    def interpret(self,fpr=0.01,number_of_positives=100):
+        wf=self.df
+        wf.loc[fpr]=pd.Series([],dtype=float)
+        wf=wf.sort_index().interpolate(method='spline',order=self.order)
+        row=wf.loc[fpr]
+
+        POS=number_of_positives
+        TP=POS*row.tpr
+        FP = TP*((1/row.ppv) -1)
+        NEG=FP/fpr
+        TOTALFLAGS=TP+FP
+        FN=POS-TP
+
+        #For every POS positive events, TOTALFLAGS are generated,
+        #of which TP are true ppositives, FP are false positives,
+        #and FN are missed alarms
+
+        return pd.DataFrame({'pos':np.round(POS),
+                'flags':int(np.round(TOTALFLAGS)),
+                'tp':int(np.round(TP)),
+                'fp':int(np.round(FP)),
+                'fn':int(np.round(FN))},index=['numbers'])
+        
