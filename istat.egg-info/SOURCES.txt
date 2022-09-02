@@ -1,0 +1,9 @@
+MANIFEST.in
+README.rst
+setup.py
+version.py
+istat.egg-info/PKG-INFO
+istat.egg-info/SOURCES.txt
+istat.egg-info/dependency_links.txt
+istat.egg-info/requires.txt
+istat.egg-info/top_level.txt
