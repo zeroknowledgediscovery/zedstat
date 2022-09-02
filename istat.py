@@ -41,6 +41,9 @@ class istat(object):
         self.alpha=alpha
         
     def get(self):
+        '''
+        return dataframe
+        '''
         return self.df
     
     def auc(self):
