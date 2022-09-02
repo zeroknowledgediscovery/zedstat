@@ -232,13 +232,13 @@ class istat(object):
             n=total_samples
             n_pos=positive_samples
 
-    
+
+        if 'nominal' not in self._auc.keys():
+            self.auc()
+            
         import scipy.stats as stats
         auc=self._auc['nominal']
         z=stats. norm. ppf(1 - (alpha/2))
-        #P=self.df.copy()
-        #P['fpr']=z*np.sqrt((self.df.reset_index().fpr*(1-self.df.reset_index().fpr))/n)
-        #P.tpr=z*np.sqrt((self.df.tpr*(1-self.df.tpr))/n_pos)
 
         eta=1+(n_pos/(z*z))
         b=(auc-.5)/eta
@@ -267,6 +267,24 @@ class istat(object):
         self._operating_zone.index=['high precision']*n + ['high sensitivity']*n
         return self._operating_zone
 
+
+    def samplesize(self,delta_auc,target_auc=None,alpha=None):
+        if alpha is None:
+            alpha=self.alpha
+
+        if target_auc is None:
+            if 'nominal' not in self._auc.keys():
+                self.auc()
+            target_auc=self._auc['nominal']
+            
+        import scipy.stats as stats
+        z=stats. norm. ppf(1 - (alpha/2))
+
+        required_npos = (z*z)*target_auc*(1-target_auc)/(delta_auc*delta_auc)
+
+        return required_npos
+
+    
     def interpret(self,fpr=0.01,number_of_positives=100):
         wf=self.df
         wf.loc[fpr]=pd.Series([],dtype=float)
@@ -279,14 +297,16 @@ class istat(object):
         NEG=FP/fpr
         TOTALFLAGS=TP+FP
         FN=POS-TP
+        TN=POS/self.prevalence
 
         #For every POS positive events, TOTALFLAGS are generated,
         #of which TP are true ppositives, FP are false positives,
         #and FN are missed alarms
 
         return pd.DataFrame({'pos':np.round(POS),
-                'flags':int(np.round(TOTALFLAGS)),
-                'tp':int(np.round(TP)),
-                'fp':int(np.round(FP)),
-                'fn':int(np.round(FN))},index=['numbers'])
+                             'flags':int(np.round(TOTALFLAGS)),
+                             'tp':int(np.round(TP)),
+                             'fp':int(np.round(FP)),
+                             'fn':int(np.round(FN)),
+                             'tn':int(np.round(TN))},index=['numbers'])
         

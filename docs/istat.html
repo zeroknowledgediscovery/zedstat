@@ -1,0 +1,1108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>istat API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#666666;background-color:black;//mix-blend-mode:difference;color:#bbbbbb;z-index:3}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#66bb66;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#66FF66}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:transparent;padding:1px 4px;color:#FFA500;overflow-wrap:break-word}h1 code{background:transparent}pre{overflow-wrap:break-word;background:#111111;word-wrap:break-word;border:0;border-top:1px solid #666;border-bottom:1px solid #666;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#333333;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#aaeeaa;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;color:#bbbbbb;background-color:black;overflow-wrap:break-word}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML" integrity="sha256-kZafAc6mZvK3W3v1pHOcUix30OHQN6pU/NO2oFkqZVw=" crossorigin></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>istat</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import pandas as pd
+import numpy as np
+from sklearn.metrics import auc
+
+class istat(object):
+    &#34;&#34;&#34;istat&#34;&#34;&#34;
+
+    def __init__(self,
+                 df=None,
+                 fprcol=&#39;fpr&#39;,
+                 tprcol=&#39;tpr&#39;,
+                 thresholdcol=&#39;threshold&#39;,
+                 prevalence=None,
+                 order=2,
+                 total_samples=None,
+                 positive_samples=None,
+                 alpha=0.01,
+                 random_state=None):
+        
+        if df.index.name==fprcol:
+            self.df=df
+        else:
+            if fprcol in df.columns:
+                self.df=df.set_index(fprcol)
+            else:
+                raise(&#39;fpr not in columns or index&#39;)
+            self.thresholdcol = thresholdcol
+        if thresholdcol not in self.df.columns:
+            self.thresholdcol=None
+            
+        self.fprcol = fprcol
+        self.tprcol = tprcol
+        self.random_state = random_state
+        self.raw_df = self.df.copy()
+        self.prevalence=prevalence
+        self.order=order
+        self.df_lim={}
+        self._auc={}
+        self.total_samples=total_samples
+        self.positive_samples=positive_samples
+        self.alpha=alpha
+        
+    def get(self):
+        return self.df
+    
+    def auc(self):
+        from sklearn.metrics import auc
+        self._auc[&#39;nominal&#39;]=auc(self.df.index.values,self.df.tpr.values)
+        return self._auc
+    
+    def convexify(self):
+        &#39;&#39;&#39;
+        get convex hull of roc curve
+        &#39;&#39;&#39;   
+        from scipy.spatial import ConvexHull
+        if self.df.index.name==self.fprcol:
+            rf=self.df
+        else:
+            if self.fprcol in self.df.columns:
+                rf=self.df.set_index(self.fprcol)#.drop(&#39;threshold&#39;,axis=1)
+            else:
+                raise(&#39;fpr not in columns or index&#39;)
+        pts=rf.reset_index()[[self.fprcol,self.tprcol]].values
+        if len(pts)&lt;3:
+            rf_=rf.reset_index()
+            rf_.columns=[&#39;tpr&#39;,&#39;fpr&#39;]
+            rf_=rf_.sort_values(&#39;fpr&#39;)
+            rf_=rf_.sort_values(&#39;tpr&#39;)
+            self.df=rf_.set_index(self.fprcol)
+            return #self.df
+        
+        hull = ConvexHull(pts)
+        rf_=pd.DataFrame(pts[hull.vertices, 0], pts[hull.vertices, 1]).reset_index()
+        rf_.columns=[&#39;tpr&#39;,&#39;fpr&#39;]
+        rf_=rf_.sort_values(&#39;fpr&#39;)
+        rf_=rf_.sort_values(&#39;tpr&#39;)
+        self.df=rf_.set_index(self.fprcol).sort_index()
+        return #self.df
+
+
+    def smooth(self,STEP=0.0001,interpolate=True):
+        self.df=self.raw_df.copy()
+        VAR=self.fprcol
+        df_=self.df.reset_index()
+        DF=pd.concat([pd.DataFrame(
+            df_[df_[VAR].between(i,i+STEP)].max()).transpose()
+                      for i in np.arange(0,1,STEP)]).set_index(VAR)
+        DF=DF.dropna()
+        DF.loc[0]=pd.Series([],dtype=float) 
+        DF.loc[1]=pd.Series([],dtype=float) 
+        DF.loc[0,&#39;tpr&#39;]=0
+        DF.loc[1,&#39;tpr&#39;]=1
+        
+        DF=DF.sort_index()
+        if interpolate:
+            DF=DF.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,order=self.order)
+            DF[DF &lt; 0] = 0
+            self.df=DF   
+        return #self.df
+
+    def allmeasures(self,prevalence=None,interpolate=False):
+        if prevalence is not None:
+            p=prevalence
+            self.prevalence=p
+        else:
+            p=self.prevalence
+        if p is None:
+            raise(&#39;prevalence undefined&#39;)
+        df__=self.df.copy()
+        if self.fprcol == df__.index.name:
+            df__=df__.reset_index()
+            df__[&#39;ppv&#39;]=1/(1+((df__.fpr/df__.tpr)*((1/p)-1)))
+            df__[&#39;acc&#39;]=p*df__.tpr + (1-p)*(1-df__.fpr)
+            df__[&#39;npv&#39;]=1/(1+((1-df__.tpr)/(1-df__.fpr))*(1/((1/p)-1)))
+            df__[&#39;LR+&#39;]=(df__.tpr)/(df__.fpr)
+            df__[&#39;LR-&#39;]=(1-df__.tpr)/(1-df__.fpr)
+            
+        df__=df__.set_index(self.fprcol)
+        if interpolate:
+            df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,order=self.order)
+            
+        if self.thresholdcol is not None:
+            if self.thresholdcol not in df__.columns:
+                df__=df__.join(self.raw_df[self.thresholdcol])
+                self.df=df__
+                self.correctPPV()
+                self.df[self.df &lt; 0] = 0
+        return #self.df
+
+
+    def correctPPV(self):
+        &#39;&#39;&#39;
+        make ppv monotonic
+        &#39;&#39;&#39;
+        if &#39;ppv&#39; not in self.df.columns:
+            return
+        
+        self.df.loc[0].ppv=1.0
+        self.df.loc[1].ppv=0.0
+        arr=self.df.ppv.values
+        a_=[]
+        for i in np.arange(len(arr)-1):
+            if arr[i+1]&gt;arr[i]:
+                a_.append(1.05*arr[i+1])
+            else:
+                a_.append(arr[i])
+        a_.append(arr[-1])
+        self.df.ppv=a_
+        return #self.df
+
+    
+    def usample(self,precision=3):
+        step=10**(-precision)
+        fpr=[np.round(x,precision) for x in np.arange(0,1+step,step)]
+        fpr_=[x for x in fpr if x not in self.df.index]
+
+        df___=self.df.copy()
+        for x in fpr_:
+            df___.loc[x]=pd.Series([],dtype=float) 
+        df___=df___.sort_index().interpolate()
+        self.df=df___.loc[fpr]
+        return #self.df
+    
+    def cb_delta(self,
+                 total_samples=None,
+                 positive_samples=None,
+                 alpha=None):
+        if total_samples is None:
+            total_samples=self.total_samples
+        if positive_samples is None:
+            positive_samples = self.positive_samples
+        if alpha is None:
+            alpha=self.alpha
+            n=total_samples
+            n_pos=positive_samples
+        if self.fprcol not in self.df.columns:
+            if self.fprcol != self.df.index.name:
+                return
+        if self.tprcol not in self.df.columns:
+            return
+        
+        import scipy.stats as stats
+        z=stats. norm. ppf(1 - (alpha/2))
+        delta_=pd.DataFrame()
+        df_=self.df.copy()
+        if self.fprcol == df_.index.name:
+            df_=df_.reset_index()
+            delta_[&#39;fprdel&#39;]=z*np.sqrt((df_.fpr*(1-df_.fpr))/n)
+            delta_[&#39;tprdel&#39;]=z*np.sqrt((df_.tpr*(1-df_.tpr))/n_pos)
+            self.delta_=delta_
+        return 
+
+    def getUL(self,direction=&#39;U&#39;):
+        df__=self.df.copy().reset_index()
+        if direction==&#39;U&#39;:
+            df__.tpr=df__.tpr+self.delta_.tprdel
+            df__.fpr=df__.fpr-self.delta_.fprdel
+        if direction==&#39;L&#39;:
+            df__.tpr=df__.tpr-self.delta_.tprdel
+            df__.fpr=df__.fpr+self.delta_.fprdel
+            df__[df__ &lt; 0] = 0
+            df__[df__ &gt; 1.0] = 1.0
+            
+        p=self.prevalence
+        if p is None:
+            raise(&#39;[revalence undefined&#39;)
+        df__[&#39;ppv&#39;]=1/(1+((df__.fpr/df__.tpr)*((1/p)-1)))
+        df__[&#39;acc&#39;]=p*df__.tpr + (1-p)*(1-df__.fpr)
+        df__[&#39;npv&#39;]=1/(1+((1-df__.tpr)/(1-df__.fpr))*(1/((1/p)-1)))
+        df__[&#39;LR+&#39;]=(df__.tpr)/(df__.fpr)
+        df__[&#39;LR-&#39;]=(1-df__.tpr)/(1-df__.fpr)
+        df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,
+                              order=self.order).set_index(self.fprcol)
+        df__[df__ &lt; 0] = 0
+        self.df_lim[direction]=df__
+        self._auc[direction]=auc(df__.index.values,df__.tpr.values)
+        return 
+
+
+
+    def auc_cb2(self,
+                total_samples=None,
+                positive_samples=None,
+                alpha=None):
+        
+        if total_samples is None:
+            total_samples=self.total_samples
+        if positive_samples is None:
+            positive_samples = self.positive_samples
+        if alpha is None:
+            alpha=self.alpha
+            n=total_samples
+            n_pos=positive_samples
+
+
+        if &#39;nominal&#39; not in self._auc.keys():
+            self.auc()
+            
+        import scipy.stats as stats
+        auc=self._auc[&#39;nominal&#39;]
+        z=stats. norm. ppf(1 - (alpha/2))
+
+        eta=1+(n_pos/(z*z))
+        b=(auc-.5)/eta
+        auc_U=auc+b+ (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
+        auc_L=auc+b- (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
+
+        self._auc[&#39;auc_L&#39;]=auc_L
+        self._auc[&#39;auc_U&#39;]=auc_U
+
+        return
+
+    def operating_zone(self,n=1,LRplus=10,LRminus=0.6):
+        wf=self.df
+        
+        opf=pd.concat([wf[(wf[&#39;LR+&#39;]&gt;LRplus)
+                          &amp; (wf[&#39;LR-&#39;]&lt;LRminus) ]\
+                       .sort_values(&#39;ppv&#39;,ascending=False).head(n),
+                       wf[(wf[&#39;LR+&#39;]&gt;LRplus)
+                          &amp; (wf[&#39;LR-&#39;]&lt;LRminus) ]\
+                       .sort_values(&#39;tpr&#39;,ascending=False).head(n)])
+
+        if opf.empty:
+            self._operating_zone=opf
+            return self._operating_zone
+        self._operating_zone=opf.reset_index()
+        self._operating_zone.index=[&#39;high precision&#39;]*n + [&#39;high sensitivity&#39;]*n
+        return self._operating_zone
+
+
+    def samplesize(self,delta_auc,target_auc=None,alpha=None):
+        if alpha is None:
+            alpha=self.alpha
+
+        if target_auc is None:
+            if &#39;nominal&#39; not in self._auc.keys():
+                self.auc()
+            target_auc=self._auc[&#39;nominal&#39;]
+            
+        import scipy.stats as stats
+        z=stats. norm. ppf(1 - (alpha/2))
+
+        required_npos = (z*z)*target_auc*(1-target_auc)/(delta_auc*delta_auc)
+
+        return required_npos
+
+    
+    def interpret(self,fpr=0.01,number_of_positives=100):
+        wf=self.df
+        wf.loc[fpr]=pd.Series([],dtype=float)
+        wf=wf.sort_index().interpolate(method=&#39;spline&#39;,order=self.order)
+        row=wf.loc[fpr]
+
+        POS=number_of_positives
+        TP=POS*row.tpr
+        FP = TP*((1/row.ppv) -1)
+        NEG=FP/fpr
+        TOTALFLAGS=TP+FP
+        FN=POS-TP
+        TN=POS/self.prevalence
+
+        #For every POS positive events, TOTALFLAGS are generated,
+        #of which TP are true ppositives, FP are false positives,
+        #and FN are missed alarms
+
+        return pd.DataFrame({&#39;pos&#39;:np.round(POS),
+                             &#39;flags&#39;:int(np.round(TOTALFLAGS)),
+                             &#39;tp&#39;:int(np.round(TP)),
+                             &#39;fp&#39;:int(np.round(FP)),
+                             &#39;fn&#39;:int(np.round(FN)),
+                             &#39;tn&#39;:int(np.round(TN))},index=[&#39;numbers&#39;])
+        </code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="istat.istat"><code class="flex name class">
+<span>class <span class="ident">istat</span></span>
+<span>(</span><span>df=None, fprcol='fpr', tprcol='tpr', thresholdcol='threshold', prevalence=None, order=2, total_samples=None, positive_samples=None, alpha=0.01, random_state=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>istat</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class istat(object):
+    &#34;&#34;&#34;istat&#34;&#34;&#34;
+
+    def __init__(self,
+                 df=None,
+                 fprcol=&#39;fpr&#39;,
+                 tprcol=&#39;tpr&#39;,
+                 thresholdcol=&#39;threshold&#39;,
+                 prevalence=None,
+                 order=2,
+                 total_samples=None,
+                 positive_samples=None,
+                 alpha=0.01,
+                 random_state=None):
+        
+        if df.index.name==fprcol:
+            self.df=df
+        else:
+            if fprcol in df.columns:
+                self.df=df.set_index(fprcol)
+            else:
+                raise(&#39;fpr not in columns or index&#39;)
+            self.thresholdcol = thresholdcol
+        if thresholdcol not in self.df.columns:
+            self.thresholdcol=None
+            
+        self.fprcol = fprcol
+        self.tprcol = tprcol
+        self.random_state = random_state
+        self.raw_df = self.df.copy()
+        self.prevalence=prevalence
+        self.order=order
+        self.df_lim={}
+        self._auc={}
+        self.total_samples=total_samples
+        self.positive_samples=positive_samples
+        self.alpha=alpha
+        
+    def get(self):
+        return self.df
+    
+    def auc(self):
+        from sklearn.metrics import auc
+        self._auc[&#39;nominal&#39;]=auc(self.df.index.values,self.df.tpr.values)
+        return self._auc
+    
+    def convexify(self):
+        &#39;&#39;&#39;
+        get convex hull of roc curve
+        &#39;&#39;&#39;   
+        from scipy.spatial import ConvexHull
+        if self.df.index.name==self.fprcol:
+            rf=self.df
+        else:
+            if self.fprcol in self.df.columns:
+                rf=self.df.set_index(self.fprcol)#.drop(&#39;threshold&#39;,axis=1)
+            else:
+                raise(&#39;fpr not in columns or index&#39;)
+        pts=rf.reset_index()[[self.fprcol,self.tprcol]].values
+        if len(pts)&lt;3:
+            rf_=rf.reset_index()
+            rf_.columns=[&#39;tpr&#39;,&#39;fpr&#39;]
+            rf_=rf_.sort_values(&#39;fpr&#39;)
+            rf_=rf_.sort_values(&#39;tpr&#39;)
+            self.df=rf_.set_index(self.fprcol)
+            return #self.df
+        
+        hull = ConvexHull(pts)
+        rf_=pd.DataFrame(pts[hull.vertices, 0], pts[hull.vertices, 1]).reset_index()
+        rf_.columns=[&#39;tpr&#39;,&#39;fpr&#39;]
+        rf_=rf_.sort_values(&#39;fpr&#39;)
+        rf_=rf_.sort_values(&#39;tpr&#39;)
+        self.df=rf_.set_index(self.fprcol).sort_index()
+        return #self.df
+
+
+    def smooth(self,STEP=0.0001,interpolate=True):
+        self.df=self.raw_df.copy()
+        VAR=self.fprcol
+        df_=self.df.reset_index()
+        DF=pd.concat([pd.DataFrame(
+            df_[df_[VAR].between(i,i+STEP)].max()).transpose()
+                      for i in np.arange(0,1,STEP)]).set_index(VAR)
+        DF=DF.dropna()
+        DF.loc[0]=pd.Series([],dtype=float) 
+        DF.loc[1]=pd.Series([],dtype=float) 
+        DF.loc[0,&#39;tpr&#39;]=0
+        DF.loc[1,&#39;tpr&#39;]=1
+        
+        DF=DF.sort_index()
+        if interpolate:
+            DF=DF.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,order=self.order)
+            DF[DF &lt; 0] = 0
+            self.df=DF   
+        return #self.df
+
+    def allmeasures(self,prevalence=None,interpolate=False):
+        if prevalence is not None:
+            p=prevalence
+            self.prevalence=p
+        else:
+            p=self.prevalence
+        if p is None:
+            raise(&#39;prevalence undefined&#39;)
+        df__=self.df.copy()
+        if self.fprcol == df__.index.name:
+            df__=df__.reset_index()
+            df__[&#39;ppv&#39;]=1/(1+((df__.fpr/df__.tpr)*((1/p)-1)))
+            df__[&#39;acc&#39;]=p*df__.tpr + (1-p)*(1-df__.fpr)
+            df__[&#39;npv&#39;]=1/(1+((1-df__.tpr)/(1-df__.fpr))*(1/((1/p)-1)))
+            df__[&#39;LR+&#39;]=(df__.tpr)/(df__.fpr)
+            df__[&#39;LR-&#39;]=(1-df__.tpr)/(1-df__.fpr)
+            
+        df__=df__.set_index(self.fprcol)
+        if interpolate:
+            df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,order=self.order)
+            
+        if self.thresholdcol is not None:
+            if self.thresholdcol not in df__.columns:
+                df__=df__.join(self.raw_df[self.thresholdcol])
+                self.df=df__
+                self.correctPPV()
+                self.df[self.df &lt; 0] = 0
+        return #self.df
+
+
+    def correctPPV(self):
+        &#39;&#39;&#39;
+        make ppv monotonic
+        &#39;&#39;&#39;
+        if &#39;ppv&#39; not in self.df.columns:
+            return
+        
+        self.df.loc[0].ppv=1.0
+        self.df.loc[1].ppv=0.0
+        arr=self.df.ppv.values
+        a_=[]
+        for i in np.arange(len(arr)-1):
+            if arr[i+1]&gt;arr[i]:
+                a_.append(1.05*arr[i+1])
+            else:
+                a_.append(arr[i])
+        a_.append(arr[-1])
+        self.df.ppv=a_
+        return #self.df
+
+    
+    def usample(self,precision=3):
+        step=10**(-precision)
+        fpr=[np.round(x,precision) for x in np.arange(0,1+step,step)]
+        fpr_=[x for x in fpr if x not in self.df.index]
+
+        df___=self.df.copy()
+        for x in fpr_:
+            df___.loc[x]=pd.Series([],dtype=float) 
+        df___=df___.sort_index().interpolate()
+        self.df=df___.loc[fpr]
+        return #self.df
+    
+    def cb_delta(self,
+                 total_samples=None,
+                 positive_samples=None,
+                 alpha=None):
+        if total_samples is None:
+            total_samples=self.total_samples
+        if positive_samples is None:
+            positive_samples = self.positive_samples
+        if alpha is None:
+            alpha=self.alpha
+            n=total_samples
+            n_pos=positive_samples
+        if self.fprcol not in self.df.columns:
+            if self.fprcol != self.df.index.name:
+                return
+        if self.tprcol not in self.df.columns:
+            return
+        
+        import scipy.stats as stats
+        z=stats. norm. ppf(1 - (alpha/2))
+        delta_=pd.DataFrame()
+        df_=self.df.copy()
+        if self.fprcol == df_.index.name:
+            df_=df_.reset_index()
+            delta_[&#39;fprdel&#39;]=z*np.sqrt((df_.fpr*(1-df_.fpr))/n)
+            delta_[&#39;tprdel&#39;]=z*np.sqrt((df_.tpr*(1-df_.tpr))/n_pos)
+            self.delta_=delta_
+        return 
+
+    def getUL(self,direction=&#39;U&#39;):
+        df__=self.df.copy().reset_index()
+        if direction==&#39;U&#39;:
+            df__.tpr=df__.tpr+self.delta_.tprdel
+            df__.fpr=df__.fpr-self.delta_.fprdel
+        if direction==&#39;L&#39;:
+            df__.tpr=df__.tpr-self.delta_.tprdel
+            df__.fpr=df__.fpr+self.delta_.fprdel
+            df__[df__ &lt; 0] = 0
+            df__[df__ &gt; 1.0] = 1.0
+            
+        p=self.prevalence
+        if p is None:
+            raise(&#39;[revalence undefined&#39;)
+        df__[&#39;ppv&#39;]=1/(1+((df__.fpr/df__.tpr)*((1/p)-1)))
+        df__[&#39;acc&#39;]=p*df__.tpr + (1-p)*(1-df__.fpr)
+        df__[&#39;npv&#39;]=1/(1+((1-df__.tpr)/(1-df__.fpr))*(1/((1/p)-1)))
+        df__[&#39;LR+&#39;]=(df__.tpr)/(df__.fpr)
+        df__[&#39;LR-&#39;]=(1-df__.tpr)/(1-df__.fpr)
+        df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,
+                              order=self.order).set_index(self.fprcol)
+        df__[df__ &lt; 0] = 0
+        self.df_lim[direction]=df__
+        self._auc[direction]=auc(df__.index.values,df__.tpr.values)
+        return 
+
+
+
+    def auc_cb2(self,
+                total_samples=None,
+                positive_samples=None,
+                alpha=None):
+        
+        if total_samples is None:
+            total_samples=self.total_samples
+        if positive_samples is None:
+            positive_samples = self.positive_samples
+        if alpha is None:
+            alpha=self.alpha
+            n=total_samples
+            n_pos=positive_samples
+
+
+        if &#39;nominal&#39; not in self._auc.keys():
+            self.auc()
+            
+        import scipy.stats as stats
+        auc=self._auc[&#39;nominal&#39;]
+        z=stats. norm. ppf(1 - (alpha/2))
+
+        eta=1+(n_pos/(z*z))
+        b=(auc-.5)/eta
+        auc_U=auc+b+ (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
+        auc_L=auc+b- (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
+
+        self._auc[&#39;auc_L&#39;]=auc_L
+        self._auc[&#39;auc_U&#39;]=auc_U
+
+        return
+
+    def operating_zone(self,n=1,LRplus=10,LRminus=0.6):
+        wf=self.df
+        
+        opf=pd.concat([wf[(wf[&#39;LR+&#39;]&gt;LRplus)
+                          &amp; (wf[&#39;LR-&#39;]&lt;LRminus) ]\
+                       .sort_values(&#39;ppv&#39;,ascending=False).head(n),
+                       wf[(wf[&#39;LR+&#39;]&gt;LRplus)
+                          &amp; (wf[&#39;LR-&#39;]&lt;LRminus) ]\
+                       .sort_values(&#39;tpr&#39;,ascending=False).head(n)])
+
+        if opf.empty:
+            self._operating_zone=opf
+            return self._operating_zone
+        self._operating_zone=opf.reset_index()
+        self._operating_zone.index=[&#39;high precision&#39;]*n + [&#39;high sensitivity&#39;]*n
+        return self._operating_zone
+
+
+    def samplesize(self,delta_auc,target_auc=None,alpha=None):
+        if alpha is None:
+            alpha=self.alpha
+
+        if target_auc is None:
+            if &#39;nominal&#39; not in self._auc.keys():
+                self.auc()
+            target_auc=self._auc[&#39;nominal&#39;]
+            
+        import scipy.stats as stats
+        z=stats. norm. ppf(1 - (alpha/2))
+
+        required_npos = (z*z)*target_auc*(1-target_auc)/(delta_auc*delta_auc)
+
+        return required_npos
+
+    
+    def interpret(self,fpr=0.01,number_of_positives=100):
+        wf=self.df
+        wf.loc[fpr]=pd.Series([],dtype=float)
+        wf=wf.sort_index().interpolate(method=&#39;spline&#39;,order=self.order)
+        row=wf.loc[fpr]
+
+        POS=number_of_positives
+        TP=POS*row.tpr
+        FP = TP*((1/row.ppv) -1)
+        NEG=FP/fpr
+        TOTALFLAGS=TP+FP
+        FN=POS-TP
+        TN=POS/self.prevalence
+
+        #For every POS positive events, TOTALFLAGS are generated,
+        #of which TP are true ppositives, FP are false positives,
+        #and FN are missed alarms
+
+        return pd.DataFrame({&#39;pos&#39;:np.round(POS),
+                             &#39;flags&#39;:int(np.round(TOTALFLAGS)),
+                             &#39;tp&#39;:int(np.round(TP)),
+                             &#39;fp&#39;:int(np.round(FP)),
+                             &#39;fn&#39;:int(np.round(FN)),
+                             &#39;tn&#39;:int(np.round(TN))},index=[&#39;numbers&#39;])</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="istat.istat.allmeasures"><code class="name flex">
+<span>def <span class="ident">allmeasures</span></span>(<span>self, prevalence=None, interpolate=False)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def allmeasures(self,prevalence=None,interpolate=False):
+    if prevalence is not None:
+        p=prevalence
+        self.prevalence=p
+    else:
+        p=self.prevalence
+    if p is None:
+        raise(&#39;prevalence undefined&#39;)
+    df__=self.df.copy()
+    if self.fprcol == df__.index.name:
+        df__=df__.reset_index()
+        df__[&#39;ppv&#39;]=1/(1+((df__.fpr/df__.tpr)*((1/p)-1)))
+        df__[&#39;acc&#39;]=p*df__.tpr + (1-p)*(1-df__.fpr)
+        df__[&#39;npv&#39;]=1/(1+((1-df__.tpr)/(1-df__.fpr))*(1/((1/p)-1)))
+        df__[&#39;LR+&#39;]=(df__.tpr)/(df__.fpr)
+        df__[&#39;LR-&#39;]=(1-df__.tpr)/(1-df__.fpr)
+        
+    df__=df__.set_index(self.fprcol)
+    if interpolate:
+        df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,order=self.order)
+        
+    if self.thresholdcol is not None:
+        if self.thresholdcol not in df__.columns:
+            df__=df__.join(self.raw_df[self.thresholdcol])
+            self.df=df__
+            self.correctPPV()
+            self.df[self.df &lt; 0] = 0
+    return #self.df</code></pre>
+</details>
+</dd>
+<dt id="istat.istat.auc"><code class="name flex">
+<span>def <span class="ident">auc</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def auc(self):
+    from sklearn.metrics import auc
+    self._auc[&#39;nominal&#39;]=auc(self.df.index.values,self.df.tpr.values)
+    return self._auc</code></pre>
+</details>
+</dd>
+<dt id="istat.istat.auc_cb2"><code class="name flex">
+<span>def <span class="ident">auc_cb2</span></span>(<span>self, total_samples=None, positive_samples=None, alpha=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def auc_cb2(self,
+            total_samples=None,
+            positive_samples=None,
+            alpha=None):
+    
+    if total_samples is None:
+        total_samples=self.total_samples
+    if positive_samples is None:
+        positive_samples = self.positive_samples
+    if alpha is None:
+        alpha=self.alpha
+        n=total_samples
+        n_pos=positive_samples
+
+
+    if &#39;nominal&#39; not in self._auc.keys():
+        self.auc()
+        
+    import scipy.stats as stats
+    auc=self._auc[&#39;nominal&#39;]
+    z=stats. norm. ppf(1 - (alpha/2))
+
+    eta=1+(n_pos/(z*z))
+    b=(auc-.5)/eta
+    auc_U=auc+b+ (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
+    auc_L=auc+b- (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
+
+    self._auc[&#39;auc_L&#39;]=auc_L
+    self._auc[&#39;auc_U&#39;]=auc_U
+
+    return</code></pre>
+</details>
+</dd>
+<dt id="istat.istat.cb_delta"><code class="name flex">
+<span>def <span class="ident">cb_delta</span></span>(<span>self, total_samples=None, positive_samples=None, alpha=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def cb_delta(self,
+             total_samples=None,
+             positive_samples=None,
+             alpha=None):
+    if total_samples is None:
+        total_samples=self.total_samples
+    if positive_samples is None:
+        positive_samples = self.positive_samples
+    if alpha is None:
+        alpha=self.alpha
+        n=total_samples
+        n_pos=positive_samples
+    if self.fprcol not in self.df.columns:
+        if self.fprcol != self.df.index.name:
+            return
+    if self.tprcol not in self.df.columns:
+        return
+    
+    import scipy.stats as stats
+    z=stats. norm. ppf(1 - (alpha/2))
+    delta_=pd.DataFrame()
+    df_=self.df.copy()
+    if self.fprcol == df_.index.name:
+        df_=df_.reset_index()
+        delta_[&#39;fprdel&#39;]=z*np.sqrt((df_.fpr*(1-df_.fpr))/n)
+        delta_[&#39;tprdel&#39;]=z*np.sqrt((df_.tpr*(1-df_.tpr))/n_pos)
+        self.delta_=delta_
+    return </code></pre>
+</details>
+</dd>
+<dt id="istat.istat.convexify"><code class="name flex">
+<span>def <span class="ident">convexify</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>get convex hull of roc curve</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def convexify(self):
+    &#39;&#39;&#39;
+    get convex hull of roc curve
+    &#39;&#39;&#39;   
+    from scipy.spatial import ConvexHull
+    if self.df.index.name==self.fprcol:
+        rf=self.df
+    else:
+        if self.fprcol in self.df.columns:
+            rf=self.df.set_index(self.fprcol)#.drop(&#39;threshold&#39;,axis=1)
+        else:
+            raise(&#39;fpr not in columns or index&#39;)
+    pts=rf.reset_index()[[self.fprcol,self.tprcol]].values
+    if len(pts)&lt;3:
+        rf_=rf.reset_index()
+        rf_.columns=[&#39;tpr&#39;,&#39;fpr&#39;]
+        rf_=rf_.sort_values(&#39;fpr&#39;)
+        rf_=rf_.sort_values(&#39;tpr&#39;)
+        self.df=rf_.set_index(self.fprcol)
+        return #self.df
+    
+    hull = ConvexHull(pts)
+    rf_=pd.DataFrame(pts[hull.vertices, 0], pts[hull.vertices, 1]).reset_index()
+    rf_.columns=[&#39;tpr&#39;,&#39;fpr&#39;]
+    rf_=rf_.sort_values(&#39;fpr&#39;)
+    rf_=rf_.sort_values(&#39;tpr&#39;)
+    self.df=rf_.set_index(self.fprcol).sort_index()
+    return #self.df</code></pre>
+</details>
+</dd>
+<dt id="istat.istat.correctPPV"><code class="name flex">
+<span>def <span class="ident">correctPPV</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>make ppv monotonic</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def correctPPV(self):
+    &#39;&#39;&#39;
+    make ppv monotonic
+    &#39;&#39;&#39;
+    if &#39;ppv&#39; not in self.df.columns:
+        return
+    
+    self.df.loc[0].ppv=1.0
+    self.df.loc[1].ppv=0.0
+    arr=self.df.ppv.values
+    a_=[]
+    for i in np.arange(len(arr)-1):
+        if arr[i+1]&gt;arr[i]:
+            a_.append(1.05*arr[i+1])
+        else:
+            a_.append(arr[i])
+    a_.append(arr[-1])
+    self.df.ppv=a_
+    return #self.df</code></pre>
+</details>
+</dd>
+<dt id="istat.istat.get"><code class="name flex">
+<span>def <span class="ident">get</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get(self):
+    return self.df</code></pre>
+</details>
+</dd>
+<dt id="istat.istat.getUL"><code class="name flex">
+<span>def <span class="ident">getUL</span></span>(<span>self, direction='U')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getUL(self,direction=&#39;U&#39;):
+    df__=self.df.copy().reset_index()
+    if direction==&#39;U&#39;:
+        df__.tpr=df__.tpr+self.delta_.tprdel
+        df__.fpr=df__.fpr-self.delta_.fprdel
+    if direction==&#39;L&#39;:
+        df__.tpr=df__.tpr-self.delta_.tprdel
+        df__.fpr=df__.fpr+self.delta_.fprdel
+        df__[df__ &lt; 0] = 0
+        df__[df__ &gt; 1.0] = 1.0
+        
+    p=self.prevalence
+    if p is None:
+        raise(&#39;[revalence undefined&#39;)
+    df__[&#39;ppv&#39;]=1/(1+((df__.fpr/df__.tpr)*((1/p)-1)))
+    df__[&#39;acc&#39;]=p*df__.tpr + (1-p)*(1-df__.fpr)
+    df__[&#39;npv&#39;]=1/(1+((1-df__.tpr)/(1-df__.fpr))*(1/((1/p)-1)))
+    df__[&#39;LR+&#39;]=(df__.tpr)/(df__.fpr)
+    df__[&#39;LR-&#39;]=(1-df__.tpr)/(1-df__.fpr)
+    df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,
+                          order=self.order).set_index(self.fprcol)
+    df__[df__ &lt; 0] = 0
+    self.df_lim[direction]=df__
+    self._auc[direction]=auc(df__.index.values,df__.tpr.values)
+    return </code></pre>
+</details>
+</dd>
+<dt id="istat.istat.interpret"><code class="name flex">
+<span>def <span class="ident">interpret</span></span>(<span>self, fpr=0.01, number_of_positives=100)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def interpret(self,fpr=0.01,number_of_positives=100):
+    wf=self.df
+    wf.loc[fpr]=pd.Series([],dtype=float)
+    wf=wf.sort_index().interpolate(method=&#39;spline&#39;,order=self.order)
+    row=wf.loc[fpr]
+
+    POS=number_of_positives
+    TP=POS*row.tpr
+    FP = TP*((1/row.ppv) -1)
+    NEG=FP/fpr
+    TOTALFLAGS=TP+FP
+    FN=POS-TP
+    TN=POS/self.prevalence
+
+    #For every POS positive events, TOTALFLAGS are generated,
+    #of which TP are true ppositives, FP are false positives,
+    #and FN are missed alarms
+
+    return pd.DataFrame({&#39;pos&#39;:np.round(POS),
+                         &#39;flags&#39;:int(np.round(TOTALFLAGS)),
+                         &#39;tp&#39;:int(np.round(TP)),
+                         &#39;fp&#39;:int(np.round(FP)),
+                         &#39;fn&#39;:int(np.round(FN)),
+                         &#39;tn&#39;:int(np.round(TN))},index=[&#39;numbers&#39;])</code></pre>
+</details>
+</dd>
+<dt id="istat.istat.operating_zone"><code class="name flex">
+<span>def <span class="ident">operating_zone</span></span>(<span>self, n=1, LRplus=10, LRminus=0.6)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def operating_zone(self,n=1,LRplus=10,LRminus=0.6):
+    wf=self.df
+    
+    opf=pd.concat([wf[(wf[&#39;LR+&#39;]&gt;LRplus)
+                      &amp; (wf[&#39;LR-&#39;]&lt;LRminus) ]\
+                   .sort_values(&#39;ppv&#39;,ascending=False).head(n),
+                   wf[(wf[&#39;LR+&#39;]&gt;LRplus)
+                      &amp; (wf[&#39;LR-&#39;]&lt;LRminus) ]\
+                   .sort_values(&#39;tpr&#39;,ascending=False).head(n)])
+
+    if opf.empty:
+        self._operating_zone=opf
+        return self._operating_zone
+    self._operating_zone=opf.reset_index()
+    self._operating_zone.index=[&#39;high precision&#39;]*n + [&#39;high sensitivity&#39;]*n
+    return self._operating_zone</code></pre>
+</details>
+</dd>
+<dt id="istat.istat.samplesize"><code class="name flex">
+<span>def <span class="ident">samplesize</span></span>(<span>self, delta_auc, target_auc=None, alpha=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def samplesize(self,delta_auc,target_auc=None,alpha=None):
+    if alpha is None:
+        alpha=self.alpha
+
+    if target_auc is None:
+        if &#39;nominal&#39; not in self._auc.keys():
+            self.auc()
+        target_auc=self._auc[&#39;nominal&#39;]
+        
+    import scipy.stats as stats
+    z=stats. norm. ppf(1 - (alpha/2))
+
+    required_npos = (z*z)*target_auc*(1-target_auc)/(delta_auc*delta_auc)
+
+    return required_npos</code></pre>
+</details>
+</dd>
+<dt id="istat.istat.smooth"><code class="name flex">
+<span>def <span class="ident">smooth</span></span>(<span>self, STEP=0.0001, interpolate=True)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def smooth(self,STEP=0.0001,interpolate=True):
+    self.df=self.raw_df.copy()
+    VAR=self.fprcol
+    df_=self.df.reset_index()
+    DF=pd.concat([pd.DataFrame(
+        df_[df_[VAR].between(i,i+STEP)].max()).transpose()
+                  for i in np.arange(0,1,STEP)]).set_index(VAR)
+    DF=DF.dropna()
+    DF.loc[0]=pd.Series([],dtype=float) 
+    DF.loc[1]=pd.Series([],dtype=float) 
+    DF.loc[0,&#39;tpr&#39;]=0
+    DF.loc[1,&#39;tpr&#39;]=1
+    
+    DF=DF.sort_index()
+    if interpolate:
+        DF=DF.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,order=self.order)
+        DF[DF &lt; 0] = 0
+        self.df=DF   
+    return #self.df</code></pre>
+</details>
+</dd>
+<dt id="istat.istat.usample"><code class="name flex">
+<span>def <span class="ident">usample</span></span>(<span>self, precision=3)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def usample(self,precision=3):
+    step=10**(-precision)
+    fpr=[np.round(x,precision) for x in np.arange(0,1+step,step)]
+    fpr_=[x for x in fpr if x not in self.df.index]
+
+    df___=self.df.copy()
+    for x in fpr_:
+        df___.loc[x]=pd.Series([],dtype=float) 
+    df___=df___.sort_index().interpolate()
+    self.df=df___.loc[fpr]
+    return #self.df</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<img src="logozed_nowhite.png" alt="drawing" style="width:400px;"/>
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="istat.istat" href="#istat.istat">istat</a></code></h4>
+<ul class="two-column">
+<li><code><a title="istat.istat.allmeasures" href="#istat.istat.allmeasures">allmeasures</a></code></li>
+<li><code><a title="istat.istat.auc" href="#istat.istat.auc">auc</a></code></li>
+<li><code><a title="istat.istat.auc_cb2" href="#istat.istat.auc_cb2">auc_cb2</a></code></li>
+<li><code><a title="istat.istat.cb_delta" href="#istat.istat.cb_delta">cb_delta</a></code></li>
+<li><code><a title="istat.istat.convexify" href="#istat.istat.convexify">convexify</a></code></li>
+<li><code><a title="istat.istat.correctPPV" href="#istat.istat.correctPPV">correctPPV</a></code></li>
+<li><code><a title="istat.istat.get" href="#istat.istat.get">get</a></code></li>
+<li><code><a title="istat.istat.getUL" href="#istat.istat.getUL">getUL</a></code></li>
+<li><code><a title="istat.istat.interpret" href="#istat.istat.interpret">interpret</a></code></li>
+<li><code><a title="istat.istat.operating_zone" href="#istat.istat.operating_zone">operating_zone</a></code></li>
+<li><code><a title="istat.istat.samplesize" href="#istat.istat.samplesize">samplesize</a></code></li>
+<li><code><a title="istat.istat.smooth" href="#istat.istat.smooth">smooth</a></code></li>
+<li><code><a title="istat.istat.usample" href="#istat.istat.usample">usample</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+Author: <a href="https://zed.uchicago.edu"> Zero Knowledge Discovery, University of Chicago</a>. Email: ishanu@uchicago.edu
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

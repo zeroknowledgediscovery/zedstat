@@ -1,0 +1,441 @@
+\usepackage{etex}
+\usepackage{amssymb,amsfonts,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage[usenames,x11names, dvipsnames, svgnames]{xcolor}
+\usepackage{amsmath,amssymb}
+\usepackage{dsfont}
+\usepackage{amsfonts}
+\usepackage{mathrsfs}
+\usepackage{texshade}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  filecolor=black,
+  urlcolor=DodgerBlue4,
+  breaklinks=false,
+  % linkbordercolor=red,% hyperlink borders will be red
+  % pdfborderstyle={/S/U/W 1}% border style will be underline of width 1pt
+}
+\usepackage{array}
+\usepackage{xr}
+\usepackage{verbatim}
+\usepackage{multirow}
+\usepackage{longtable}
+% \usepackage[T1,euler-digits]{eulervm}
+% \usepackage{times}
+% \usepackage{pxfonts}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usetikzlibrary{shapes,calc,shadows,fadings,arrows,decorations.pathreplacing,automata,positioning}
+\usetikzlibrary{external}
+\usetikzlibrary{decorations.text}
+\usepgfplotslibrary{colorbrewer} 
+\usepgfplotslibrary{statistics}
+
+\tikzexternalize[prefix=./Figures/External/]% activate externalization!
+\tikzexternaldisable
+% \addtolength{\voffset}{.1in}  
+\usepackage{geometry}
+\geometry{a4paper, left=.65in,right=.65in,top=.8in,bottom=0.7in}
+
+\addtolength{\textwidth}{-.1in}    
+\addtolength{\hoffset}{.05in}    
+\addtolength{\textheight}{.1in}    
+\addtolength{\footskip}{0in}    
+\usepackage{rotating}
+\definecolor{nodecol}{RGB}{240,240,220}
+\definecolor{nodeedge}{RGB}{240,240,225}
+\definecolor{edgecol}{RGB}{130,130,130}
+\tikzset{%
+  fshadow/.style={      preaction={
+      fill=black,opacity=.3,
+      path fading=circle with fuzzy edge 20 percent,
+      transform canvas={xshift=1mm,yshift=-1mm}
+    }} 
+}
+\usetikzlibrary{pgfplots.dateplot}
+\usetikzlibrary{patterns}
+\usetikzlibrary{decorations.markings}
+\usepackage{fancyhdr}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage{comment}
+%% ## Equation Space Control---------------------------
+\def\EQSP{3pt}
+\newcommand{\mltlne}[2][\EQSP]{\begingroup\setlength\abovedisplayskip{#1}\setlength\belowdisplayskip{#1}\begin{equation}\begin{multlined} #2 \end{multlined}\end{equation}\endgroup\noindent}
+\newcommand{\cgather}[2][\EQSP]{\begingroup\setlength\abovedisplayskip{#1}\setlength\belowdisplayskip{#1}\begin{gather} #2 \end{gather}\endgroup\noindent}
+\newcommand{\cgathers}[2][\EQSP]{\begingroup\setlength\abovedisplayskip{#1}\setlength\belowdisplayskip{#1}\begin{gather*} #2 \end{gather*}\endgroup\noindent}
+\newcommand{\calign}[2][\EQSP]{\begingroup\setlength\abovedisplayskip{#1}\setlength\belowdisplayskip{#1}\begin{align} #2 \end{align}\endgroup\noindent}
+\newcommand{\caligns}[2][\EQSP]{\begingroup\setlength\abovedisplayskip{#1}\setlength\belowdisplayskip{#1}\begin{align*} #2 \end{align*}\endgroup\noindent}
+\newcommand{\mnp}[2]{\begin{minipage}{#1}#2\end{minipage}} 
+%% COLOR DEFS------------------------------------------
+\newtheorem{thm}{Theorem}
+\newtheorem{cor}{Corollary}
+\newtheorem{lem}{Lemma}
+\newtheorem{prop}{Proposition}
+\newtheorem{defn}{Definition}
+\newtheorem{exmpl}{Example}
+\newtheorem{rem}{Remark}
+\newtheorem{notn}{Notation}
+%% ------------PROOF INCLUSION -----------------
+\def\NOPROOF{Proof omitted.}
+\newif\ifproof
+\prooffalse % or \draftfalse
+\newcommand{\Proof}[1]{
+  \ifproof
+  \begin{IEEEproof}
+    #1\end{IEEEproof}
+  \else
+  \NOPROOF
+  \fi
+}
+%% ------------ -----------------
+\newcommand{\DETAILS}[1]{#1}
+%% ------------ -----------------
+% color commands------------------------
+\newcommand{\etal}{\textit{et} \mspace{3mu} \textit{al.}}
+% \renewcommand{\algorithmiccomment}[1]{$/** $ #1 $ **/$}
+\newcommand{\vect}[1]{\textbf{\textit{#1}}}
+\newcommand{\figfont}{\fontsize{8}{8}\selectfont\strut}
+\newcommand{\hlt}{ \bf \sffamily \itshape\color[rgb]{.1,.2,.45}}
+\newcommand{\pitilde}{\widetilde{\pi}}
+\newcommand{\Pitilde}{\widetilde{\Pi}}
+\newcommand{\bvec}{\vartheta}
+\newcommand{\algo}{\textrm{\bf\texttt{GenESeSS}}\xspace}
+\newcommand{\xalgo}{\textrm{\bf\texttt{xGenESeSS}}\xspace}
+\newcommand{\FNTST}{\bf }
+\newcommand{\FNTED}{\color{darkgray} \scriptsize $\phantom{.}$}
+\renewcommand{\baselinestretch}{.95}
+\newcommand{\sync}{\otimes}
+\newcommand{\psync}{\hspace{3pt}\overrightarrow{\hspace{-3pt}\sync}}
+% \newcommand{\psync}{\raisebox{-4pt}{\begin{tikzpicture}\node[anchor=south] (A) {$\sync$};
+%   \draw [->,>=stealth] ([yshift=-2pt, xshift=2pt]A.north west) -- ([yshift=-2pt]A.north east); %\end{tikzpicture}}}
+\newcommand{\base}[1]{\llbracket #1 \rrbracket}
+\newcommand{\nst}{\textrm{\sffamily\textsc{Numstates}}}
+\newcommand{\HA}{\boldsymbol{\mathds{H}}}
+\newcommand{\eqp}{ \vartheta }
+\newcommand{\entropy}[1]{\boldsymbol{h}\left ( #1 \right )}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}%
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}%
+\newcommand{\absB}[1]{\big\lvert #1 \big\rvert}%
+% #############################################################
+% #############################################################
+% PREAMBLE ####################################################
+% #############################################################
+% #############################################################
+% \usepackage{pnastwoF}      
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\expect}{\mathbf{E}}
+\DeclareMathOperator*{\var}{\mathbf{Var}}
+
+\newcommand{\ND}{ \mathcal{N}  }
+\usepackage[linesnumbered,ruled,vlined,noend]{algorithm2e}
+\newcommand{\captionN}[1]{\caption{\color{darkgray} \sffamily \fontsize{9}{10}\selectfont #1  }}
+\newcommand{\btl}{\ \textbf{\small\sffamily bits/letter}}
+\usepackage{txfonts}
+% \usepackage{ccfonts}
+%%% save defaults
+\renewcommand{\rmdefault}{phv} % Arial
+\renewcommand{\sfdefault}{phv} % Arial
+\edef\keptrmdefault{\rmdefault}
+\edef\keptsfdefault{\sfdefault}
+\edef\keptttdefault{\ttdefault}
+
+% \usepackage{kerkis}
+\usepackage[OT1]{fontenc}
+\usepackage{concmath}
+% \usepackage[T1]{eulervm} 
+% \usepackage[OT1]{fontenc}
+%%% restore defaults
+\edef\rmdefault{\keptrmdefault}
+\edef\sfdefault{\keptsfdefault}
+\edef\ttdefault{\keptttdefault}
+\tikzexternalenable
+% ##########################################################
+\tikzfading[name=fade out,
+inner color=transparent!0,
+outer color=transparent!100]
+% ###################################
+\newcommand{\xtitaut}[2]{
+  \noindent\mnp{\textwidth}{
+    \mnp{\textwidth}{\raggedright\Huge \bf \sffamily #1}
+
+    \vskip 1em
+
+    {\bf \sffamily #2}
+  }
+  \vskip 2em
+}
+% ###################################
+% ###################################
+\tikzset{wiggle/.style={decorate, decoration={random steps, amplitude=10pt}}}
+\usetikzlibrary{decorations.pathmorphing}
+\pgfdeclaredecoration{Snake}{initial}
+{
+  \state{initial}[switch if less than=+.625\pgfdecorationsegmentlength to final,
+  width=+.3125\pgfdecorationsegmentlength,
+  next state=down]{
+    \pgfpathmoveto{\pgfqpoint{0pt}{\pgfdecorationsegmentamplitude}}
+  }
+  \state{down}[switch if less than=+.8125\pgfdecorationsegmentlength to end down,
+  width=+.5\pgfdecorationsegmentlength,
+  next state=up]{
+    \pgfpathcosine{\pgfqpoint{.25\pgfdecorationsegmentlength}{-1\pgfdecorationsegmentamplitude}}
+    \pgfpathsine{\pgfqpoint{.25\pgfdecorationsegmentlength}{-1\pgfdecorationsegmentamplitude}}
+  }
+  \state{up}[switch if less than=+.8125\pgfdecorationsegmentlength to end up,
+  width=+.5\pgfdecorationsegmentlength,
+  next state=down]{
+    \pgfpathcosine{\pgfqpoint{.25\pgfdecorationsegmentlength}{\pgfdecorationsegmentamplitude}}
+    \pgfpathsine{\pgfqpoint{.25\pgfdecorationsegmentlength}{\pgfdecorationsegmentamplitude}}
+  }
+  \state{end down}[width=+.3125\pgfdecorationsegmentlength,
+  next state=final]{
+    \pgfpathcosine{\pgfqpoint{.15625\pgfdecorationsegmentlength}{-.5\pgfdecorationsegmentamplitude}}
+    \pgfpathsine{\pgfqpoint{.15625\pgfdecorationsegmentlength}{-.5\pgfdecorationsegmentamplitude}}
+  }
+  \state{end up}[width=+.3125\pgfdecorationsegmentlength,
+  next state=final]{
+    \pgfpathcosine{\pgfqpoint{.15625\pgfdecorationsegmentlength}{.5\pgfdecorationsegmentamplitude}}
+    \pgfpathsine{\pgfqpoint{.15625\pgfdecorationsegmentlength}{.5\pgfdecorationsegmentamplitude}}
+  }
+  \state{final}{\pgfpathlineto{\pgfpointdecoratedpathlast}}
+}
+% ###################################
+% ###################################
+\newcolumntype{L}[1]{>{\rule{0pt}{2ex}\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\rule{0pt}{2ex}\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\rule{0pt}{2ex}\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+
+
+% ################################################
+% ################################################
+% ################################################
+% ################################################
+\def\DISCLOSURE#1{\def\disclosure{#1}}
+\DISCLOSURE{\raisebox{15pt}{$\phantom{XxxX}$This sheet contains proprietary information 
+    not to be released to third parties except for the explicit purpose of evaluation.}
+}
+% ####################################
+\newcommand{\set}[1]{\left\{ #1 \right\}}
+\newcommand{\paren}[1]{\left( #1 \right)}
+\newcommand{\bracket}[1]{\left[ #1 \right]}
+% \newcommand{\norm}[1]{\left\Vert #1 \right\Vert}
+\newcommand{\nrm}[1]{\left\llbracket{#1}\right\rrbracket}
+\newcommand{\parenBar}[2]{\paren{#1\,{\left\Vert\,#2\right.}}}
+\newcommand{\parenBarl}[2]{\paren{\left.#1\,\right\Vert\,#2}}
+\newcommand{\ie}{$i.e.$\xspace}
+\newcommand{\addcitation}{\textcolor{black!50!red}{\textbf{ADD CITATION}}}
+\newcommand{\subtochange}[1]{{\color{black!50!green}{#1}}}
+\newcommand{\tobecompleted}{{\color{black!50!red}TO BE COMPLETED.}}
+
+
+\newcommand{\pIn}{\mathscr{P}_{\textrm{in}}}
+\newcommand{\pOut}{\mathscr{P}_{\textrm{out}}}
+\newcommand{\aIn}[1][\Sigma]{#1_{\textrm{in}}}
+\newcommand{\aOut}[1][\Sigma]{#1_{\textrm{out}}}
+\newcommand{\xin}[1]{#1_{\textrm{in}}}
+\newcommand{\xout}[1]{#1_{\textrm{out}}}
+
+\newcommand{\R}{\mathbb{R}} % Set of real numbers
+\newcommand{\F}[1][]{\mathcal{F}_{#1}}
+\newcommand{\SR}{\mathcal{S}} % Semiring of sets
+\newcommand{\RR}{\mathcal{R}} % Ring of sets
+\newcommand{\N}{\mathbb{N}} % Set of natural numbers (0 included)
+
+
+\newcommand{\Pp}[1][n]{\mathscr{P}^+_{#1}}
+\renewcommand{\entropy}[1]{\boldsymbol{h}\left ( #1 \right )}
+
+
+
+\makeatletter
+\pgfdeclarepatternformonly[\hatchdistance,\hatchthickness]{flexible hatch}
+{\pgfqpoint{0pt}{0pt}}
+{\pgfqpoint{\hatchdistance}{\hatchdistance}}
+{\pgfpoint{\hatchdistance-1pt}{\hatchdistance-1pt}}%
+{
+  \pgfsetcolor{\tikz@pattern@color}
+  \pgfsetlinewidth{\hatchthickness}
+  \pgfpathmoveto{\pgfqpoint{0pt}{0pt}}
+  \pgfpathlineto{\pgfqpoint{\hatchdistance}{\hatchdistance}}
+  \pgfusepath{stroke}
+}
+\makeatother
+
+\pgfdeclarepatternformonly{north east lines wide}%
+{\pgfqpoint{-1pt}{-1pt}}%
+{\pgfqpoint{10pt}{10pt}}%
+{\pgfqpoint{9pt}{9pt}}%
+{
+  \pgfsetlinewidth{0.7pt}
+  \pgfpathmoveto{\pgfqpoint{0pt}{0pt}}
+  \pgfpathlineto{\pgfqpoint{9.1pt}{9.1pt}}
+  \pgfusepath{stroke}
+}
+
+\pgfdeclarepatternformonly{north west lines wide}%
+{\pgfqpoint{-1pt}{-1pt}}%
+{\pgfqpoint{10pt}{10pt}}%
+{\pgfqpoint{9pt}{9pt}}%
+{
+  \pgfsetlinewidth{0.7pt}
+  \pgfpathmoveto{\pgfqpoint{0pt}{9pt}}
+  \pgfpathlineto{\pgfqpoint{9.1pt}{-0.1pt}}
+  \pgfusepath{stroke}
+}
+\makeatletter
+
+\pgfdeclarepatternformonly[\hatchdistance,\hatchthickness]{flexible hatchB}
+{\pgfqpoint{0pt}{\hatchdistance}}
+{\pgfqpoint{\hatchdistance}{0pt}}
+{\pgfpoint{1pt}{\hatchdistance-1pt}}%
+{
+  \pgfsetcolor{\tikz@pattern@color}
+  \pgfsetlinewidth{\hatchthickness}
+  \pgfpathmoveto{\pgfqpoint{0pt}{\hatchdistance}}
+  \pgfpathlineto{\pgfqpoint{\hatchdistance}{0pt}}
+  \pgfusepath{stroke}
+}    \makeatother
+
+
+\def\TPR{\textrm{TPR}\xspace}
+\def\TNR{\textrm{TNR}\xspace}
+\def\FPR{\textrm{FPR}\xspace}
+\def\PPV{\textrm{PPV}\xspace}
+
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{decorations.pathreplacing,shapes.misc}
+\usetikzlibrary{decorations.softclip}
+
+\usepgfplotslibrary{fillbetween}
+%usepackage{tikz-network}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{math}
+\usepgfplotslibrary{colorbrewer} 
+
+\usepackage{textcomp}
+\usepackage{colortbl}
+\usepackage{array}
+\usepackage{courier} 
+\usepackage{wrapfig}
+\usepackage{pifont}
+\usetikzlibrary{chains,backgrounds}
+\usetikzlibrary{intersections}
+\usetikzlibrary{pgfplots.groupplots}
+\usepgfplotslibrary{fillbetween} 
+\usetikzlibrary{arrows.meta}
+\usepackage{pgfplotstable}
+\usepackage[super,compress,sort,comma]{natbib}
+%\usepackage{natbib}
+\usepackage{setspace}
+\usetikzlibrary{math}
+\usetikzlibrary{matrix}
+\usepackage{xstring}
+\usepackage{xspace}
+\usepackage{flushend}
+\makeatletter
+\renewcommand\section{\@startsection {section}{1}{\z@}%
+  {-2ex \@plus -1ex \@minus -.2ex}%
+  {1ex \@plus.1ex}%
+  {\Large\bfseries\scshape}}
+\renewcommand\subsection{\@startsection {section}{1}{\z@}%
+  {-2ex \@plus -.25ex \@minus -.2ex}%
+  {0.1ex \@plus.0ex}%
+  {\fontsize{11}{10}\selectfont\bfseries\sffamily\color{black}}}
+\renewcommand\subsubsection{\@startsection {section}{1}{\z@}%
+  {0ex \@plus -.5ex \@minus -.2ex}%
+  {0.0ex \@plus.5ex}%
+  {\fontsize{9}{9}\selectfont\bfseries\itshape\sffamily\color{darkgray}}}
+\renewcommand\paragraph{\@startsection {section}{1}{\z@}%
+  {-.2ex \@plus -.5ex \@minus -.2ex}%
+  {0.0ex \@plus.5ex}%
+  {\fontsize{9}{9}\selectfont\itshape\sffamily\color{darkgray}}}
+       
+ 
+\makeatother
+\makeatletter
+\pgfdeclareradialshading[tikz@ball]{ball}{\pgfqpoint{-10bp}{10bp}}{%
+  color(0bp)=(tikz@ball!30!white);
+  color(9bp)=(tikz@ball!75!white);
+  color(18bp)=(tikz@ball!90!black);
+  color(25bp)=(tikz@ball!70!black);
+  color(50bp)=(black)}
+\makeatother
+%\newcommand{\tball}[1][CadetBlue4]{${\color{#1}\Large\boldsymbol{\blacksquare}}$}
+\renewcommand{\baselinestretch}{1}
+%\renewcommand{\captionN}[1]{\caption{\color{CadetBlue4!50!black} \sffamily \fontsize{9}{10}\selectfont #1  }}
+\tikzexternaldisable 
+\parskip=6pt
+\parindent=0pt
+%\newcommand{\Mark}[1]{\textsuperscript{#1}}
+\pagestyle{fancy}
+
+\newcounter{Dcounter}
+\setcounter{Dcounter}{1}
+\newcommand{\DQS}[1]{\marginpar{\tikzexternaldisable \tikz{\node[rounded corners=5pt,draw=none,thick,fill=black!10,font=\sffamily\fontsize{7}{8}\selectfont] {\mnp{.45in} {\color{Red3}\raggedright  \#\theDcounter.~#1}}; }}\stepcounter{Dcounter}\xspace}
+
+\newcommand{\qn}[1][i]{\Phi_{#1}}
+\newcommand{\D}[1][i]{\mathscr{D}\left ( {\Sigma_#1} \right ) }
+\newcommand{\Dx}{\mathscr{D}}
+\def\J{\mathds{J}}
+\def\M{\omega}
+\def\N{\mathds{N}}
+\newcommand{\cp}[1][P]{\langle #1 \rangle}
+\newcommand{\mem}[1]{\M_{#1}}
+
+
+\makeatletter
+\newcommand\transformxdimension[1]{
+    \pgfmathparse{((#1/\pgfplots@x@veclength)+\pgfplots@data@scale@trafo@SHIFT@x)/10^\pgfplots@data@scale@trafo@EXPONENT@x}
+}
+\newcommand\transformydimension[1]{
+    \pgfmathparse{((#1/\pgfplots@y@veclength)+\pgfplots@data@scale@trafo@SHIFT@y)/10^\pgfplots@data@scale@trafo@EXPONENT@y}
+}
+\makeatother
+
+\parskip=6pt
+\parindent=0pt
+
+
+\pgfplotsset{
+    discard if/.style 2 args={
+        x filter/.code={
+            \edef\tempa{\thisrow{#1}}
+            \edef\tempb{#2}
+            \ifx\tempa\tempb
+                \def\pgfmathresult{inf}
+            \fi
+        }
+    },
+    discard if not/.style 2 args={
+        x filter/.code={
+            \edef\tempa{\thisrow{#1}}
+            \edef\tempb{#2}
+            \ifx\tempa\tempb
+            \else
+                \def\pgfmathresult{inf}
+            \fi
+        }
+    }
+  }
+
+  %\newcommand{\HLT}[2][Red1]{{\color{#1}#2}}
+
+ % \def\commatonone{\expandafter\zappointzerozero
+%    \romannumeral`\^^@}
+%\def\zappointzerozero#1.00{\zapcomma#1,!}
+%\def\zapcomma#1,#2{#1\ifx!#2\else#2\expandafter\zapcomma\fi}
+\def\commatononei#1,{#1}
+\def\commatononej#1,#2,{#1#2}
+\def\commatonone#1{\expandafter\commatononei#1}
+\def\commatononeT#1{\expandafter\commatononej#1}
+\newcommand{\Sum} [2] {#1 + #2 = \the\numexpr #1 + #2 \relax \\}
+
+
+\usepackage{sistyle}
+\SIthousandsep{,}
