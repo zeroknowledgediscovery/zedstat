@@ -3,6 +3,8 @@ MANIFEST.in
 README.rst
 setup.py
 version.py
+zedstat/__init__.py
+zedstat/zedstat.py
 zedstat.egg-info/PKG-INFO
 zedstat.egg-info/SOURCES.txt
 zedstat.egg-info/dependency_links.txt
