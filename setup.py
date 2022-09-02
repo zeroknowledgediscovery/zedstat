@@ -3,7 +3,7 @@ from codecs import open
 from os import path
 import warnings
 
-package_name = 'istat'
+package_name = 'zedstat'
 example_dir = 'examples/'
 bin_dir = 'bin/'
 example_data_dir = example_dir + 'examples_data/'
@@ -26,15 +26,13 @@ setup(
     version = str(version['__version__']),
     packages=find_packages(),
     scripts=[],
-    url='https://github.com/zeroknowledgediscovery/emergenet',
+    url='https://github.com/zeroknowledgediscovery/zedstat',
     license='LICENSE',
-    description='Superfast Risk Estimation of Emerging Pathogens',
+    description='Statistics tools for ML models and deployment',
     keywords=[
-        'computational biology',
-        'decision trees', 
         'machine learning', 
-        'emerging pathogens'],
-    download_url='https://github.com/zeroknowledgediscovery/emergenet/archive/'+str(version['__version__'])+'.tar.gz',
+        'statistics'],
+    download_url='https://github.com/zeroknowledgediscovery/zedstat/archive/'+str(version['__version__'])+'.tar.gz',
     long_description=long_description,
     long_description_content_type='text/x-rst',
     install_requires=[
@@ -42,8 +40,6 @@ setup(
         "scipy", 
         "numpy",  
         "pandas",
-        "joblib",
-        "quasinet",
         "scipy"],
     python_requires='>=3.6',
     classifiers=[
@@ -52,6 +48,7 @@ setup(
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Information Analysis",
         "Topic :: Software Development :: Libraries",
+        "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3.6"],
     include_package_data=True,
     )

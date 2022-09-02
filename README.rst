@@ -9,11 +9,11 @@ istat
 
 :Author: ZeD@UChicago <zed.uchicago.edu>
 :Description: Tools for ML statistics 
-:Documentation: https://zeroknowledgediscovery.github.io/istat/
+:Documentation: https://zeroknowledgediscovery.github.io/zedstat/
 
 **Usage:**
 
 .. code-block::
 
-   from istat import istat
+   from zedstat.zedstat import zedstat
 

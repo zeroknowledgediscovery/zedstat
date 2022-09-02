@@ -1,4 +1,4 @@
 include version.py
-recursive-include istat/examples *.py *.ipynb *.sh
-recursive-include istat/bin *.so
-recursive-include istat *.ipynb *.joblib *.c *.so *.pyx
+recursive-include zedstat/examples *.py *.ipynb *.sh
+recursive-include zedstat/bin *.so
+recursive-include zedstat *.ipynb *.joblib *.c *.so *.pyx
