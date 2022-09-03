@@ -35,10 +35,11 @@ class zedstat(object):
         self.prevalence=prevalence
         self.order=order
         self.df_lim={}
-        self._auc={}
+        self._auc={'U':[],'L':[]}
         self.total_samples=total_samples
         self.positive_samples=positive_samples
         self.alpha=alpha
+        
         
     def get(self):
         '''
@@ -68,7 +69,9 @@ class zedstat(object):
         self.auc_cb2(total_samples=total_samples,
                 positive_samples=positive_samples,
                 alpha=alpha)
-        return self._auc
+        return self._auc['nominal'],
+    (self._auc['U'].min(),
+     self._auc['L'].max())
     
     def convexify(self):
         '''
@@ -233,15 +236,25 @@ class zedstat(object):
             self.delta_=delta_
         return 
 
-    def getBounds(self):
+    def getBounds(self,
+                  total_samples=None,
+                  positive_samples=None,
+                  alpha=None,
+                  prevalence=None):
         '''
         compute confidence bounds on performance measures
         '''
-        self.getDelta()
+        self.getDelta(total_samples=total_samples,
+                 positive_samples=positive_samples,
+                      alpha=alpha)
+
+        if prevalence is None:
+            p=self.prevalence
+        else:
+            p=prevalence
         
-        p=self.prevalence
         if p is None:
-            raise('[revalence undefined')
+            raise('prevalence undefined')
 
         for direction in ['U','L']:
             df__=self.df.copy().reset_index()
@@ -263,7 +276,8 @@ class zedstat(object):
                                   order=self.order).set_index(self.fprcol)
             df__[df__ < 0] = 0
             self.df_lim[direction]=df__
-            self._auc[direction]=auc(df__.index.values,df__.tpr.values)
+            self._auc[direction]=np.append(self._auc[direction],
+                                           auc(df__.index.values,df__.tpr.values))
 
         return 
 
@@ -298,8 +312,8 @@ class zedstat(object):
         auc_U=auc+b+ (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
         auc_L=auc+b- (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
 
-        self._auc['auc_L']=auc_L
-        self._auc['auc_U']=auc_U
+        self._auc['L']=np.append(self._auc['L'],auc_L)
+        self._auc['U']=np.append(self._auc['U'],auc_U)
 
         return
 
