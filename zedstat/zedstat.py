@@ -319,8 +319,10 @@ class zedstat(object):
         tp=rf['tp'].values[0]
         fn=rf['fn'].values[0]
 
-        txt=f"For every {pos} positive instances, we raise {flags} flags, \
-        out of which {tp} are true positives, {fp} are false alarms, and \
-        {fn} positive instances are missed"
+        txt=[f"For every {pos} positive instances",
+             f"we raise {flags} flags,",
+             f"out of which {tp} are true positives",
+             f"{fp} are false alarms",
+             f"{fn} cases are missed"]
 
         return rf,txt
