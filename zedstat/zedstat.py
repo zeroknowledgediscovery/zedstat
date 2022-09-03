@@ -220,8 +220,14 @@ class zedstat(object):
 
         for direction in ['U','L']:
             df__=self.df.copy().reset_index()
-            df__.tpr=df__.tpr+self.delta_.tprdel
-            df__.fpr=df__.fpr-self.delta_.fprdel
+
+            if direction=='U':
+                df__.tpr=df__.tpr+self.delta_.tprdel
+                df__.fpr=df__.fpr-self.delta_.fprdel
+            else:
+                df__.tpr=df__.tpr-self.delta_.tprdel
+                df__.fpr=df__.fpr+self.delta_.fprdel
+                
 
             df__['ppv']=1/(1+((df__.fpr/df__.tpr)*((1/p)-1)))
             df__['acc']=p*df__.tpr + (1-p)*(1-df__.fpr)
@@ -280,7 +286,7 @@ class zedstat(object):
         compute the end points of the operating zone, 
         one for maximizing precions, and one for maximizing sensitivity
         '''
-        wf=self.df
+        wf=self.df.copy()
         
         opf=pd.concat([wf[(wf['LR+']>LRplus)
                           & (wf['LR-']<LRminus) ]\
