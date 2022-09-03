@@ -335,13 +335,26 @@ class zedstat(object):
         #of which TP are true ppositives, FP are false positives,
         #and FN are missed alarms
 
-        return pd.DataFrame({&#39;pos&#39;:np.round(POS),
-                             &#39;flags&#39;:int(np.round(TOTALFLAGS)),
-                             &#39;tp&#39;:int(np.round(TP)),
-                             &#39;fp&#39;:int(np.round(FP)),
-                             &#39;fn&#39;:int(np.round(FN)),
-                             &#39;tn&#39;:int(np.round(TN))},index=[&#39;numbers&#39;])
-        </code></pre>
+        rf=pd.DataFrame({&#39;pos&#39;:np.round(POS),
+                      &#39;flags&#39;:int(np.round(TOTALFLAGS)),
+                      &#39;tp&#39;:int(np.round(TP)),
+                      &#39;fp&#39;:int(np.round(FP)),
+                      &#39;fn&#39;:int(np.round(FN)),
+                      &#39;tn&#39;:int(np.round(TN))},index=[&#39;numbers&#39;])
+
+        pos=rf.pos.values[0]
+        flags=rf[&#39;flags&#39;].values[0]
+        fp=rf[&#39;fp&#39;].values[0]
+        tp=rf[&#39;tp&#39;].values[0]
+        fn=rf[&#39;fn&#39;].values[0]
+
+        txt=[f&#34;For every {pos} positive instances&#34;,
+             f&#34;we raise {flags} flags,&#34;,
+             f&#34;out of which {tp} are true positives&#34;,
+             f&#34;{fp} are false alarms&#34;,
+             f&#34;{fn} cases are missed&#34;]
+
+        return rf,txt</code></pre>
 </details>
 </section>
 <section>
@@ -667,12 +680,26 @@ class zedstat(object):
         #of which TP are true ppositives, FP are false positives,
         #and FN are missed alarms
 
-        return pd.DataFrame({&#39;pos&#39;:np.round(POS),
-                             &#39;flags&#39;:int(np.round(TOTALFLAGS)),
-                             &#39;tp&#39;:int(np.round(TP)),
-                             &#39;fp&#39;:int(np.round(FP)),
-                             &#39;fn&#39;:int(np.round(FN)),
-                             &#39;tn&#39;:int(np.round(TN))},index=[&#39;numbers&#39;])</code></pre>
+        rf=pd.DataFrame({&#39;pos&#39;:np.round(POS),
+                      &#39;flags&#39;:int(np.round(TOTALFLAGS)),
+                      &#39;tp&#39;:int(np.round(TP)),
+                      &#39;fp&#39;:int(np.round(FP)),
+                      &#39;fn&#39;:int(np.round(FN)),
+                      &#39;tn&#39;:int(np.round(TN))},index=[&#39;numbers&#39;])
+
+        pos=rf.pos.values[0]
+        flags=rf[&#39;flags&#39;].values[0]
+        fp=rf[&#39;fp&#39;].values[0]
+        tp=rf[&#39;tp&#39;].values[0]
+        fn=rf[&#39;fn&#39;].values[0]
+
+        txt=[f&#34;For every {pos} positive instances&#34;,
+             f&#34;we raise {flags} flags,&#34;,
+             f&#34;out of which {tp} are true positives&#34;,
+             f&#34;{fp} are false alarms&#34;,
+             f&#34;{fn} cases are missed&#34;]
+
+        return rf,txt</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -959,12 +986,26 @@ class zedstat(object):
     #of which TP are true ppositives, FP are false positives,
     #and FN are missed alarms
 
-    return pd.DataFrame({&#39;pos&#39;:np.round(POS),
-                         &#39;flags&#39;:int(np.round(TOTALFLAGS)),
-                         &#39;tp&#39;:int(np.round(TP)),
-                         &#39;fp&#39;:int(np.round(FP)),
-                         &#39;fn&#39;:int(np.round(FN)),
-                         &#39;tn&#39;:int(np.round(TN))},index=[&#39;numbers&#39;])</code></pre>
+    rf=pd.DataFrame({&#39;pos&#39;:np.round(POS),
+                  &#39;flags&#39;:int(np.round(TOTALFLAGS)),
+                  &#39;tp&#39;:int(np.round(TP)),
+                  &#39;fp&#39;:int(np.round(FP)),
+                  &#39;fn&#39;:int(np.round(FN)),
+                  &#39;tn&#39;:int(np.round(TN))},index=[&#39;numbers&#39;])
+
+    pos=rf.pos.values[0]
+    flags=rf[&#39;flags&#39;].values[0]
+    fp=rf[&#39;fp&#39;].values[0]
+    tp=rf[&#39;tp&#39;].values[0]
+    fn=rf[&#39;fn&#39;].values[0]
+
+    txt=[f&#34;For every {pos} positive instances&#34;,
+         f&#34;we raise {flags} flags,&#34;,
+         f&#34;out of which {tp} are true positives&#34;,
+         f&#34;{fp} are false alarms&#34;,
+         f&#34;{fn} cases are missed&#34;]
+
+    return rf,txt</code></pre>
 </details>
 </dd>
 <dt id="zedstat.zedstat.zedstat.operating_zone"><code class="name flex">
