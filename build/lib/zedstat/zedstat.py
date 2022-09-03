@@ -298,7 +298,7 @@ class zedstat(object):
                twosided=True):
         if 'nominal' not in self._auc.keys():
             self.auc()
-            auc=self._auc['nominal']
+        auc=self._auc['nominal']
             
         import scipy.stats as stats
         z=np.sqrt(self.positive_samples/(auc*(1-auc)/(delta_auc*delta_auc)) )
