@@ -69,9 +69,7 @@ class zedstat(object):
         self.auc_cb2(total_samples=total_samples,
                 positive_samples=positive_samples,
                 alpha=alpha)
-        return self._auc['nominal'],
-    (self._auc['U'].min(),
-     self._auc['L'].max())
+        return self._auc['nominal'], self._auc['U'].min(), self._auc['L'].max()
     
     def convexify(self):
         '''

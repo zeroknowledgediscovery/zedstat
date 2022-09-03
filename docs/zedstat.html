@@ -64,10 +64,11 @@ class zedstat(object):
         self.prevalence=prevalence
         self.order=order
         self.df_lim={}
-        self._auc={}
+        self._auc={&#39;U&#39;:[],&#39;L&#39;:[]}
         self.total_samples=total_samples
         self.positive_samples=positive_samples
         self.alpha=alpha
+        
         
     def get(self):
         &#39;&#39;&#39;
@@ -97,7 +98,7 @@ class zedstat(object):
         self.auc_cb2(total_samples=total_samples,
                 positive_samples=positive_samples,
                 alpha=alpha)
-        return self._auc
+        return self._auc[&#39;nominal&#39;], self._auc[&#39;U&#39;].min(), self._auc[&#39;L&#39;].max()
     
     def convexify(self):
         &#39;&#39;&#39;
@@ -262,15 +263,25 @@ class zedstat(object):
             self.delta_=delta_
         return 
 
-    def getBounds(self):
+    def getBounds(self,
+                  total_samples=None,
+                  positive_samples=None,
+                  alpha=None,
+                  prevalence=None):
         &#39;&#39;&#39;
         compute confidence bounds on performance measures
         &#39;&#39;&#39;
-        self.getDelta()
+        self.getDelta(total_samples=total_samples,
+                 positive_samples=positive_samples,
+                      alpha=alpha)
+
+        if prevalence is None:
+            p=self.prevalence
+        else:
+            p=prevalence
         
-        p=self.prevalence
         if p is None:
-            raise(&#39;[revalence undefined&#39;)
+            raise(&#39;prevalence undefined&#39;)
 
         for direction in [&#39;U&#39;,&#39;L&#39;]:
             df__=self.df.copy().reset_index()
@@ -292,7 +303,8 @@ class zedstat(object):
                                   order=self.order).set_index(self.fprcol)
             df__[df__ &lt; 0] = 0
             self.df_lim[direction]=df__
-            self._auc[direction]=auc(df__.index.values,df__.tpr.values)
+            self._auc[direction]=np.append(self._auc[direction],
+                                           auc(df__.index.values,df__.tpr.values))
 
         return 
 
@@ -327,8 +339,8 @@ class zedstat(object):
         auc_U=auc+b+ (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
         auc_L=auc+b- (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
 
-        self._auc[&#39;auc_L&#39;]=auc_L
-        self._auc[&#39;auc_U&#39;]=auc_U
+        self._auc[&#39;L&#39;]=np.append(self._auc[&#39;L&#39;],auc_L)
+        self._auc[&#39;U&#39;]=np.append(self._auc[&#39;U&#39;],auc_U)
 
         return
 
@@ -488,10 +500,11 @@ class zedstat(object):
         self.prevalence=prevalence
         self.order=order
         self.df_lim={}
-        self._auc={}
+        self._auc={&#39;U&#39;:[],&#39;L&#39;:[]}
         self.total_samples=total_samples
         self.positive_samples=positive_samples
         self.alpha=alpha
+        
         
     def get(self):
         &#39;&#39;&#39;
@@ -521,7 +534,7 @@ class zedstat(object):
         self.auc_cb2(total_samples=total_samples,
                 positive_samples=positive_samples,
                 alpha=alpha)
-        return self._auc
+        return self._auc[&#39;nominal&#39;], self._auc[&#39;U&#39;].min(), self._auc[&#39;L&#39;].max()
     
     def convexify(self):
         &#39;&#39;&#39;
@@ -686,15 +699,25 @@ class zedstat(object):
             self.delta_=delta_
         return 
 
-    def getBounds(self):
+    def getBounds(self,
+                  total_samples=None,
+                  positive_samples=None,
+                  alpha=None,
+                  prevalence=None):
         &#39;&#39;&#39;
         compute confidence bounds on performance measures
         &#39;&#39;&#39;
-        self.getDelta()
+        self.getDelta(total_samples=total_samples,
+                 positive_samples=positive_samples,
+                      alpha=alpha)
+
+        if prevalence is None:
+            p=self.prevalence
+        else:
+            p=prevalence
         
-        p=self.prevalence
         if p is None:
-            raise(&#39;[revalence undefined&#39;)
+            raise(&#39;prevalence undefined&#39;)
 
         for direction in [&#39;U&#39;,&#39;L&#39;]:
             df__=self.df.copy().reset_index()
@@ -716,7 +739,8 @@ class zedstat(object):
                                   order=self.order).set_index(self.fprcol)
             df__[df__ &lt; 0] = 0
             self.df_lim[direction]=df__
-            self._auc[direction]=auc(df__.index.values,df__.tpr.values)
+            self._auc[direction]=np.append(self._auc[direction],
+                                           auc(df__.index.values,df__.tpr.values))
 
         return 
 
@@ -751,8 +775,8 @@ class zedstat(object):
         auc_U=auc+b+ (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
         auc_L=auc+b- (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
 
-        self._auc[&#39;auc_L&#39;]=auc_L
-        self._auc[&#39;auc_U&#39;]=auc_U
+        self._auc[&#39;L&#39;]=np.append(self._auc[&#39;L&#39;],auc_L)
+        self._auc[&#39;U&#39;]=np.append(self._auc[&#39;U&#39;],auc_U)
 
         return
 
@@ -929,7 +953,7 @@ class zedstat(object):
     self.auc_cb2(total_samples=total_samples,
             positive_samples=positive_samples,
             alpha=alpha)
-    return self._auc</code></pre>
+    return self._auc[&#39;nominal&#39;], self._auc[&#39;U&#39;].min(), self._auc[&#39;L&#39;].max()</code></pre>
 </details>
 </dd>
 <dt id="zedstat.zedstat.zedstat.auc_cb2"><code class="name flex">
@@ -970,8 +994,8 @@ class zedstat(object):
     auc_U=auc+b+ (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
     auc_L=auc+b- (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
 
-    self._auc[&#39;auc_L&#39;]=auc_L
-    self._auc[&#39;auc_U&#39;]=auc_U
+    self._auc[&#39;L&#39;]=np.append(self._auc[&#39;L&#39;],auc_L)
+    self._auc[&#39;U&#39;]=np.append(self._auc[&#39;U&#39;],auc_U)
 
     return</code></pre>
 </details>
@@ -1062,7 +1086,7 @@ class zedstat(object):
 </details>
 </dd>
 <dt id="zedstat.zedstat.zedstat.getBounds"><code class="name flex">
-<span>def <span class="ident">getBounds</span></span>(<span>self)</span>
+<span>def <span class="ident">getBounds</span></span>(<span>self, total_samples=None, positive_samples=None, alpha=None, prevalence=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>compute confidence bounds on performance measures</p></div>
@@ -1070,15 +1094,25 @@ class zedstat(object):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def getBounds(self):
+<pre><code class="python">def getBounds(self,
+              total_samples=None,
+              positive_samples=None,
+              alpha=None,
+              prevalence=None):
     &#39;&#39;&#39;
     compute confidence bounds on performance measures
     &#39;&#39;&#39;
-    self.getDelta()
+    self.getDelta(total_samples=total_samples,
+             positive_samples=positive_samples,
+                  alpha=alpha)
+
+    if prevalence is None:
+        p=self.prevalence
+    else:
+        p=prevalence
     
-    p=self.prevalence
     if p is None:
-        raise(&#39;[revalence undefined&#39;)
+        raise(&#39;prevalence undefined&#39;)
 
     for direction in [&#39;U&#39;,&#39;L&#39;]:
         df__=self.df.copy().reset_index()
@@ -1100,7 +1134,8 @@ class zedstat(object):
                               order=self.order).set_index(self.fprcol)
         df__[df__ &lt; 0] = 0
         self.df_lim[direction]=df__
-        self._auc[direction]=auc(df__.index.values,df__.tpr.values)
+        self._auc[direction]=np.append(self._auc[direction],
+                                       auc(df__.index.values,df__.tpr.values))
 
     return </code></pre>
 </details>
