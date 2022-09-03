@@ -306,10 +306,21 @@ class zedstat(object):
         #of which TP are true ppositives, FP are false positives,
         #and FN are missed alarms
 
-        return pd.DataFrame({'pos':np.round(POS),
-                             'flags':int(np.round(TOTALFLAGS)),
-                             'tp':int(np.round(TP)),
-                             'fp':int(np.round(FP)),
-                             'fn':int(np.round(FN)),
-                             'tn':int(np.round(TN))},index=['numbers'])
-        
+        rf=pd.DataFrame({'pos':np.round(POS),
+                      'flags':int(np.round(TOTALFLAGS)),
+                      'tp':int(np.round(TP)),
+                      'fp':int(np.round(FP)),
+                      'fn':int(np.round(FN)),
+                      'tn':int(np.round(TN))},index=['numbers'])
+
+        pos=rf.pos.values[0]
+        flags=rf['flags'].values[0]
+        fp=rf['fp'].values[0]
+        tp=rf['tp'].values[0]
+        fn=rf['fn'].values[0]
+
+        txt=f"For every {pos} positive instances, we raise {flags} flags, \
+        out of which {tp} are true positives, {fp} are false alarms, and \
+        {fn} positive instances are missed"
+
+        return rf,txt
