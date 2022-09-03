@@ -303,7 +303,7 @@ class zedstat(object):
         import scipy.stats as stats
         z=np.sqrt(self.positive_samples/(auc*(1-auc)/(delta_auc*delta_auc)) )
 
-        pvalue=scipy.stats.norm.sf(abs(z))
+        pvalue=stats.norm.sf(abs(z))
 
         if twosided:
             pvalue=2*pvalue
