@@ -64,8 +64,8 @@ class zedstat(object):
         calculate auc with confidence bounds
         '''
         self.nominal_auc()
-        self._auc={'U':[],'L':[]}
-
+        self._auc['U']=[]
+        self._auc['L']=[]
         
         self.getBounds()
         self.auc_cb2(total_samples=total_samples,
