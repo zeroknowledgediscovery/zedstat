@@ -249,8 +249,14 @@ class zedstat(object):
 
         for direction in [&#39;U&#39;,&#39;L&#39;]:
             df__=self.df.copy().reset_index()
-            df__.tpr=df__.tpr+self.delta_.tprdel
-            df__.fpr=df__.fpr-self.delta_.fprdel
+
+            if direction==&#39;U&#39;:
+                df__.tpr=df__.tpr+self.delta_.tprdel
+                df__.fpr=df__.fpr-self.delta_.fprdel
+            else:
+                df__.tpr=df__.tpr-self.delta_.tprdel
+                df__.fpr=df__.fpr+self.delta_.fprdel
+                
 
             df__[&#39;ppv&#39;]=1/(1+((df__.fpr/df__.tpr)*((1/p)-1)))
             df__[&#39;acc&#39;]=p*df__.tpr + (1-p)*(1-df__.fpr)
@@ -309,7 +315,7 @@ class zedstat(object):
         compute the end points of the operating zone, 
         one for maximizing precions, and one for maximizing sensitivity
         &#39;&#39;&#39;
-        wf=self.df
+        wf=self.df.copy()
         
         opf=pd.concat([wf[(wf[&#39;LR+&#39;]&gt;LRplus)
                           &amp; (wf[&#39;LR-&#39;]&lt;LRminus) ]\
@@ -320,10 +326,10 @@ class zedstat(object):
 
         if opf.empty:
             self._operating_zone=opf.copy()
-            return self._operating_zone.copy()
+            return #self._operating_zone.copy()
         self._operating_zone=opf.reset_index()
         self._operating_zone.index=[&#39;high precision&#39;]*n + [&#39;high sensitivity&#39;]*n
-        return self._operating_zone.copy()
+        return #self._operating_zone.copy()
 
     
     def samplesize(self,
@@ -370,7 +376,7 @@ class zedstat(object):
         &#39;&#39;&#39;
         generate simple interpretation of inferred model, based on a number of positive cases
         &#39;&#39;&#39;
-        wf=self.df
+        wf=self.df.copy()
         wf.loc[fpr]=pd.Series([],dtype=float)
         wf=wf.sort_index().interpolate(method=&#39;spline&#39;,order=self.order)
         row=wf.loc[fpr]
@@ -642,8 +648,14 @@ class zedstat(object):
 
         for direction in [&#39;U&#39;,&#39;L&#39;]:
             df__=self.df.copy().reset_index()
-            df__.tpr=df__.tpr+self.delta_.tprdel
-            df__.fpr=df__.fpr-self.delta_.fprdel
+
+            if direction==&#39;U&#39;:
+                df__.tpr=df__.tpr+self.delta_.tprdel
+                df__.fpr=df__.fpr-self.delta_.fprdel
+            else:
+                df__.tpr=df__.tpr-self.delta_.tprdel
+                df__.fpr=df__.fpr+self.delta_.fprdel
+                
 
             df__[&#39;ppv&#39;]=1/(1+((df__.fpr/df__.tpr)*((1/p)-1)))
             df__[&#39;acc&#39;]=p*df__.tpr + (1-p)*(1-df__.fpr)
@@ -702,7 +714,7 @@ class zedstat(object):
         compute the end points of the operating zone, 
         one for maximizing precions, and one for maximizing sensitivity
         &#39;&#39;&#39;
-        wf=self.df
+        wf=self.df.copy()
         
         opf=pd.concat([wf[(wf[&#39;LR+&#39;]&gt;LRplus)
                           &amp; (wf[&#39;LR-&#39;]&lt;LRminus) ]\
@@ -713,10 +725,10 @@ class zedstat(object):
 
         if opf.empty:
             self._operating_zone=opf.copy()
-            return self._operating_zone.copy()
+            return #self._operating_zone.copy()
         self._operating_zone=opf.reset_index()
         self._operating_zone.index=[&#39;high precision&#39;]*n + [&#39;high sensitivity&#39;]*n
-        return self._operating_zone.copy()
+        return #self._operating_zone.copy()
 
     
     def samplesize(self,
@@ -763,7 +775,7 @@ class zedstat(object):
         &#39;&#39;&#39;
         generate simple interpretation of inferred model, based on a number of positive cases
         &#39;&#39;&#39;
-        wf=self.df
+        wf=self.df.copy()
         wf.loc[fpr]=pd.Series([],dtype=float)
         wf=wf.sort_index().interpolate(method=&#39;spline&#39;,order=self.order)
         row=wf.loc[fpr]
@@ -1009,8 +1021,14 @@ class zedstat(object):
 
     for direction in [&#39;U&#39;,&#39;L&#39;]:
         df__=self.df.copy().reset_index()
-        df__.tpr=df__.tpr+self.delta_.tprdel
-        df__.fpr=df__.fpr-self.delta_.fprdel
+
+        if direction==&#39;U&#39;:
+            df__.tpr=df__.tpr+self.delta_.tprdel
+            df__.fpr=df__.fpr-self.delta_.fprdel
+        else:
+            df__.tpr=df__.tpr-self.delta_.tprdel
+            df__.fpr=df__.fpr+self.delta_.fprdel
+            
 
         df__[&#39;ppv&#39;]=1/(1+((df__.fpr/df__.tpr)*((1/p)-1)))
         df__[&#39;acc&#39;]=p*df__.tpr + (1-p)*(1-df__.fpr)
@@ -1081,7 +1099,7 @@ class zedstat(object):
     &#39;&#39;&#39;
     generate simple interpretation of inferred model, based on a number of positive cases
     &#39;&#39;&#39;
-    wf=self.df
+    wf=self.df.copy()
     wf.loc[fpr]=pd.Series([],dtype=float)
     wf=wf.sort_index().interpolate(method=&#39;spline&#39;,order=self.order)
     row=wf.loc[fpr]
@@ -1134,7 +1152,7 @@ one for maximizing precions, and one for maximizing sensitivity</p></div>
     compute the end points of the operating zone, 
     one for maximizing precions, and one for maximizing sensitivity
     &#39;&#39;&#39;
-    wf=self.df
+    wf=self.df.copy()
     
     opf=pd.concat([wf[(wf[&#39;LR+&#39;]&gt;LRplus)
                       &amp; (wf[&#39;LR-&#39;]&lt;LRminus) ]\
@@ -1145,10 +1163,10 @@ one for maximizing precions, and one for maximizing sensitivity</p></div>
 
     if opf.empty:
         self._operating_zone=opf.copy()
-        return self._operating_zone.copy()
+        return #self._operating_zone.copy()
     self._operating_zone=opf.reset_index()
     self._operating_zone.index=[&#39;high precision&#39;]*n + [&#39;high sensitivity&#39;]*n
-    return self._operating_zone.copy()</code></pre>
+    return #self._operating_zone.copy()</code></pre>
 </details>
 </dd>
 <dt id="zedstat.zedstat.zedstat.pvalue"><code class="name flex">

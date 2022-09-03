@@ -297,10 +297,10 @@ class zedstat(object):
 
         if opf.empty:
             self._operating_zone=opf.copy()
-            return self._operating_zone.copy()
+            return #self._operating_zone.copy()
         self._operating_zone=opf.reset_index()
         self._operating_zone.index=['high precision']*n + ['high sensitivity']*n
-        return self._operating_zone.copy()
+        return #self._operating_zone.copy()
 
     
     def samplesize(self,
@@ -347,7 +347,7 @@ class zedstat(object):
         '''
         generate simple interpretation of inferred model, based on a number of positive cases
         '''
-        wf=self.df
+        wf=self.df.copy()
         wf.loc[fpr]=pd.Series([],dtype=float)
         wf=wf.sort_index().interpolate(method='spline',order=self.order)
         row=wf.loc[fpr]
