@@ -18,10 +18,10 @@ class zedstat(object):
                  random_state=None):
         
         if df.index.name==fprcol:
-            self.df=df
+            self.df=df.copy()
         else:
             if fprcol in df.columns:
-                self.df=df.set_index(fprcol)
+                self.df=df.set_index(fprcol).copy()
             else:
                 raise('fpr not in columns or index')
             self.thresholdcol = thresholdcol
@@ -44,7 +44,7 @@ class zedstat(object):
         '''
         return dataframe
         '''
-        return self.df
+        return self.df.copy()
     
     def auc(self):
         '''
@@ -72,7 +72,7 @@ class zedstat(object):
             rf_.columns=['tpr','fpr']
             rf_=rf_.sort_values('fpr')
             rf_=rf_.sort_values('tpr')
-            self.df=rf_.set_index(self.fprcol)
+            self.df=rf_.set_index(self.fprcol).copy()
             return #self.df
         
         hull = ConvexHull(pts)
@@ -80,7 +80,7 @@ class zedstat(object):
         rf_.columns=['tpr','fpr']
         rf_=rf_.sort_values('fpr')
         rf_=rf_.sort_values('tpr')
-        self.df=rf_.set_index(self.fprcol).sort_index()
+        self.df=rf_.set_index(self.fprcol).sort_index().copy()
         return #self.df
 
 
@@ -290,13 +290,13 @@ class zedstat(object):
                        .sort_values('tpr',ascending=False).head(n)])
 
         if opf.empty:
-            self._operating_zone=opf
-            return self._operating_zone
+            self._operating_zone=opf.copy()
+            return self._operating_zone.copy()
         self._operating_zone=opf.reset_index()
         self._operating_zone.index=['high precision']*n + ['high sensitivity']*n
-        return self._operating_zone
+        return self._operating_zone.copy()
 
-
+    
     def samplesize(self,
                    delta_auc,
                    target_auc=None,
@@ -314,7 +314,6 @@ class zedstat(object):
             
         import scipy.stats as stats
         z=stats. norm. ppf(1 - (alpha/2))
-
         required_npos = (z*z)*target_auc*(1-target_auc)/(delta_auc*delta_auc)
 
         return required_npos
@@ -331,7 +330,6 @@ class zedstat(object):
             
         import scipy.stats as stats
         z=np.sqrt(self.positive_samples/(auc*(1-auc)/(delta_auc*delta_auc)) )
-
         pvalue=stats.norm.sf(abs(z))
 
         if twosided:
@@ -355,7 +353,6 @@ class zedstat(object):
         TOTALFLAGS=TP+FP
         FN=POS-TP
         TN=POS/self.prevalence
-
 
         rf=pd.DataFrame({'pos':np.round(POS),
                       'flags':int(np.round(TOTALFLAGS)),
