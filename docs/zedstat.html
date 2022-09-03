@@ -96,7 +96,9 @@ class zedstat(object):
         self._auc[&#39;U&#39;]=[]
         self._auc[&#39;L&#39;]=[]
         
-        self.getBounds()
+        self.getBounds(otal_samples=total_samples,
+                positive_samples=positive_samples,
+                alpha=alpha)
         self.auc_cb2(total_samples=total_samples,
                 positive_samples=positive_samples,
                 alpha=alpha)
@@ -535,7 +537,9 @@ class zedstat(object):
         self._auc[&#39;U&#39;]=[]
         self._auc[&#39;L&#39;]=[]
         
-        self.getBounds()
+        self.getBounds(otal_samples=total_samples,
+                positive_samples=positive_samples,
+                alpha=alpha)
         self.auc_cb2(total_samples=total_samples,
                 positive_samples=positive_samples,
                 alpha=alpha)
@@ -957,7 +961,9 @@ class zedstat(object):
     self._auc[&#39;U&#39;]=[]
     self._auc[&#39;L&#39;]=[]
     
-    self.getBounds()
+    self.getBounds(otal_samples=total_samples,
+            positive_samples=positive_samples,
+            alpha=alpha)
     self.auc_cb2(total_samples=total_samples,
             positive_samples=positive_samples,
             alpha=alpha)
