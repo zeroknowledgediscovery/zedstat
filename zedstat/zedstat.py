@@ -47,13 +47,16 @@ class zedstat(object):
         return self.df
     
     def auc(self):
+        '''
+        calculate nominal auc
+        '''
         from sklearn.metrics import auc
         self._auc['nominal']=auc(self.df.index.values,self.df.tpr.values)
         return self._auc
     
     def convexify(self):
         '''
-        get convex hull of roc curve
+        compute convex hull of the roc curve
         '''   
         from scipy.spatial import ConvexHull
         if self.df.index.name==self.fprcol:
@@ -82,6 +85,9 @@ class zedstat(object):
 
 
     def smooth(self,STEP=0.0001,interpolate=True):
+        '''
+        smooth roc curves
+        '''
         self.df=self.raw_df.copy()
         VAR=self.fprcol
         df_=self.df.reset_index()
@@ -102,6 +108,9 @@ class zedstat(object):
         return #self.df
 
     def allmeasures(self,prevalence=None,interpolate=False):
+        '''
+        compute accuracy, PPV, NPV, positive and negative likelihood ratios
+        '''
         if prevalence is not None:
             p=prevalence
             self.prevalence=p
@@ -153,6 +162,9 @@ class zedstat(object):
 
     
     def usample(self,precision=3):
+        '''
+        make roc curve and other measures estimated at regular intervals of false positive rate
+        '''
         step=10**(-precision)
         fpr=[np.round(x,precision) for x in np.arange(0,1+step,step)]
         fpr_=[x for x in fpr if x not in self.df.index]
@@ -164,10 +176,13 @@ class zedstat(object):
         self.df=df___.loc[fpr]
         return #self.df
     
-    def cb_delta(self,
+    def getDelta(self,
                  total_samples=None,
                  positive_samples=None,
                  alpha=None):
+        '''
+        confidence bounds on specificity and sensitivity using Wald-type approach
+        '''
         if total_samples is None:
             total_samples=self.total_samples
         if positive_samples is None:
@@ -193,30 +208,32 @@ class zedstat(object):
             self.delta_=delta_
         return 
 
-    def getUL(self,direction='U'):
-        df__=self.df.copy().reset_index()
-        if direction=='U':
-            df__.tpr=df__.tpr+self.delta_.tprdel
-            df__.fpr=df__.fpr-self.delta_.fprdel
-        if direction=='L':
-            df__.tpr=df__.tpr-self.delta_.tprdel
-            df__.fpr=df__.fpr+self.delta_.fprdel
-            df__[df__ < 0] = 0
-            df__[df__ > 1.0] = 1.0
-            
+    def getBounds(self,direction='U'):
+        '''
+        compute confidence bounds on performance measures
+        '''
+        self.getDelta()
+        
         p=self.prevalence
         if p is None:
             raise('[revalence undefined')
-        df__['ppv']=1/(1+((df__.fpr/df__.tpr)*((1/p)-1)))
-        df__['acc']=p*df__.tpr + (1-p)*(1-df__.fpr)
-        df__['npv']=1/(1+((1-df__.tpr)/(1-df__.fpr))*(1/((1/p)-1)))
-        df__['LR+']=(df__.tpr)/(df__.fpr)
-        df__['LR-']=(1-df__.tpr)/(1-df__.fpr)
-        df__=df__.interpolate(limit_direction='both',method='spline',
-                              order=self.order).set_index(self.fprcol)
-        df__[df__ < 0] = 0
-        self.df_lim[direction]=df__
-        self._auc[direction]=auc(df__.index.values,df__.tpr.values)
+
+        for direction in ['U','L']:
+            df__=self.df.copy().reset_index()
+            df__.tpr=df__.tpr+self.delta_.tprdel
+            df__.fpr=df__.fpr-self.delta_.fprdel
+
+            df__['ppv']=1/(1+((df__.fpr/df__.tpr)*((1/p)-1)))
+            df__['acc']=p*df__.tpr + (1-p)*(1-df__.fpr)
+            df__['npv']=1/(1+((1-df__.tpr)/(1-df__.fpr))*(1/((1/p)-1)))
+            df__['LR+']=(df__.tpr)/(df__.fpr)
+            df__['LR-']=(1-df__.tpr)/(1-df__.fpr)
+            df__=df__.interpolate(limit_direction='both',method='spline',
+                                  order=self.order).set_index(self.fprcol)
+            df__[df__ < 0] = 0
+            self.df_lim[direction]=df__
+            self._auc[direction]=auc(df__.index.values,df__.tpr.values)
+
         return 
 
 
@@ -225,7 +242,9 @@ class zedstat(object):
                 total_samples=None,
                 positive_samples=None,
                 alpha=None):
-        
+        '''
+        compute auc confidence bounds using Danzig bounds
+        '''
         if total_samples is None:
             total_samples=self.total_samples
         if positive_samples is None:
@@ -257,6 +276,10 @@ class zedstat(object):
                        n=1,
                        LRplus=10,
                        LRminus=0.6):
+        '''
+        compute the end points of the operating zone, 
+        one for maximizing precions, and one for maximizing sensitivity
+        '''
         wf=self.df
         
         opf=pd.concat([wf[(wf['LR+']>LRplus)
@@ -278,6 +301,9 @@ class zedstat(object):
                    delta_auc,
                    target_auc=None,
                    alpha=None):
+        '''
+        estimate sample size for atataing auc bound under given significance level
+        '''
         if alpha is None:
             alpha=self.alpha
 
@@ -296,6 +322,9 @@ class zedstat(object):
     def pvalue(self,
                delta_auc=0.1,
                twosided=True):
+        '''
+        compute p-value for given auc bounds
+        '''
         if 'nominal' not in self._auc.keys():
             self.auc()
         auc=self._auc['nominal']
@@ -308,10 +337,12 @@ class zedstat(object):
         if twosided:
             pvalue=2*pvalue
         return pvalue
-
     
     
     def interpret(self,fpr=0.01,number_of_positives=100):
+        '''
+        generate simple interpretation of inferred model, based on a number of positive cases
+        '''
         wf=self.df
         wf.loc[fpr]=pd.Series([],dtype=float)
         wf=wf.sort_index().interpolate(method='spline',order=self.order)
