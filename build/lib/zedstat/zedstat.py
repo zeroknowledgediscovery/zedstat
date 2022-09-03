@@ -46,15 +46,23 @@ class zedstat(object):
         '''
         return self.df.copy()
     
-    def auc(self,
-            total_samples=None,
-            positive_samples=None,
-            alpha=None):
+
+    def nominal_auc(self):
         '''
         calculate nominal auc
         '''
         from sklearn.metrics import auc
         self._auc['nominal']=auc(self.df.index.values,self.df.tpr.values)
+        return
+    
+    def auc(self,
+            total_samples=None,
+            positive_samples=None,
+            alpha=None):
+        '''
+        calculate auc with confidence bounds
+        '''
+        self.nominal_auc()
 
         self.getBounds()
         self.auc_cb2(self,
@@ -280,7 +288,7 @@ class zedstat(object):
 
 
         if 'nominal' not in self._auc.keys():
-            self.auc()
+            assert('calculate nominal auc first')
             
         import scipy.stats as stats
         auc=self._auc['nominal']

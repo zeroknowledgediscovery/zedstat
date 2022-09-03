@@ -75,15 +75,23 @@ class zedstat(object):
         &#39;&#39;&#39;
         return self.df.copy()
     
-    def auc(self,
-            total_samples=None,
-            positive_samples=None,
-            alpha=None):
+
+    def nominal_auc(self):
         &#39;&#39;&#39;
         calculate nominal auc
         &#39;&#39;&#39;
         from sklearn.metrics import auc
         self._auc[&#39;nominal&#39;]=auc(self.df.index.values,self.df.tpr.values)
+        return
+    
+    def auc(self,
+            total_samples=None,
+            positive_samples=None,
+            alpha=None):
+        &#39;&#39;&#39;
+        calculate auc with confidence bounds
+        &#39;&#39;&#39;
+        self.nominal_auc()
 
         self.getBounds()
         self.auc_cb2(self,
@@ -309,7 +317,7 @@ class zedstat(object):
 
 
         if &#39;nominal&#39; not in self._auc.keys():
-            self.auc()
+            assert(&#39;calculate nominal auc first&#39;)
             
         import scipy.stats as stats
         auc=self._auc[&#39;nominal&#39;]
@@ -492,15 +500,23 @@ class zedstat(object):
         &#39;&#39;&#39;
         return self.df.copy()
     
-    def auc(self,
-            total_samples=None,
-            positive_samples=None,
-            alpha=None):
+
+    def nominal_auc(self):
         &#39;&#39;&#39;
         calculate nominal auc
         &#39;&#39;&#39;
         from sklearn.metrics import auc
         self._auc[&#39;nominal&#39;]=auc(self.df.index.values,self.df.tpr.values)
+        return
+    
+    def auc(self,
+            total_samples=None,
+            positive_samples=None,
+            alpha=None):
+        &#39;&#39;&#39;
+        calculate auc with confidence bounds
+        &#39;&#39;&#39;
+        self.nominal_auc()
 
         self.getBounds()
         self.auc_cb2(self,
@@ -726,7 +742,7 @@ class zedstat(object):
 
 
         if &#39;nominal&#39; not in self._auc.keys():
-            self.auc()
+            assert(&#39;calculate nominal auc first&#39;)
             
         import scipy.stats as stats
         auc=self._auc[&#39;nominal&#39;]
@@ -897,7 +913,7 @@ class zedstat(object):
 <span>def <span class="ident">auc</span></span>(<span>self, total_samples=None, positive_samples=None, alpha=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>calculate nominal auc</p></div>
+<div class="desc"><p>calculate auc with confidence bounds</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -907,10 +923,9 @@ class zedstat(object):
         positive_samples=None,
         alpha=None):
     &#39;&#39;&#39;
-    calculate nominal auc
+    calculate auc with confidence bounds
     &#39;&#39;&#39;
-    from sklearn.metrics import auc
-    self._auc[&#39;nominal&#39;]=auc(self.df.index.values,self.df.tpr.values)
+    self.nominal_auc()
 
     self.getBounds()
     self.auc_cb2(self,
@@ -947,7 +962,7 @@ class zedstat(object):
 
 
     if &#39;nominal&#39; not in self._auc.keys():
-        self.auc()
+        assert(&#39;calculate nominal auc first&#39;)
         
     import scipy.stats as stats
     auc=self._auc[&#39;nominal&#39;]
@@ -1183,6 +1198,24 @@ class zedstat(object):
     return rf,txt</code></pre>
 </details>
 </dd>
+<dt id="zedstat.zedstat.zedstat.nominal_auc"><code class="name flex">
+<span>def <span class="ident">nominal_auc</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>calculate nominal auc</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def nominal_auc(self):
+    &#39;&#39;&#39;
+    calculate nominal auc
+    &#39;&#39;&#39;
+    from sklearn.metrics import auc
+    self._auc[&#39;nominal&#39;]=auc(self.df.index.values,self.df.tpr.values)
+    return</code></pre>
+</details>
+</dd>
 <dt id="zedstat.zedstat.zedstat.operating_zone"><code class="name flex">
 <span>def <span class="ident">operating_zone</span></span>(<span>self, n=1, LRplus=10, LRminus=0.6)</span>
 </code></dt>
@@ -1371,6 +1404,7 @@ one for maximizing precions, and one for maximizing sensitivity</p></div>
 <li><code><a title="zedstat.zedstat.zedstat.getBounds" href="#zedstat.zedstat.zedstat.getBounds">getBounds</a></code></li>
 <li><code><a title="zedstat.zedstat.zedstat.getDelta" href="#zedstat.zedstat.zedstat.getDelta">getDelta</a></code></li>
 <li><code><a title="zedstat.zedstat.zedstat.interpret" href="#zedstat.zedstat.zedstat.interpret">interpret</a></code></li>
+<li><code><a title="zedstat.zedstat.zedstat.nominal_auc" href="#zedstat.zedstat.zedstat.nominal_auc">nominal_auc</a></code></li>
 <li><code><a title="zedstat.zedstat.zedstat.operating_zone" href="#zedstat.zedstat.zedstat.operating_zone">operating_zone</a></code></li>
 <li><code><a title="zedstat.zedstat.zedstat.pvalue" href="#zedstat.zedstat.zedstat.pvalue">pvalue</a></code></li>
 <li><code><a title="zedstat.zedstat.zedstat.samplesize" href="#zedstat.zedstat.zedstat.samplesize">samplesize</a></code></li>
