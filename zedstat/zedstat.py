@@ -294,8 +294,9 @@ class zedstat(object):
             positive_samples = self.positive_samples
         if alpha is None:
             alpha=self.alpha
-            n=total_samples
-            n_pos=positive_samples
+
+        n=total_samples
+        n_pos=positive_samples
 
 
         if 'nominal' not in self._auc.keys():
