@@ -280,9 +280,15 @@ class zedstat(object):
                                   order=self.order).set_index(self.fprcol)
             df__[df__ < 0] = 0
             self.df_lim[direction]=df__
-            self._auc[direction]=np.append(self._auc[direction],
-                                           auc(df__.index.values,df__.tpr.values))
 
+            if direction=='U':
+                self._auc[direction]=[np.append(self._auc[direction],
+                                                auc(df__.index.values,
+                                                    df__.tpr.values)).min()]
+            if direction=='L':
+                self._auc[direction]=[np.append(self._auc[direction],
+                                                auc(df__.index.values,
+                                                    df__.tpr.values)).max()]
         return 
 
 
@@ -317,8 +323,8 @@ class zedstat(object):
         auc_U=auc+b+ (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
         auc_L=auc+b- (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
 
-        self._auc['L']=np.append(self._auc['L'],auc_L)
-        self._auc['U']=np.append(self._auc['U'],auc_U)
+        self._auc['L']=[np.append(self._auc['L'],auc_L).max()]
+        self._auc['U']=[np.append(self._auc['U'],auc_U).min()]
 
         return
 

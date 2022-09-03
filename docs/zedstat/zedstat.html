@@ -309,9 +309,15 @@ class zedstat(object):
                                   order=self.order).set_index(self.fprcol)
             df__[df__ &lt; 0] = 0
             self.df_lim[direction]=df__
-            self._auc[direction]=np.append(self._auc[direction],
-                                           auc(df__.index.values,df__.tpr.values))
 
+            if direction==&#39;U&#39;:
+                self._auc[direction]=[np.append(self._auc[direction],
+                                                auc(df__.index.values,
+                                                    df__.tpr.values)).min()]
+            if direction==&#39;L&#39;:
+                self._auc[direction]=[np.append(self._auc[direction],
+                                                auc(df__.index.values,
+                                                    df__.tpr.values)).max()]
         return 
 
 
@@ -346,8 +352,8 @@ class zedstat(object):
         auc_U=auc+b+ (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
         auc_L=auc+b- (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
 
-        self._auc[&#39;L&#39;]=np.append(self._auc[&#39;L&#39;],auc_L)
-        self._auc[&#39;U&#39;]=np.append(self._auc[&#39;U&#39;],auc_U)
+        self._auc[&#39;L&#39;]=[np.append(self._auc[&#39;L&#39;],auc_L).max()]
+        self._auc[&#39;U&#39;]=[np.append(self._auc[&#39;U&#39;],auc_U).min()]
 
         return
 
@@ -752,9 +758,15 @@ class zedstat(object):
                                   order=self.order).set_index(self.fprcol)
             df__[df__ &lt; 0] = 0
             self.df_lim[direction]=df__
-            self._auc[direction]=np.append(self._auc[direction],
-                                           auc(df__.index.values,df__.tpr.values))
 
+            if direction==&#39;U&#39;:
+                self._auc[direction]=[np.append(self._auc[direction],
+                                                auc(df__.index.values,
+                                                    df__.tpr.values)).min()]
+            if direction==&#39;L&#39;:
+                self._auc[direction]=[np.append(self._auc[direction],
+                                                auc(df__.index.values,
+                                                    df__.tpr.values)).max()]
         return 
 
 
@@ -789,8 +801,8 @@ class zedstat(object):
         auc_U=auc+b+ (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
         auc_L=auc+b- (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
 
-        self._auc[&#39;L&#39;]=np.append(self._auc[&#39;L&#39;],auc_L)
-        self._auc[&#39;U&#39;]=np.append(self._auc[&#39;U&#39;],auc_U)
+        self._auc[&#39;L&#39;]=[np.append(self._auc[&#39;L&#39;],auc_L).max()]
+        self._auc[&#39;U&#39;]=[np.append(self._auc[&#39;U&#39;],auc_U).min()]
 
         return
 
@@ -1013,8 +1025,8 @@ class zedstat(object):
     auc_U=auc+b+ (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
     auc_L=auc+b- (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
 
-    self._auc[&#39;L&#39;]=np.append(self._auc[&#39;L&#39;],auc_L)
-    self._auc[&#39;U&#39;]=np.append(self._auc[&#39;U&#39;],auc_U)
+    self._auc[&#39;L&#39;]=[np.append(self._auc[&#39;L&#39;],auc_L).max()]
+    self._auc[&#39;U&#39;]=[np.append(self._auc[&#39;U&#39;],auc_U).min()]
 
     return</code></pre>
 </details>
@@ -1153,9 +1165,15 @@ class zedstat(object):
                               order=self.order).set_index(self.fprcol)
         df__[df__ &lt; 0] = 0
         self.df_lim[direction]=df__
-        self._auc[direction]=np.append(self._auc[direction],
-                                       auc(df__.index.values,df__.tpr.values))
 
+        if direction==&#39;U&#39;:
+            self._auc[direction]=[np.append(self._auc[direction],
+                                            auc(df__.index.values,
+                                                df__.tpr.values)).min()]
+        if direction==&#39;L&#39;:
+            self._auc[direction]=[np.append(self._auc[direction],
+                                            auc(df__.index.values,
+                                                df__.tpr.values)).max()]
     return </code></pre>
 </details>
 </dd>
