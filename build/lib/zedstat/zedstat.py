@@ -65,8 +65,7 @@ class zedstat(object):
         self.nominal_auc()
 
         self.getBounds()
-        self.auc_cb2(self,
-                total_samples=total_samples,
+        self.auc_cb2(total_samples=total_samples,
                 positive_samples=positive_samples,
                 alpha=alpha)
         return self._auc
