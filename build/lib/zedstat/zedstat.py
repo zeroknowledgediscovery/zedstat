@@ -46,12 +46,21 @@ class zedstat(object):
         '''
         return self.df.copy()
     
-    def auc(self):
+    def auc(self,
+            total_samples=None,
+            positive_samples=None,
+            alpha=None):
         '''
         calculate nominal auc
         '''
         from sklearn.metrics import auc
         self._auc['nominal']=auc(self.df.index.values,self.df.tpr.values)
+
+        self.getBounds()
+        self.auc_cb2(self,
+                total_samples=total_samples,
+                positive_samples=positive_samples,
+                alpha=alpha)
         return self._auc
     
     def convexify(self):
@@ -84,7 +93,10 @@ class zedstat(object):
         return #self.df
 
 
-    def smooth(self,STEP=0.0001,interpolate=True):
+    def smooth(self,
+               STEP=0.0001,
+               interpolate=True,
+               convexify=True):
         '''
         smooth roc curves
         '''
@@ -104,8 +116,10 @@ class zedstat(object):
         if interpolate:
             DF=DF.interpolate(limit_direction='both',method='spline',order=self.order)
             DF[DF < 0] = 0
-            self.df=DF   
-        return #self.df
+            self.df=DF
+        if convexify:
+            self.convexify()
+        return 
 
     def allmeasures(self,prevalence=None,interpolate=False):
         '''
@@ -126,6 +140,9 @@ class zedstat(object):
             df__['npv']=1/(1+((1-df__.tpr)/(1-df__.fpr))*(1/((1/p)-1)))
             df__['LR+']=(df__.tpr)/(df__.fpr)
             df__['LR-']=(1-df__.tpr)/(1-df__.fpr)
+        else:
+            assert('set fpr as index')
+            
             
         df__=df__.set_index(self.fprcol)
         if interpolate:
@@ -134,9 +151,10 @@ class zedstat(object):
         if self.thresholdcol is not None:
             if self.thresholdcol not in df__.columns:
                 df__=df__.join(self.raw_df[self.thresholdcol])
-                self.df=df__
-                self.correctPPV()
-                self.df[self.df < 0] = 0
+        self.df=df__
+        self.correctPPV()
+        self.df[self.df < 0] = 0
+        
         return #self.df
 
 
@@ -208,7 +226,7 @@ class zedstat(object):
             self.delta_=delta_
         return 
 
-    def getBounds(self,direction='U'):
+    def getBounds(self):
         '''
         compute confidence bounds on performance measures
         '''
