@@ -253,7 +253,10 @@ class zedstat(object):
 
         return
 
-    def operating_zone(self,n=1,LRplus=10,LRminus=0.6):
+    def operating_zone(self,
+                       n=1,
+                       LRplus=10,
+                       LRminus=0.6):
         wf=self.df
         
         opf=pd.concat([wf[(wf['LR+']>LRplus)
@@ -271,7 +274,10 @@ class zedstat(object):
         return self._operating_zone
 
 
-    def samplesize(self,delta_auc,target_auc=None,alpha=None):
+    def samplesize(self,
+                   delta_auc,
+                   target_auc=None,
+                   alpha=None):
         if alpha is None:
             alpha=self.alpha
 
@@ -287,6 +293,23 @@ class zedstat(object):
 
         return required_npos
 
+    def pvalue(self,
+               delta_auc=0.1,
+               twosided=True):
+        if 'nominal' not in self._auc.keys():
+            self.auc()
+            auc=self._auc['nominal']
+            
+        import scipy.stats as stats
+        z=np.sqrt(self.positive_samples/(auc*(1-auc)/(delta_auc*delta_auc)) )
+
+        pvalue=scipy.stats.norm.sf(abs(z))
+
+        if twosided:
+            pvalue=2*pvalue
+        return pvalue
+
+    
     
     def interpret(self,fpr=0.01,number_of_positives=100):
         wf=self.df
@@ -302,9 +325,6 @@ class zedstat(object):
         FN=POS-TP
         TN=POS/self.prevalence
 
-        #For every POS positive events, TOTALFLAGS are generated,
-        #of which TP are true ppositives, FP are false positives,
-        #and FN are missed alarms
 
         rf=pd.DataFrame({'pos':np.round(POS),
                       'flags':int(np.round(TOTALFLAGS)),

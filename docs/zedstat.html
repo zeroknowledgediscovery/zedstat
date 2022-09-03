@@ -282,7 +282,10 @@ class zedstat(object):
 
         return
 
-    def operating_zone(self,n=1,LRplus=10,LRminus=0.6):
+    def operating_zone(self,
+                       n=1,
+                       LRplus=10,
+                       LRminus=0.6):
         wf=self.df
         
         opf=pd.concat([wf[(wf[&#39;LR+&#39;]&gt;LRplus)
@@ -300,7 +303,10 @@ class zedstat(object):
         return self._operating_zone
 
 
-    def samplesize(self,delta_auc,target_auc=None,alpha=None):
+    def samplesize(self,
+                   delta_auc,
+                   target_auc=None,
+                   alpha=None):
         if alpha is None:
             alpha=self.alpha
 
@@ -316,6 +322,23 @@ class zedstat(object):
 
         return required_npos
 
+    def pvalue(self,
+               delta_auc=0.1,
+               twosided=True):
+        if &#39;nominal&#39; not in self._auc.keys():
+            self.auc()
+            auc=self._auc[&#39;nominal&#39;]
+            
+        import scipy.stats as stats
+        z=np.sqrt(self.positive_samples/(auc*(1-auc)/(delta_auc*delta_auc)) )
+
+        pvalue=scipy.stats.norm.sf(abs(z))
+
+        if twosided:
+            pvalue=2*pvalue
+        return pvalue
+
+    
     
     def interpret(self,fpr=0.01,number_of_positives=100):
         wf=self.df
@@ -331,9 +354,6 @@ class zedstat(object):
         FN=POS-TP
         TN=POS/self.prevalence
 
-        #For every POS positive events, TOTALFLAGS are generated,
-        #of which TP are true ppositives, FP are false positives,
-        #and FN are missed alarms
 
         rf=pd.DataFrame({&#39;pos&#39;:np.round(POS),
                       &#39;flags&#39;:int(np.round(TOTALFLAGS)),
@@ -627,7 +647,10 @@ class zedstat(object):
 
         return
 
-    def operating_zone(self,n=1,LRplus=10,LRminus=0.6):
+    def operating_zone(self,
+                       n=1,
+                       LRplus=10,
+                       LRminus=0.6):
         wf=self.df
         
         opf=pd.concat([wf[(wf[&#39;LR+&#39;]&gt;LRplus)
@@ -645,7 +668,10 @@ class zedstat(object):
         return self._operating_zone
 
 
-    def samplesize(self,delta_auc,target_auc=None,alpha=None):
+    def samplesize(self,
+                   delta_auc,
+                   target_auc=None,
+                   alpha=None):
         if alpha is None:
             alpha=self.alpha
 
@@ -661,6 +687,23 @@ class zedstat(object):
 
         return required_npos
 
+    def pvalue(self,
+               delta_auc=0.1,
+               twosided=True):
+        if &#39;nominal&#39; not in self._auc.keys():
+            self.auc()
+            auc=self._auc[&#39;nominal&#39;]
+            
+        import scipy.stats as stats
+        z=np.sqrt(self.positive_samples/(auc*(1-auc)/(delta_auc*delta_auc)) )
+
+        pvalue=scipy.stats.norm.sf(abs(z))
+
+        if twosided:
+            pvalue=2*pvalue
+        return pvalue
+
+    
     
     def interpret(self,fpr=0.01,number_of_positives=100):
         wf=self.df
@@ -676,9 +719,6 @@ class zedstat(object):
         FN=POS-TP
         TN=POS/self.prevalence
 
-        #For every POS positive events, TOTALFLAGS are generated,
-        #of which TP are true ppositives, FP are false positives,
-        #and FN are missed alarms
 
         rf=pd.DataFrame({&#39;pos&#39;:np.round(POS),
                       &#39;flags&#39;:int(np.round(TOTALFLAGS)),
@@ -982,9 +1022,6 @@ class zedstat(object):
     FN=POS-TP
     TN=POS/self.prevalence
 
-    #For every POS positive events, TOTALFLAGS are generated,
-    #of which TP are true ppositives, FP are false positives,
-    #and FN are missed alarms
 
     rf=pd.DataFrame({&#39;pos&#39;:np.round(POS),
                   &#39;flags&#39;:int(np.round(TOTALFLAGS)),
@@ -1017,7 +1054,10 @@ class zedstat(object):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def operating_zone(self,n=1,LRplus=10,LRminus=0.6):
+<pre><code class="python">def operating_zone(self,
+                   n=1,
+                   LRplus=10,
+                   LRminus=0.6):
     wf=self.df
     
     opf=pd.concat([wf[(wf[&#39;LR+&#39;]&gt;LRplus)
@@ -1035,6 +1075,32 @@ class zedstat(object):
     return self._operating_zone</code></pre>
 </details>
 </dd>
+<dt id="zedstat.zedstat.zedstat.pvalue"><code class="name flex">
+<span>def <span class="ident">pvalue</span></span>(<span>self, delta_auc=0.1, twosided=True)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pvalue(self,
+           delta_auc=0.1,
+           twosided=True):
+    if &#39;nominal&#39; not in self._auc.keys():
+        self.auc()
+        auc=self._auc[&#39;nominal&#39;]
+        
+    import scipy.stats as stats
+    z=np.sqrt(self.positive_samples/(auc*(1-auc)/(delta_auc*delta_auc)) )
+
+    pvalue=scipy.stats.norm.sf(abs(z))
+
+    if twosided:
+        pvalue=2*pvalue
+    return pvalue</code></pre>
+</details>
+</dd>
 <dt id="zedstat.zedstat.zedstat.samplesize"><code class="name flex">
 <span>def <span class="ident">samplesize</span></span>(<span>self, delta_auc, target_auc=None, alpha=None)</span>
 </code></dt>
@@ -1044,7 +1110,10 @@ class zedstat(object):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def samplesize(self,delta_auc,target_auc=None,alpha=None):
+<pre><code class="python">def samplesize(self,
+               delta_auc,
+               target_auc=None,
+               alpha=None):
     if alpha is None:
         alpha=self.alpha
 
@@ -1145,6 +1214,7 @@ class zedstat(object):
 <li><code><a title="zedstat.zedstat.zedstat.getUL" href="#zedstat.zedstat.zedstat.getUL">getUL</a></code></li>
 <li><code><a title="zedstat.zedstat.zedstat.interpret" href="#zedstat.zedstat.zedstat.interpret">interpret</a></code></li>
 <li><code><a title="zedstat.zedstat.zedstat.operating_zone" href="#zedstat.zedstat.zedstat.operating_zone">operating_zone</a></code></li>
+<li><code><a title="zedstat.zedstat.zedstat.pvalue" href="#zedstat.zedstat.zedstat.pvalue">pvalue</a></code></li>
 <li><code><a title="zedstat.zedstat.zedstat.samplesize" href="#zedstat.zedstat.zedstat.samplesize">samplesize</a></code></li>
 <li><code><a title="zedstat.zedstat.zedstat.smooth" href="#zedstat.zedstat.zedstat.smooth">smooth</a></code></li>
 <li><code><a title="zedstat.zedstat.zedstat.usample" href="#zedstat.zedstat.zedstat.usample">usample</a></code></li>
