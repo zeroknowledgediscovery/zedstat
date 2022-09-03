@@ -25,20 +25,23 @@ class zedstat(object):
             else:
                 raise('fpr not in columns or index')
             self.thresholdcol = thresholdcol
+            
         if thresholdcol not in self.df.columns:
             self.thresholdcol=None
+
+        self.df = self.df.sort_values('fpr')
             
         self.fprcol = fprcol
         self.tprcol = tprcol
         self.random_state = random_state
         self.raw_df = self.df.copy()
-        self.prevalence=prevalence
-        self.order=order
-        self.df_lim={}
-        self._auc={'U':[],'L':[]}
-        self.total_samples=total_samples
-        self.positive_samples=positive_samples
-        self.alpha=alpha
+        self.prevalence = prevalence
+        self.order = order
+        self.df_lim = {}
+        self._auc = {'U':[],'L':[]}
+        self.total_samples = total_samples
+        self.positive_samples = positive_samples
+        self.alpha = alpha
         
         
     def get(self):

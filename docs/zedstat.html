@@ -54,20 +54,23 @@ class zedstat(object):
             else:
                 raise(&#39;fpr not in columns or index&#39;)
             self.thresholdcol = thresholdcol
+            
         if thresholdcol not in self.df.columns:
             self.thresholdcol=None
+
+        self.df = self.df.sort_values(&#39;fpr&#39;)
             
         self.fprcol = fprcol
         self.tprcol = tprcol
         self.random_state = random_state
         self.raw_df = self.df.copy()
-        self.prevalence=prevalence
-        self.order=order
-        self.df_lim={}
-        self._auc={&#39;U&#39;:[],&#39;L&#39;:[]}
-        self.total_samples=total_samples
-        self.positive_samples=positive_samples
-        self.alpha=alpha
+        self.prevalence = prevalence
+        self.order = order
+        self.df_lim = {}
+        self._auc = {&#39;U&#39;:[],&#39;L&#39;:[]}
+        self.total_samples = total_samples
+        self.positive_samples = positive_samples
+        self.alpha = alpha
         
         
     def get(self):
@@ -503,20 +506,23 @@ class zedstat(object):
             else:
                 raise(&#39;fpr not in columns or index&#39;)
             self.thresholdcol = thresholdcol
+            
         if thresholdcol not in self.df.columns:
             self.thresholdcol=None
+
+        self.df = self.df.sort_values(&#39;fpr&#39;)
             
         self.fprcol = fprcol
         self.tprcol = tprcol
         self.random_state = random_state
         self.raw_df = self.df.copy()
-        self.prevalence=prevalence
-        self.order=order
-        self.df_lim={}
-        self._auc={&#39;U&#39;:[],&#39;L&#39;:[]}
-        self.total_samples=total_samples
-        self.positive_samples=positive_samples
-        self.alpha=alpha
+        self.prevalence = prevalence
+        self.order = order
+        self.df_lim = {}
+        self._auc = {&#39;U&#39;:[],&#39;L&#39;:[]}
+        self.total_samples = total_samples
+        self.positive_samples = positive_samples
+        self.alpha = alpha
         
         
     def get(self):
