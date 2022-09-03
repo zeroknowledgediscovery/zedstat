@@ -282,13 +282,13 @@ class zedstat(object):
             self.df_lim[direction]=df__
 
             if direction=='U':
-                self._auc[direction]=[np.append(self._auc[direction],
+                self._auc[direction]=np.array([np.append(self._auc[direction],
                                                 auc(df__.index.values,
-                                                    df__.tpr.values)).min()]
+                                                    df__.tpr.values)).min()])
             if direction=='L':
-                self._auc[direction]=[np.append(self._auc[direction],
+                self._auc[direction]=np.array([np.append(self._auc[direction],
                                                 auc(df__.index.values,
-                                                    df__.tpr.values)).max()]
+                                                    df__.tpr.values)).max()])
         return 
 
 
@@ -323,8 +323,8 @@ class zedstat(object):
         auc_U=auc+b+ (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
         auc_L=auc+b- (1/eta)*np.sqrt((auc-.5)**2 + (auc*(1-auc)*eta))
 
-        self._auc['L']=[np.append(self._auc['L'],auc_L).max()]
-        self._auc['U']=[np.append(self._auc['U'],auc_U).min()]
+        self._auc['L']=np.array([np.append(self._auc['L'],auc_L).max()])
+        self._auc['U']=np.array([np.append(self._auc['U'],auc_U).min()])
 
         return
 
