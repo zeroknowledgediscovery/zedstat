@@ -2,6 +2,10 @@
 istat
 ===============
 
+.. image:: https://github.com/zeroknowledgediscovery/zedstat/blob/master/docs/logozed_nowhite.png
+   :scale: 50
+   :align: center 
+
 .. image:: https://zenodo.org/badge/526971595.svg
    :target: https://zenodo.org/badge/latestdoi/526971595
 
