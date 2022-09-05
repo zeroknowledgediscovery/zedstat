@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>zedstat API documentation</title>
-<meta name="description" content="zedstat …" />
+<title>zedstat.mwauc API documentation</title>
+<meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -20,63 +20,98 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Package <code>zedstat</code></h1>
+<h1 class="title">Module <code>zedstat.mwauc</code></h1>
 </header>
 <section id="section-intro">
-<h1 id="zedstat">zedstat</h1>
-<p>Description:
-<br>
-Utilities for uncertainty quantification and deployment of ML models
-</p>
-<hr>
-<p>Installation:
-<br>
-<code>pip install zedstat</code>
-<br>
-Notes:
-<br>
-Useful for calculation of likelihood ratios, confidence intervals on AUC,
-simple performance interpretation (list to be expanded)</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;                                                                                                                        
-# zedstat                                                                                                                   
-                                                                                                                           
-Description:                                                                                                               
-    Utilities for uncertainty quantification and deployment of ML models                                                                  
-                                                                                                                           
----                                                                                                                        
-                                                                                                                           
-Installation:                                                                                                              
-   ```                                                                                                                     
-      pip install zedstat                                                                                                   
-   ```                                                                                                                                                                                                      
-Notes:                                                                                                                     
-   Useful for calculation of likelihood ratios, confidence intervals on AUC,
-   simple performance interpretation (list to be expanded)
+<pre><code class="python">import pandas as pd
+from tqdm import tqdm
+import glob
+import pylab as plt
+import scipy as sp
+import numpy as np
+from scipy import stats, optimize, interpolate
+plt.style.use(&#39;ggplot&#39;)
 
-
-&#34;&#34;&#34;</code></pre>
+def calc_auc(y_true, y_score,cb=0.99):
+    &#39;&#39;&#39;
+    Calculate AUC and confidence bounds / pvalue 
+    on AUC using U test correspondance using y_true and y_score
+    &#39;&#39;&#39;    
+    ZALPHA={0.9:1.645,0.95:1.96,.99:2.58,.999:3.27}
+    n1 = np.sum(y_true==1)
+    n0 = len(y_score)-n1
+    order = np.argsort(y_score)
+    rank = np.argsort(order)
+    rank += 1
+    U1 = np.sum(rank[y_true == 1]) - n1*(n1+1)/2
+    U0 = np.sum(rank[y_true == 0]) - n0*(n0+1)/2
+    AUC1 = U1/ (n1*n0)
+    AUC0 = U0/ (n1*n0)
+    
+    EU1=n0*n1*0.5
+    s1=np.sqrt(n0*n1*(n0+n1+1)/12.)
+    U1_z= (U1-EU1)/s1
+    p = sp.stats.norm.sf(abs(U1_z))*2 #twosided
+    
+    CF=(ZALPHA[cb]*s1)/(n1*n0)
+    
+    if AUC1&gt;AUC0:
+        return AUC1, p,U1,U1_z,CF
+    
+    return AUC0, p0,U0,U0_z,CF  </code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="zedstat.mwauc" href="mwauc.html">zedstat.mwauc</a></code></dt>
+<dt id="zedstat.mwauc.calc_auc"><code class="name flex">
+<span>def <span class="ident">calc_auc</span></span>(<span>y_true, y_score, cb=0.99)</span>
+</code></dt>
 <dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="zedstat.zedstat" href="zedstat.html">zedstat.zedstat</a></code></dt>
-<dd>
-<div class="desc"></div>
+<div class="desc"><p>Calculate AUC and confidence bounds / pvalue
+on AUC using U test correspondance using y_true and y_score</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def calc_auc(y_true, y_score,cb=0.99):
+    &#39;&#39;&#39;
+    Calculate AUC and confidence bounds / pvalue 
+    on AUC using U test correspondance using y_true and y_score
+    &#39;&#39;&#39;    
+    ZALPHA={0.9:1.645,0.95:1.96,.99:2.58,.999:3.27}
+    n1 = np.sum(y_true==1)
+    n0 = len(y_score)-n1
+    order = np.argsort(y_score)
+    rank = np.argsort(order)
+    rank += 1
+    U1 = np.sum(rank[y_true == 1]) - n1*(n1+1)/2
+    U0 = np.sum(rank[y_true == 0]) - n0*(n0+1)/2
+    AUC1 = U1/ (n1*n0)
+    AUC0 = U0/ (n1*n0)
+    
+    EU1=n0*n1*0.5
+    s1=np.sqrt(n0*n1*(n0+n1+1)/12.)
+    U1_z= (U1-EU1)/s1
+    p = sp.stats.norm.sf(abs(U1_z))*2 #twosided
+    
+    CF=(ZALPHA[cb]*s1)/(n1*n0)
+    
+    if AUC1&gt;AUC0:
+        return AUC1, p,U1,U1_z,CF
+    
+    return AUC0, p0,U0,U0_z,CF  </code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -85,15 +120,17 @@ Notes:
 <img src="logozed_nowhite.png" alt="drawing" style="width:400px;"/>
 <h1>Index</h1>
 <div class="toc">
-<ul>
-<li><a href="#zedstat">zedstat</a></li>
-</ul>
+<ul></ul>
 </div>
 <ul id="index">
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<li><h3>Super-module</h3>
 <ul>
-<li><code><a title="zedstat.mwauc" href="mwauc.html">zedstat.mwauc</a></code></li>
-<li><code><a title="zedstat.zedstat" href="zedstat.html">zedstat.zedstat</a></code></li>
+<li><code><a title="zedstat" href="index.html">zedstat</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="zedstat.mwauc.calc_auc" href="#zedstat.mwauc.calc_auc">calc_auc</a></code></li>
 </ul>
 </li>
 </ul>

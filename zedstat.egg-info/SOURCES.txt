@@ -4,6 +4,7 @@ README.rst
 setup.py
 version.py
 zedstat/__init__.py
+zedstat/mwauc.py
 zedstat/zedstat.py
 zedstat.egg-info/PKG-INFO
 zedstat.egg-info/SOURCES.txt
