@@ -223,7 +223,7 @@ class zedstat(object):
         return #self.df
 
     
-    def usample(self,precision=3):
+    def usample(self,df=None,precision=3):
         &#39;&#39;&#39;
         make roc curve and other measures estimated at regular intervals of false positive rate
         &#39;&#39;&#39;
@@ -231,12 +231,21 @@ class zedstat(object):
         fpr=[np.round(x,precision) for x in np.arange(0,1+step,step)]
         fpr_=[x for x in fpr if x not in self.df.index]
 
-        df___=self.df.copy()
+        if df is None:
+            df___=self.df.copy()
+        else:
+            df___=df
+            
         for x in fpr_:
             df___.loc[x]=pd.Series([],dtype=float) 
         df___=df___.sort_index().interpolate()
-        self.df=df___.loc[fpr]
-        return #self.df
+        df___=df___.loc[fpr]
+        
+        if df is None:
+            self.df=df___
+
+            
+        return df___
     
     def getDelta(self,
                  total_samples=None,
@@ -675,7 +684,7 @@ class zedstat(object):
         return #self.df
 
     
-    def usample(self,precision=3):
+    def usample(self,df=None,precision=3):
         &#39;&#39;&#39;
         make roc curve and other measures estimated at regular intervals of false positive rate
         &#39;&#39;&#39;
@@ -683,12 +692,21 @@ class zedstat(object):
         fpr=[np.round(x,precision) for x in np.arange(0,1+step,step)]
         fpr_=[x for x in fpr if x not in self.df.index]
 
-        df___=self.df.copy()
+        if df is None:
+            df___=self.df.copy()
+        else:
+            df___=df
+            
         for x in fpr_:
             df___.loc[x]=pd.Series([],dtype=float) 
         df___=df___.sort_index().interpolate()
-        self.df=df___.loc[fpr]
-        return #self.df
+        df___=df___.loc[fpr]
+        
+        if df is None:
+            self.df=df___
+
+            
+        return df___
     
     def getDelta(self,
                  total_samples=None,
@@ -1426,7 +1444,7 @@ one for maximizing precions, and one for maximizing sensitivity</p></div>
 </details>
 </dd>
 <dt id="zedstat.zedstat.zedstat.usample"><code class="name flex">
-<span>def <span class="ident">usample</span></span>(<span>self, precision=3)</span>
+<span>def <span class="ident">usample</span></span>(<span>self, df=None, precision=3)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>make roc curve and other measures estimated at regular intervals of false positive rate</p></div>
@@ -1434,7 +1452,7 @@ one for maximizing precions, and one for maximizing sensitivity</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def usample(self,precision=3):
+<pre><code class="python">def usample(self,df=None,precision=3):
     &#39;&#39;&#39;
     make roc curve and other measures estimated at regular intervals of false positive rate
     &#39;&#39;&#39;
@@ -1442,12 +1460,21 @@ one for maximizing precions, and one for maximizing sensitivity</p></div>
     fpr=[np.round(x,precision) for x in np.arange(0,1+step,step)]
     fpr_=[x for x in fpr if x not in self.df.index]
 
-    df___=self.df.copy()
+    if df is None:
+        df___=self.df.copy()
+    else:
+        df___=df
+        
     for x in fpr_:
         df___.loc[x]=pd.Series([],dtype=float) 
     df___=df___.sort_index().interpolate()
-    self.df=df___.loc[fpr]
-    return #self.df</code></pre>
+    df___=df___.loc[fpr]
+    
+    if df is None:
+        self.df=df___
+
+        
+    return df___</code></pre>
 </details>
 </dd>
 </dl>
