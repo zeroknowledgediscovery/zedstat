@@ -1,12 +1,12 @@
 Metadata-Version: 2.1
 Name: zedstat
-Version: 0.0.44
+Version: 0.0.45
 Summary: Statistics tools for ML models and deployment
 Home-page: https://github.com/zeroknowledgediscovery/zedstat
 Author: zed.uchicago.edu
 Author-email: ishanu@uchicago.edu
 License: LICENSE
-Download-URL: https://github.com/zeroknowledgediscovery/zedstat/archive/0.0.44.tar.gz
+Download-URL: https://github.com/zeroknowledgediscovery/zedstat/archive/0.0.45.tar.gz
 Keywords: machine learning,statistics
 Platform: UNKNOWN
 Classifier: Development Status :: 4 - Beta
@@ -24,7 +24,7 @@ License-File: LICENSE
 zedstat
 ===============
 
-.. image:: https://github.com/zeroknowledgediscovery/zedstat/blob/master/docs/logo.png
+.. image:: https://zed.uchicago.edu/logo/logo_zedstat.png
    :height: 150px
    :align: center 
 
