@@ -73,6 +73,7 @@ def tablewithbounds(df,
                     df_upper=None,
                     df_lower=None,
                     df_delta=None,
+                    thresholdcolname=&#39;threshold&#39;,
                     width=5):
     &#39;&#39;&#39;
     get datafraem with bounds displayed
@@ -97,28 +98,29 @@ def tablewithbounds(df,
         df_delta = pd.DataFrame()
         for col in df.columns:
             if col == &#39;tpr&#39;:
-                df_delta[col]=df.col-df_lower[col]
+                df_delta[col]=df[col]-df_lower[col]
                 
             if col == &#39;ppv&#39;:
-                df_delta[col]=df.col-df_lower[col]
+                df_delta[col]=df[col]-df_lower[col]
                 
             if col == &#39;acc&#39;:
-                df_delta[col]=df.col-df_lower[col]
+                df_delta[col]=df[col]-df_lower[col]
                 
             if col == &#39;npv&#39;:
-                df_delta[col]=df.col-df_lower[col]
+                df_delta[col]=df[col]-df_lower[col]
                 
             if col == &#39;LR+&#39;:
-                df_delta[col]=df.col-df_lower[col]
+                df_delta[col]=df[col]-df_lower[col]
                 
             if col == &#39;LR-&#39;:
-                df_delta[col]=df_upper.col-df[col]
+                df_delta[col]=df_lower[col]-df[col]
         
 
     df_=dfthis.join(df_delta,rsuffix=&#39;_cb&#39;)
 
     for col in df.columns:
-        dfthis[col]=df_.apply(getpm,axis=1,tag=col)
+        if col != thresholdcolname:
+            dfthis[col]=df_.apply(getpm,axis=1,tag=col)
 
     return dfthis
             
@@ -148,7 +150,7 @@ def tablewithbounds(df,
 </details>
 </dd>
 <dt id="zedstat.textable.tablewithbounds"><code class="name flex">
-<span>def <span class="ident">tablewithbounds</span></span>(<span>df, df_upper=None, df_lower=None, df_delta=None, width=5)</span>
+<span>def <span class="ident">tablewithbounds</span></span>(<span>df, df_upper=None, df_lower=None, df_delta=None, thresholdcolname='threshold', width=5)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>get datafraem with bounds displayed</p></div>
@@ -160,6 +162,7 @@ def tablewithbounds(df,
                     df_upper=None,
                     df_lower=None,
                     df_delta=None,
+                    thresholdcolname=&#39;threshold&#39;,
                     width=5):
     &#39;&#39;&#39;
     get datafraem with bounds displayed
@@ -184,28 +187,29 @@ def tablewithbounds(df,
         df_delta = pd.DataFrame()
         for col in df.columns:
             if col == &#39;tpr&#39;:
-                df_delta[col]=df.col-df_lower[col]
+                df_delta[col]=df[col]-df_lower[col]
                 
             if col == &#39;ppv&#39;:
-                df_delta[col]=df.col-df_lower[col]
+                df_delta[col]=df[col]-df_lower[col]
                 
             if col == &#39;acc&#39;:
-                df_delta[col]=df.col-df_lower[col]
+                df_delta[col]=df[col]-df_lower[col]
                 
             if col == &#39;npv&#39;:
-                df_delta[col]=df.col-df_lower[col]
+                df_delta[col]=df[col]-df_lower[col]
                 
             if col == &#39;LR+&#39;:
-                df_delta[col]=df.col-df_lower[col]
+                df_delta[col]=df[col]-df_lower[col]
                 
             if col == &#39;LR-&#39;:
-                df_delta[col]=df_upper.col-df[col]
+                df_delta[col]=df_lower[col]-df[col]
         
 
     df_=dfthis.join(df_delta,rsuffix=&#39;_cb&#39;)
 
     for col in df.columns:
-        dfthis[col]=df_.apply(getpm,axis=1,tag=col)
+        if col != thresholdcolname:
+            dfthis[col]=df_.apply(getpm,axis=1,tag=col)
 
     return dfthis</code></pre>
 </details>
