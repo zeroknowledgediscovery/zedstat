@@ -1,9 +1,9 @@
 ===============
-istat
+zedstat
 ===============
 
 .. image:: https://github.com/zeroknowledgediscovery/zedstat/blob/master/docs/logozed_nowhite.png
-   :scale: 50
+   :scale: 10
    :align: center 
 
 .. image:: https://zenodo.org/badge/526971595.svg
