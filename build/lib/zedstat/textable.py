@@ -33,3 +33,47 @@ def textable(df,tabname='tmp.tex',FORMAT='%1.2f',INDEX=True,DUMMY=DUMMY,USE_l=Fa
     
     with open(tabname,'a') as f:
         f.write('\\hline\\end{tabular}\n')
+
+
+
+def getpm(row,tag):
+    return '$'+str(row[tag])[:5]+' \pm '+str(1*row[tag+'_cb'])[:5]+'$'
+
+
+def tablewithbounds(df,
+                    df_upper=None,
+                    df_lower=None,
+                    df_delta=None,
+                    width=5):
+    '''
+    get datafraem with bounds displayed
+    '''
+
+    dfthis=df.copy()
+    if df_delta is not None:
+        assert (df_upper is None) and (df_lower is None)
+
+
+    if df_upper is not None:
+        assert df_delta is None
+        if df_lower is None:
+            df_delta=(df_upper-dfthis)/2
+
+    if df_lower is not None:
+        assert df_delta is None
+        if df_upper is None:
+            df_delta=(df_lower-dfthis)/2
+
+    if (df_lower is not None) and (df_upper is not None):
+        df_delta = (-df_lower+df_upper)/2
+
+    df_=dfthis.join(df_delta,rsuffix='_cb')
+
+    for col in df.columns:
+        dfthis[col]=df_.apply(getpm,axis=1,tag=col)
+
+    return dfthis
+            
+
+
+        

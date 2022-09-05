@@ -61,7 +61,51 @@ def textable(df,tabname=&#39;tmp.tex&#39;,FORMAT=&#39;%1.2f&#39;,INDEX=True,DUMM
               sep=&#39;&amp;&#39;,quotechar=&#39; &#39;,index=None,mode=&#39;a&#39;)
     
     with open(tabname,&#39;a&#39;) as f:
-        f.write(&#39;\\hline\\end{tabular}\n&#39;)</code></pre>
+        f.write(&#39;\\hline\\end{tabular}\n&#39;)
+
+
+
+def getpm(row,tag):
+    return &#39;$&#39;+str(row[tag])[:5]+&#39; \pm &#39;+str(1*row[tag+&#39;_cb&#39;])[:5]+&#39;$&#39;
+
+
+def tablewithbounds(df,
+                    df_upper=None,
+                    df_lower=None,
+                    df_delta=None,
+                    width=5):
+    &#39;&#39;&#39;
+    get datafraem with bounds displayed
+    &#39;&#39;&#39;
+
+    dfthis=df.copy()
+    if df_delta is not None:
+        assert (df_upper is None) and (df_lower is None)
+
+
+    if df_upper is not None:
+        assert df_delta is None
+        if df_lower is None:
+            df_delta=(df_upper-dfthis)/2
+
+    if df_lower is not None:
+        assert df_delta is None
+        if df_upper is None:
+            df_delta=(df_lower-dfthis)/2
+
+    if (df_lower is not None) and (df_upper is not None):
+        df_delta = (-df_lower+df_upper)/2
+
+    df_=dfthis.join(df_delta,rsuffix=&#39;_cb&#39;)
+
+    for col in df.columns:
+        dfthis[col]=df_.apply(getpm,axis=1,tag=col)
+
+    return dfthis
+            
+
+
+        </code></pre>
 </details>
 </section>
 <section>
@@ -71,6 +115,63 @@ def textable(df,tabname=&#39;tmp.tex&#39;,FORMAT=&#39;%1.2f&#39;,INDEX=True,DUMM
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="zedstat.textable.getpm"><code class="name flex">
+<span>def <span class="ident">getpm</span></span>(<span>row, tag)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getpm(row,tag):
+    return &#39;$&#39;+str(row[tag])[:5]+&#39; \pm &#39;+str(1*row[tag+&#39;_cb&#39;])[:5]+&#39;$&#39;</code></pre>
+</details>
+</dd>
+<dt id="zedstat.textable.tablewithbounds"><code class="name flex">
+<span>def <span class="ident">tablewithbounds</span></span>(<span>df, df_upper=None, df_lower=None, df_delta=None, width=5)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>get datafraem with bounds displayed</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def tablewithbounds(df,
+                    df_upper=None,
+                    df_lower=None,
+                    df_delta=None,
+                    width=5):
+    &#39;&#39;&#39;
+    get datafraem with bounds displayed
+    &#39;&#39;&#39;
+
+    dfthis=df.copy()
+    if df_delta is not None:
+        assert (df_upper is None) and (df_lower is None)
+
+
+    if df_upper is not None:
+        assert df_delta is None
+        if df_lower is None:
+            df_delta=(df_upper-dfthis)/2
+
+    if df_lower is not None:
+        assert df_delta is None
+        if df_upper is None:
+            df_delta=(df_lower-dfthis)/2
+
+    if (df_lower is not None) and (df_upper is not None):
+        df_delta = (-df_lower+df_upper)/2
+
+    df_=dfthis.join(df_delta,rsuffix=&#39;_cb&#39;)
+
+    for col in df.columns:
+        dfthis[col]=df_.apply(getpm,axis=1,tag=col)
+
+    return dfthis</code></pre>
+</details>
+</dd>
 <dt id="zedstat.textable.textable"><code class="name flex">
 <span>def <span class="ident">textable</span></span>(<span>df, tabname='tmp.tex', FORMAT='%1.2f', INDEX=True, DUMMY=False, USE_l=False, TABFORMAT=None, LNTERM='\\\\\\hline\n')</span>
 </code></dt>
@@ -131,6 +232,8 @@ def textable(df,tabname=&#39;tmp.tex&#39;,FORMAT=&#39;%1.2f&#39;,INDEX=True,DUMM
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="zedstat.textable.getpm" href="#zedstat.textable.getpm">getpm</a></code></li>
+<li><code><a title="zedstat.textable.tablewithbounds" href="#zedstat.textable.tablewithbounds">tablewithbounds</a></code></li>
 <li><code><a title="zedstat.textable.textable" href="#zedstat.textable.textable">textable</a></code></li>
 </ul>
 </li>
