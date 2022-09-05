@@ -194,13 +194,18 @@ class zedstat(object):
         return #self.df
 
     
-    def usample(self,df=None,precision=3):
+    def usample(self,
+                df=None,
+                precision=3):
         '''
         make roc curve and other measures estimated at regular intervals of false positive rate
         '''
         step=10**(-precision)
         fpr=[np.round(x,precision) for x in np.arange(0,1+step,step)]
-        fpr_=[x for x in fpr if x not in self.df.index]
+        if df is None:        
+            fpr_=[x for x in fpr if x not in self.df.index]
+        else:
+            fpr_=[x for x in fpr if x not in df.index]
 
         if df is None:
             df___=self.df.copy()
@@ -210,15 +215,11 @@ class zedstat(object):
         for x in fpr_:
             df___.loc[x]=pd.Series([],dtype=float) 
         df___=df___.sort_index().interpolate()
-
-        display(df___)
         
-        df___=df___.loc[fpr]
-        
+        df___=df___.loc[fpr]        
         if df is None:
             self.df=df___
 
-            
         return df___
     
     def getDelta(self,
