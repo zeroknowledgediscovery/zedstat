@@ -44,6 +44,7 @@ def tablewithbounds(df,
                     df_upper=None,
                     df_lower=None,
                     df_delta=None,
+                    thresholdcolname='threshold',
                     width=5):
     '''
     get datafraem with bounds displayed
@@ -89,7 +90,8 @@ def tablewithbounds(df,
     df_=dfthis.join(df_delta,rsuffix='_cb')
 
     for col in df.columns:
-        dfthis[col]=df_.apply(getpm,axis=1,tag=col)
+        if col != thresholdcolname:
+            dfthis[col]=df_.apply(getpm,axis=1,tag=col)
 
     return dfthis
             
