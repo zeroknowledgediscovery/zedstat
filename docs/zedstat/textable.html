@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>zedstat API documentation</title>
-<meta name="description" content="zedstat …" />
+<title>zedstat.textable API documentation</title>
+<meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -20,67 +20,99 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Package <code>zedstat</code></h1>
+<h1 class="title">Module <code>zedstat.textable</code></h1>
 </header>
 <section id="section-intro">
-<h1 id="zedstat">zedstat</h1>
-<p>Description:
-<br>
-Utilities for uncertainty quantification and deployment of ML models
-</p>
-<hr>
-<p>Installation:
-<br>
-<code>pip install zedstat</code>
-<br>
-Notes:
-<br>
-Useful for calculation of likelihood ratios, confidence intervals on AUC,
-simple performance interpretation (list to be expanded)</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;                                                                                                                        
-# zedstat                                                                                                                   
-                                                                                                                           
-Description:                                                                                                               
-    Utilities for uncertainty quantification and deployment of ML models                                                                  
-                                                                                                                           
----                                                                                                                        
-                                                                                                                           
-Installation:                                                                                                              
-   ```                                                                                                                     
-      pip install zedstat                                                                                                   
-   ```                                                                                                                                                                                                      
-Notes:                                                                                                                     
-   Useful for calculation of likelihood ratios, confidence intervals on AUC,
-   simple performance interpretation (list to be expanded)
+<pre><code class="python">import pandas as pd
+import numpy as np
+DUMMY=False
+STRA=&#39;L{1in}|L{1.25in}|L{1.25in}|L{1.5in}|L{.3in}|L{.3in}&#39;
 
-
-&#34;&#34;&#34;</code></pre>
+def textable(df,tabname=&#39;tmp.tex&#39;,FORMAT=&#39;%1.2f&#39;,INDEX=True,DUMMY=DUMMY,USE_l=False,
+             TABFORMAT=None,LNTERM=&#39;\\\\\\hline\n&#39;):
+    &#39;&#39;&#39;
+        write latex table
+    &#39;&#39;&#39;
+    if DUMMY:
+        return
+    if INDEX:
+        df=df.reset_index()
+    columns=df.columns
+    df.columns=[x.replace(&#39;_&#39;,&#39;\\_&#39;).replace(&#39;\_\_&#39;,&#39;_&#39;) for x in columns]
+    for col in df.columns:
+        if df[col].dtype == &#39;object&#39;:
+            df[col]=df[col].str.replace(&#39;_&#39;,&#39;\\_&#39;)
+    
+    if USE_l:
+        TABFORMAT=&#39;l&#39;*len(df.columns)
+    else:
+        if TABFORMAT is None:
+            TABFORMAT=&#39;L{1in}|&#39;*len(df.columns)
+            TABFORMAT=TABFORMAT[:-1]
+    STR=&#39;\\begin{tabular}{&#39;+TABFORMAT+&#39;}\\hline\n&#39;        
+    with open(tabname,&#39;w&#39;) as f:
+        f.write(STR)
+    df.to_csv(tabname,float_format=FORMAT,
+              line_terminator=LNTERM,
+              sep=&#39;&amp;&#39;,quotechar=&#39; &#39;,index=None,mode=&#39;a&#39;)
+    
+    with open(tabname,&#39;a&#39;) as f:
+        f.write(&#39;\\hline\\end{tabular}\n&#39;)</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="zedstat.mwauc" href="mwauc.html">zedstat.mwauc</a></code></dt>
+<dt id="zedstat.textable.textable"><code class="name flex">
+<span>def <span class="ident">textable</span></span>(<span>df, tabname='tmp.tex', FORMAT='%1.2f', INDEX=True, DUMMY=False, USE_l=False, TABFORMAT=None, LNTERM='\\\\\\hline\n')</span>
+</code></dt>
 <dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="zedstat.textable" href="textable.html">zedstat.textable</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="zedstat.zedstat" href="zedstat.html">zedstat.zedstat</a></code></dt>
-<dd>
-<div class="desc"></div>
+<div class="desc"><p>write latex table</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def textable(df,tabname=&#39;tmp.tex&#39;,FORMAT=&#39;%1.2f&#39;,INDEX=True,DUMMY=DUMMY,USE_l=False,
+             TABFORMAT=None,LNTERM=&#39;\\\\\\hline\n&#39;):
+    &#39;&#39;&#39;
+        write latex table
+    &#39;&#39;&#39;
+    if DUMMY:
+        return
+    if INDEX:
+        df=df.reset_index()
+    columns=df.columns
+    df.columns=[x.replace(&#39;_&#39;,&#39;\\_&#39;).replace(&#39;\_\_&#39;,&#39;_&#39;) for x in columns]
+    for col in df.columns:
+        if df[col].dtype == &#39;object&#39;:
+            df[col]=df[col].str.replace(&#39;_&#39;,&#39;\\_&#39;)
+    
+    if USE_l:
+        TABFORMAT=&#39;l&#39;*len(df.columns)
+    else:
+        if TABFORMAT is None:
+            TABFORMAT=&#39;L{1in}|&#39;*len(df.columns)
+            TABFORMAT=TABFORMAT[:-1]
+    STR=&#39;\\begin{tabular}{&#39;+TABFORMAT+&#39;}\\hline\n&#39;        
+    with open(tabname,&#39;w&#39;) as f:
+        f.write(STR)
+    df.to_csv(tabname,float_format=FORMAT,
+              line_terminator=LNTERM,
+              sep=&#39;&amp;&#39;,quotechar=&#39; &#39;,index=None,mode=&#39;a&#39;)
+    
+    with open(tabname,&#39;a&#39;) as f:
+        f.write(&#39;\\hline\\end{tabular}\n&#39;)</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -89,16 +121,17 @@ Notes:
 <img src="logozed_nowhite.png" alt="drawing" style="width:400px;"/>
 <h1>Index</h1>
 <div class="toc">
-<ul>
-<li><a href="#zedstat">zedstat</a></li>
-</ul>
+<ul></ul>
 </div>
 <ul id="index">
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<li><h3>Super-module</h3>
 <ul>
-<li><code><a title="zedstat.mwauc" href="mwauc.html">zedstat.mwauc</a></code></li>
-<li><code><a title="zedstat.textable" href="textable.html">zedstat.textable</a></code></li>
-<li><code><a title="zedstat.zedstat" href="zedstat.html">zedstat.zedstat</a></code></li>
+<li><code><a title="zedstat" href="index.html">zedstat</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="zedstat.textable.textable" href="#zedstat.textable.textable">textable</a></code></li>
 </ul>
 </li>
 </ul>
