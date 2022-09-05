@@ -68,22 +68,22 @@ def tablewithbounds(df,
         df_delta = pd.DataFrame()
         for col in df.columns:
             if col == 'tpr':
-                df_delta[col]=df.col-df_lower[col]
+                df_delta[col]=df[col]-df_lower[col]
                 
             if col == 'ppv':
-                df_delta[col]=df.col-df_lower[col]
+                df_delta[col]=df[col]-df_lower[col]
                 
             if col == 'acc':
-                df_delta[col]=df.col-df_lower[col]
+                df_delta[col]=df[col]-df_lower[col]
                 
             if col == 'npv':
-                df_delta[col]=df.col-df_lower[col]
+                df_delta[col]=df[col]-df_lower[col]
                 
             if col == 'LR+':
-                df_delta[col]=df.col-df_lower[col]
+                df_delta[col]=df[col]-df_lower[col]
                 
             if col == 'LR-':
-                df_delta[col]=df_upper.col-df[col]
+                df_delta[col]=df_upper[col]-df[col]
         
 
     df_=dfthis.join(df_delta,rsuffix='_cb')
