@@ -234,11 +234,14 @@ class zedstat(object):
         if df is None:
             df___=self.df.copy()
         else:
-            df___=df
+            df___=df.copy()
             
         for x in fpr_:
             df___.loc[x]=pd.Series([],dtype=float) 
         df___=df___.sort_index().interpolate()
+
+        display(df___)
+        
         df___=df___.loc[fpr]
         
         if df is None:
@@ -695,11 +698,14 @@ class zedstat(object):
         if df is None:
             df___=self.df.copy()
         else:
-            df___=df
+            df___=df.copy()
             
         for x in fpr_:
             df___.loc[x]=pd.Series([],dtype=float) 
         df___=df___.sort_index().interpolate()
+
+        display(df___)
+        
         df___=df___.loc[fpr]
         
         if df is None:
@@ -1463,11 +1469,14 @@ one for maximizing precions, and one for maximizing sensitivity</p></div>
     if df is None:
         df___=self.df.copy()
     else:
-        df___=df
+        df___=df.copy()
         
     for x in fpr_:
         df___.loc[x]=pd.Series([],dtype=float) 
     df___=df___.sort_index().interpolate()
+
+    display(df___)
+    
     df___=df___.loc[fpr]
     
     if df is None:

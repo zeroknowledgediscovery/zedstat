@@ -205,7 +205,7 @@ class zedstat(object):
         if df is None:
             df___=self.df.copy()
         else:
-            df___=df
+            df___=df.copy()
             
         for x in fpr_:
             df___.loc[x]=pd.Series([],dtype=float) 
