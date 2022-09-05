@@ -2,7 +2,7 @@
 zedstat
 ===============
 
-.. image:: https://github.com/zeroknowledgediscovery/zedstat/blob/master/docs/logo.png
+.. image:: https://zed.uchicago.edu/logo/logo_zedstat.png
    :height: 150px
    :align: center 
 
