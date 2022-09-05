@@ -210,6 +210,9 @@ class zedstat(object):
         for x in fpr_:
             df___.loc[x]=pd.Series([],dtype=float) 
         df___=df___.sort_index().interpolate()
+
+        display(df___)
+        
         df___=df___.loc[fpr]
         
         if df is None:
