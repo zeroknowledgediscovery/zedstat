@@ -3,7 +3,7 @@ zedstat
 ===============
 
 .. image:: https://github.com/zeroknowledgediscovery/zedstat/blob/master/docs/logozed_nowhite.png
-   :scale: 10
+   :height: 50px
    :align: center 
 
 .. image:: https://zenodo.org/badge/526971595.svg
