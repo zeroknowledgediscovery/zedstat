@@ -2,7 +2,7 @@
 zedstat
 ===============
 
-.. image:: https://github.com/zeroknowledgediscovery/zedstat/blob/master/docs/logozed_nowhite.png
+.. image:: https://github.com/zeroknowledgediscovery/zedstat/blob/master/docs/logo.png
    :height: 150px
    :align: center 
 
