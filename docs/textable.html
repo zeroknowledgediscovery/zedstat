@@ -29,11 +29,13 @@
 </summary>
 <pre><code class="python">import pandas as pd
 import numpy as np
-DUMMY=False
-STRA=&#39;L{1in}|L{1.25in}|L{1.25in}|L{1.5in}|L{.3in}|L{.3in}&#39;
-
-def textable(df,tabname=&#39;tmp.tex&#39;,FORMAT=&#39;%1.2f&#39;,INDEX=True,DUMMY=DUMMY,USE_l=False,
-             TABFORMAT=None,LNTERM=&#39;\\\\\\hline\n&#39;):
+#STRA=&#39;L{1in}|L{1.25in}|L{1.25in}|L{1.5in}|L{.3in}|L{.3in}&#39;
+def textable(df,tabname=&#39;tmp.tex&#39;,
+             FORMAT=&#39;%1.2f&#39;,
+             INDEX=True,DUMMY=False,
+             USE_l=False,
+             TABFORMAT=None,
+             LNTERM=&#39;\\\\\\hline\n&#39;):
     &#39;&#39;&#39;
         write latex table
     &#39;&#39;&#39;
@@ -64,8 +66,10 @@ def textable(df,tabname=&#39;tmp.tex&#39;,FORMAT=&#39;%1.2f&#39;,INDEX=True,DUMM
         f.write(&#39;\\hline\\end{tabular}\n&#39;)
 
 
-
 def getpm(row,tag):
+    &#39;&#39;&#39;
+    add confidence bound to table entry
+    &#39;&#39;&#39;
     return &#39;$&#39;+str(row[tag])[:5]+&#39; \pm &#39;+str(1*row[tag+&#39;_cb&#39;])[:5]+&#39;$&#39;
 
 
@@ -122,12 +126,15 @@ def tablewithbounds(df,
 <span>def <span class="ident">getpm</span></span>(<span>row, tag)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>add confidence bound to table entry</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def getpm(row,tag):
+    &#39;&#39;&#39;
+    add confidence bound to table entry
+    &#39;&#39;&#39;
     return &#39;$&#39;+str(row[tag])[:5]+&#39; \pm &#39;+str(1*row[tag+&#39;_cb&#39;])[:5]+&#39;$&#39;</code></pre>
 </details>
 </dd>
@@ -187,8 +194,12 @@ def tablewithbounds(df,
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def textable(df,tabname=&#39;tmp.tex&#39;,FORMAT=&#39;%1.2f&#39;,INDEX=True,DUMMY=DUMMY,USE_l=False,
-             TABFORMAT=None,LNTERM=&#39;\\\\\\hline\n&#39;):
+<pre><code class="python">def textable(df,tabname=&#39;tmp.tex&#39;,
+             FORMAT=&#39;%1.2f&#39;,
+             INDEX=True,DUMMY=False,
+             USE_l=False,
+             TABFORMAT=None,
+             LNTERM=&#39;\\\\\\hline\n&#39;):
     &#39;&#39;&#39;
         write latex table
     &#39;&#39;&#39;

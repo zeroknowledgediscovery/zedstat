@@ -27,14 +27,8 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import pandas as pd
-from tqdm import tqdm
-import glob
-import pylab as plt
-import scipy as sp
+<pre><code class="python">import scipy as sp
 import numpy as np
-from scipy import stats, optimize, interpolate
-plt.style.use(&#39;ggplot&#39;)
 
 def calc_auc(y_true, y_score,cb=0.99):
     &#39;&#39;&#39;

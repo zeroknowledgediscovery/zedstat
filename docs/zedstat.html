@@ -31,8 +31,8 @@
 import numpy as np
 from sklearn.metrics import auc
 
-class zedstat(object):
-    &#34;&#34;&#34;zedstat&#34;&#34;&#34;
+class processRoc(object):
+    &#34;&#34;&#34;process ROC datafile&#34;&#34;&#34;
 
     def __init__(self,
                  df=None,
@@ -508,18 +508,18 @@ class zedstat(object):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="zedstat.zedstat.zedstat"><code class="flex name class">
-<span>class <span class="ident">zedstat</span></span>
+<dt id="zedstat.zedstat.processRoc"><code class="flex name class">
+<span>class <span class="ident">processRoc</span></span>
 <span>(</span><span>df=None, fprcol='fpr', tprcol='tpr', thresholdcol='threshold', prevalence=None, order=2, total_samples=None, positive_samples=None, alpha=0.01, random_state=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>zedstat</p></div>
+<div class="desc"><p>process ROC datafile</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class zedstat(object):
-    &#34;&#34;&#34;zedstat&#34;&#34;&#34;
+<pre><code class="python">class processRoc(object):
+    &#34;&#34;&#34;process ROC datafile&#34;&#34;&#34;
 
     def __init__(self,
                  df=None,
@@ -987,7 +987,7 @@ class zedstat(object):
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="zedstat.zedstat.zedstat.allmeasures"><code class="name flex">
+<dt id="zedstat.zedstat.processRoc.allmeasures"><code class="name flex">
 <span>def <span class="ident">allmeasures</span></span>(<span>self, prevalence=None, interpolate=False)</span>
 </code></dt>
 <dd>
@@ -1033,7 +1033,7 @@ class zedstat(object):
     return #self.df</code></pre>
 </details>
 </dd>
-<dt id="zedstat.zedstat.zedstat.auc"><code class="name flex">
+<dt id="zedstat.zedstat.processRoc.auc"><code class="name flex">
 <span>def <span class="ident">auc</span></span>(<span>self, total_samples=None, positive_samples=None, alpha=None)</span>
 </code></dt>
 <dd>
@@ -1062,7 +1062,7 @@ class zedstat(object):
     return self._auc[&#39;nominal&#39;], self._auc[&#39;U&#39;].min(), self._auc[&#39;L&#39;].max()</code></pre>
 </details>
 </dd>
-<dt id="zedstat.zedstat.zedstat.auc_cb2"><code class="name flex">
+<dt id="zedstat.zedstat.processRoc.auc_cb2"><code class="name flex">
 <span>def <span class="ident">auc_cb2</span></span>(<span>self, total_samples=None, positive_samples=None, alpha=None)</span>
 </code></dt>
 <dd>
@@ -1107,7 +1107,7 @@ class zedstat(object):
     return</code></pre>
 </details>
 </dd>
-<dt id="zedstat.zedstat.zedstat.convexify"><code class="name flex">
+<dt id="zedstat.zedstat.processRoc.convexify"><code class="name flex">
 <span>def <span class="ident">convexify</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -1146,7 +1146,7 @@ class zedstat(object):
     return #self.df</code></pre>
 </details>
 </dd>
-<dt id="zedstat.zedstat.zedstat.correctPPV"><code class="name flex">
+<dt id="zedstat.zedstat.processRoc.correctPPV"><code class="name flex">
 <span>def <span class="ident">correctPPV</span></span>(<span>self, df=None)</span>
 </code></dt>
 <dd>
@@ -1188,7 +1188,7 @@ class zedstat(object):
     return df__</code></pre>
 </details>
 </dd>
-<dt id="zedstat.zedstat.zedstat.get"><code class="name flex">
+<dt id="zedstat.zedstat.processRoc.get"><code class="name flex">
 <span>def <span class="ident">get</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -1204,7 +1204,7 @@ class zedstat(object):
     return self.df.copy()</code></pre>
 </details>
 </dd>
-<dt id="zedstat.zedstat.zedstat.getBounds"><code class="name flex">
+<dt id="zedstat.zedstat.processRoc.getBounds"><code class="name flex">
 <span>def <span class="ident">getBounds</span></span>(<span>self, total_samples=None, positive_samples=None, alpha=None, prevalence=None)</span>
 </code></dt>
 <dd>
@@ -1269,7 +1269,7 @@ class zedstat(object):
     return </code></pre>
 </details>
 </dd>
-<dt id="zedstat.zedstat.zedstat.getDelta"><code class="name flex">
+<dt id="zedstat.zedstat.processRoc.getDelta"><code class="name flex">
 <span>def <span class="ident">getDelta</span></span>(<span>self, total_samples=None, positive_samples=None, alpha=None)</span>
 </code></dt>
 <dd>
@@ -1313,7 +1313,7 @@ class zedstat(object):
     return </code></pre>
 </details>
 </dd>
-<dt id="zedstat.zedstat.zedstat.interpret"><code class="name flex">
+<dt id="zedstat.zedstat.processRoc.interpret"><code class="name flex">
 <span>def <span class="ident">interpret</span></span>(<span>self, fpr=0.01, number_of_positives=100)</span>
 </code></dt>
 <dd>
@@ -1361,7 +1361,7 @@ class zedstat(object):
     return rf,txt</code></pre>
 </details>
 </dd>
-<dt id="zedstat.zedstat.zedstat.nominal_auc"><code class="name flex">
+<dt id="zedstat.zedstat.processRoc.nominal_auc"><code class="name flex">
 <span>def <span class="ident">nominal_auc</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -1379,7 +1379,7 @@ class zedstat(object):
     return</code></pre>
 </details>
 </dd>
-<dt id="zedstat.zedstat.zedstat.operating_zone"><code class="name flex">
+<dt id="zedstat.zedstat.processRoc.operating_zone"><code class="name flex">
 <span>def <span class="ident">operating_zone</span></span>(<span>self, n=1, LRplus=10, LRminus=0.6)</span>
 </code></dt>
 <dd>
@@ -1414,7 +1414,7 @@ one for maximizing precions, and one for maximizing sensitivity</p></div>
     return #self._operating_zone.copy()</code></pre>
 </details>
 </dd>
-<dt id="zedstat.zedstat.zedstat.pvalue"><code class="name flex">
+<dt id="zedstat.zedstat.processRoc.pvalue"><code class="name flex">
 <span>def <span class="ident">pvalue</span></span>(<span>self, delta_auc=0.1, twosided=True)</span>
 </code></dt>
 <dd>
@@ -1442,7 +1442,7 @@ one for maximizing precions, and one for maximizing sensitivity</p></div>
     return pvalue</code></pre>
 </details>
 </dd>
-<dt id="zedstat.zedstat.zedstat.samplesize"><code class="name flex">
+<dt id="zedstat.zedstat.processRoc.samplesize"><code class="name flex">
 <span>def <span class="ident">samplesize</span></span>(<span>self, delta_auc, target_auc=None, alpha=None)</span>
 </code></dt>
 <dd>
@@ -1473,7 +1473,7 @@ one for maximizing precions, and one for maximizing sensitivity</p></div>
     return required_npos</code></pre>
 </details>
 </dd>
-<dt id="zedstat.zedstat.zedstat.smooth"><code class="name flex">
+<dt id="zedstat.zedstat.processRoc.smooth"><code class="name flex">
 <span>def <span class="ident">smooth</span></span>(<span>self, STEP=0.0001, interpolate=True, convexify=True)</span>
 </code></dt>
 <dd>
@@ -1511,7 +1511,7 @@ one for maximizing precions, and one for maximizing sensitivity</p></div>
     return </code></pre>
 </details>
 </dd>
-<dt id="zedstat.zedstat.zedstat.usample"><code class="name flex">
+<dt id="zedstat.zedstat.processRoc.usample"><code class="name flex">
 <span>def <span class="ident">usample</span></span>(<span>self, df=None, precision=3)</span>
 </code></dt>
 <dd>
@@ -1569,23 +1569,23 @@ one for maximizing precions, and one for maximizing sensitivity</p></div>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="zedstat.zedstat.zedstat" href="#zedstat.zedstat.zedstat">zedstat</a></code></h4>
+<h4><code><a title="zedstat.zedstat.processRoc" href="#zedstat.zedstat.processRoc">processRoc</a></code></h4>
 <ul class="two-column">
-<li><code><a title="zedstat.zedstat.zedstat.allmeasures" href="#zedstat.zedstat.zedstat.allmeasures">allmeasures</a></code></li>
-<li><code><a title="zedstat.zedstat.zedstat.auc" href="#zedstat.zedstat.zedstat.auc">auc</a></code></li>
-<li><code><a title="zedstat.zedstat.zedstat.auc_cb2" href="#zedstat.zedstat.zedstat.auc_cb2">auc_cb2</a></code></li>
-<li><code><a title="zedstat.zedstat.zedstat.convexify" href="#zedstat.zedstat.zedstat.convexify">convexify</a></code></li>
-<li><code><a title="zedstat.zedstat.zedstat.correctPPV" href="#zedstat.zedstat.zedstat.correctPPV">correctPPV</a></code></li>
-<li><code><a title="zedstat.zedstat.zedstat.get" href="#zedstat.zedstat.zedstat.get">get</a></code></li>
-<li><code><a title="zedstat.zedstat.zedstat.getBounds" href="#zedstat.zedstat.zedstat.getBounds">getBounds</a></code></li>
-<li><code><a title="zedstat.zedstat.zedstat.getDelta" href="#zedstat.zedstat.zedstat.getDelta">getDelta</a></code></li>
-<li><code><a title="zedstat.zedstat.zedstat.interpret" href="#zedstat.zedstat.zedstat.interpret">interpret</a></code></li>
-<li><code><a title="zedstat.zedstat.zedstat.nominal_auc" href="#zedstat.zedstat.zedstat.nominal_auc">nominal_auc</a></code></li>
-<li><code><a title="zedstat.zedstat.zedstat.operating_zone" href="#zedstat.zedstat.zedstat.operating_zone">operating_zone</a></code></li>
-<li><code><a title="zedstat.zedstat.zedstat.pvalue" href="#zedstat.zedstat.zedstat.pvalue">pvalue</a></code></li>
-<li><code><a title="zedstat.zedstat.zedstat.samplesize" href="#zedstat.zedstat.zedstat.samplesize">samplesize</a></code></li>
-<li><code><a title="zedstat.zedstat.zedstat.smooth" href="#zedstat.zedstat.zedstat.smooth">smooth</a></code></li>
-<li><code><a title="zedstat.zedstat.zedstat.usample" href="#zedstat.zedstat.zedstat.usample">usample</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.allmeasures" href="#zedstat.zedstat.processRoc.allmeasures">allmeasures</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.auc" href="#zedstat.zedstat.processRoc.auc">auc</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.auc_cb2" href="#zedstat.zedstat.processRoc.auc_cb2">auc_cb2</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.convexify" href="#zedstat.zedstat.processRoc.convexify">convexify</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.correctPPV" href="#zedstat.zedstat.processRoc.correctPPV">correctPPV</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.get" href="#zedstat.zedstat.processRoc.get">get</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.getBounds" href="#zedstat.zedstat.processRoc.getBounds">getBounds</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.getDelta" href="#zedstat.zedstat.processRoc.getDelta">getDelta</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.interpret" href="#zedstat.zedstat.processRoc.interpret">interpret</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.nominal_auc" href="#zedstat.zedstat.processRoc.nominal_auc">nominal_auc</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.operating_zone" href="#zedstat.zedstat.processRoc.operating_zone">operating_zone</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.pvalue" href="#zedstat.zedstat.processRoc.pvalue">pvalue</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.samplesize" href="#zedstat.zedstat.processRoc.samplesize">samplesize</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.smooth" href="#zedstat.zedstat.processRoc.smooth">smooth</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.usample" href="#zedstat.zedstat.processRoc.usample">usample</a></code></li>
 </ul>
 </li>
 </ul>

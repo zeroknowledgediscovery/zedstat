@@ -1,11 +1,5 @@
-import pandas as pd
-from tqdm import tqdm
-import glob
-import pylab as plt
 import scipy as sp
 import numpy as np
-from scipy import stats, optimize, interpolate
-plt.style.use('ggplot')
 
 def calc_auc(y_true, y_score,cb=0.99):
     '''

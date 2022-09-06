@@ -2,8 +2,8 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics import auc
 
-class zedstat(object):
-    """zedstat"""
+class processRoc(object):
+    """process ROC datafile"""
 
     def __init__(self,
                  df=None,

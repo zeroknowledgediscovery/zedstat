@@ -1,10 +1,12 @@
 import pandas as pd
 import numpy as np
-DUMMY=False
-STRA='L{1in}|L{1.25in}|L{1.25in}|L{1.5in}|L{.3in}|L{.3in}'
-
-def textable(df,tabname='tmp.tex',FORMAT='%1.2f',INDEX=True,DUMMY=DUMMY,USE_l=False,
-             TABFORMAT=None,LNTERM='\\\\\\hline\n'):
+#STRA='L{1in}|L{1.25in}|L{1.25in}|L{1.5in}|L{.3in}|L{.3in}'
+def textable(df,tabname='tmp.tex',
+             FORMAT='%1.2f',
+             INDEX=True,DUMMY=False,
+             USE_l=False,
+             TABFORMAT=None,
+             LNTERM='\\\\\\hline\n'):
     '''
         write latex table
     '''
@@ -35,8 +37,10 @@ def textable(df,tabname='tmp.tex',FORMAT='%1.2f',INDEX=True,DUMMY=DUMMY,USE_l=Fa
         f.write('\\hline\\end{tabular}\n')
 
 
-
 def getpm(row,tag):
+    '''
+    add confidence bound to table entry
+    '''
     return '$'+str(row[tag])[:5]+' \pm '+str(1*row[tag+'_cb'])[:5]+'$'
 
 
