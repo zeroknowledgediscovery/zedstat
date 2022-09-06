@@ -102,13 +102,13 @@ class processRoc(object):
         self.getBounds(total_samples=total_samples,
                 positive_samples=positive_samples,
                 alpha=alpha)
-        self.auc_cb2(total_samples=total_samples,
+        self.__auc_cb2(total_samples=total_samples,
                 positive_samples=positive_samples,
                 alpha=alpha)
         return self._auc['nominal'], self._auc['U'].min(), self._auc['L'].max()
 
     
-    def convexify(self):
+    def __convexify(self):
         '''
         compute convex hull of the roc curve
         '''   
@@ -163,7 +163,7 @@ class processRoc(object):
             DF[DF < 0] = 0
             self.df=DF
         if convexify:
-            self.convexify()
+            self.__convexify()
         return 
 
     
@@ -198,13 +198,13 @@ class processRoc(object):
             if self.thresholdcol not in df__.columns:
                 df__=df__.join(self.raw_df[self.thresholdcol])
         self.df=df__
-        self.correctPPV()
+        self.__correctPPV()
         self.df[self.df < 0] = 0
         
         return #self.df
 
 
-    def correctPPV(self,df=None):
+    def __correctPPV(self,df=None):
         '''
         make ppv monotonic
         '''
@@ -241,7 +241,14 @@ class processRoc(object):
                 df=None,
                 precision=3):
         '''
-        make roc curve and other measures estimated at regular intervals of false positive rate
+        make performance measures estimated at regular intervals of false positive rate
+
+        Args:
+            df (pandas.DataFrame): dataframe woth performance values, fpr as index. default: None, when the dataframe entered at initialization is used
+            precision (int): number of digits after decismal point used to sample fpr range
+        
+        Returns:
+            pandas.DataFrame: uniformly sampled performance dataframe
         '''
         step=10**(-precision)
         fpr=[np.round(x,precision) for x in np.arange(0,1+step,step)]
@@ -266,7 +273,7 @@ class processRoc(object):
         return df___
 
 
-    def getDelta(self,
+    def __getDelta(self,
                  total_samples=None,
                  positive_samples=None,
                  alpha=None):
@@ -308,8 +315,15 @@ class processRoc(object):
                   prevalence=None):
         '''
         compute confidence bounds on performance measures
+
+        Args:
+            total_samples (int): total number fo samples, default None
+            positive_samples (int): number fo positive samples, default None
+            alpha (float): significance level, default None
+            prevalence (float): prevalence of positive cases in population, default None
+
         '''
-        self.getDelta(total_samples=total_samples,
+        self.__getDelta(total_samples=total_samples,
                  positive_samples=positive_samples,
                       alpha=alpha)
 
@@ -340,7 +354,7 @@ class processRoc(object):
                                   order=self.order).set_index(self.fprcol)
             df__[df__ < 0] = 0
 
-            self.df_lim[direction]=self.correctPPV(df__)
+            self.df_lim[direction]=self.__correctPPV(df__)
             
             if direction=='U':
                 self._auc[direction]=np.array([np.append(self._auc[direction],
@@ -358,12 +372,17 @@ class processRoc(object):
 
 
 
-    def auc_cb2(self,
+    def __auc_cb2(self,
                 total_samples=None,
                 positive_samples=None,
                 alpha=None):
         '''
         compute auc confidence bounds using Danzig bounds
+
+        Args:
+            total_samples (int): total number fo samples, default None
+            positive_samples (int): number fo positive samples, default None
+            alpha (float): significance level, default None
         '''
         if total_samples is None:
             total_samples=self.total_samples
@@ -401,6 +420,12 @@ class processRoc(object):
         '''
         compute the end points of the operating zone, 
         one for maximizing precions, and one for maximizing sensitivity
+
+        Args:
+            n (int): number of operting points per condition returned, default 1
+            LRplus (float): lower bound on positive likelihood ratio, default 10.0
+            LRminus (float): upper bound on negative likelihood ratio, default 0.6
+
         '''
         wf=self.df.copy()
         
@@ -459,9 +484,13 @@ class processRoc(object):
         return pvalue
     
     
-    def interpret(self,fpr=0.01,number_of_positives=100):
+    def interpret(self,fpr=0.01,number_of_positives=10):
         '''
         generate simple interpretation of inferred model, based on a number of positive cases
+
+        Args:
+            fpr (float): teh false psotive rate or 1-specificity of the operating point
+            number_of_positives (int): interpret assuming this many positive cases, default 10
         '''
         wf=self.df.copy()
         wf.loc[fpr]=pd.Series([],dtype=float)
