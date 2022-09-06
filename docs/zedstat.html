@@ -235,7 +235,7 @@ class zedstat(object):
         df__.loc[1].ppv=0.0
         
         
-        return 
+        return df__
 
     
     def usample(self,
@@ -341,11 +341,8 @@ class zedstat(object):
                                   order=self.order).set_index(self.fprcol)
             df__[df__ &lt; 0] = 0
 
-            self.correctPPV(df__)
+            self.df_lim[direction]=self.correctPPV(df__)
             
-            
-            self.df_lim[direction]=df__
-
             if direction==&#39;U&#39;:
                 self._auc[direction]=np.array([np.append(self._auc[direction],
                                                 auc(df__.index.values,
@@ -721,7 +718,7 @@ class zedstat(object):
         df__.loc[1].ppv=0.0
         
         
-        return 
+        return df__
 
     
     def usample(self,
@@ -827,11 +824,8 @@ class zedstat(object):
                                   order=self.order).set_index(self.fprcol)
             df__[df__ &lt; 0] = 0
 
-            self.correctPPV(df__)
+            self.df_lim[direction]=self.correctPPV(df__)
             
-            
-            self.df_lim[direction]=df__
-
             if direction==&#39;U&#39;:
                 self._auc[direction]=np.array([np.append(self._auc[direction],
                                                 auc(df__.index.values,
@@ -1183,7 +1177,7 @@ class zedstat(object):
     df__.loc[1].ppv=0.0
     
     
-    return </code></pre>
+    return df__</code></pre>
 </details>
 </dd>
 <dt id="zedstat.zedstat.zedstat.get"><code class="name flex">
@@ -1250,11 +1244,8 @@ class zedstat(object):
                               order=self.order).set_index(self.fprcol)
         df__[df__ &lt; 0] = 0
 
-        self.correctPPV(df__)
+        self.df_lim[direction]=self.correctPPV(df__)
         
-        
-        self.df_lim[direction]=df__
-
         if direction==&#39;U&#39;:
             self._auc[direction]=np.array([np.append(self._auc[direction],
                                             auc(df__.index.values,
