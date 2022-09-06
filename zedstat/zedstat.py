@@ -14,8 +14,22 @@ class processRoc(object):
                  order=2,
                  total_samples=None,
                  positive_samples=None,
-                 alpha=0.01,
-                 random_state=None):
+                 alpha=0.05):
+
+        """Initialization
+
+        Args:
+            df (pandas.DataFrame): dataframe with columns tabulating fpr, tpr, and optionally threshold values
+            fprcol (str): string name of fpr column
+            tprcol (str): string name of tpr column
+            thresholdcol (str): string name of threshold column
+            prevalence (float): prevalence of positive cases in population (need not be the data ratio)
+            order (int): order of polynomial/spline for smoothing
+            total_samples (int): total number of samples in the original data
+            positive samples (int): number of positive cases in the original data
+            alpha (float): significance level e.g. 0.05
+        """
+        
         
         if df.index.name==fprcol:
             self.df=df.copy()
@@ -46,7 +60,10 @@ class processRoc(object):
         
     def get(self):
         '''
-        return dataframe
+        return dataframe currently in class
+
+        Returns:
+            pandas.DataFrame 
         '''
         return self.df.copy()
     
@@ -65,7 +82,18 @@ class processRoc(object):
             positive_samples=None,
             alpha=None):
         '''
-        calculate auc with confidence bounds
+        calculate auc with confidence bounds. As default, the arguments are read from class initializtion.
+
+        Args:
+            total_samples (int): total number fo samples, default None
+            positive_samples (int): number fo positive samples, default None
+            alpha (float): significance level, default None
+
+        Returns:
+            float: nominal auc
+            float: upper bound
+            float: lower bound
+        
         '''
         self.nominal_auc()
         self._auc['U']=[]
