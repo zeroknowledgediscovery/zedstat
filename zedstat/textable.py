@@ -66,25 +66,7 @@ def tablewithbounds(df,
             df_delta=(df_lower-dfthis)/2
 
     if (df_lower is not None) and (df_upper is not None):
-        df_delta = pd.DataFrame()
-        for col in df.columns:
-            if col == 'tpr':
-                df_delta[col]=df[col]-df_lower[col]
-                
-            if col == 'ppv':
-                df_delta[col]=df[col]-df_lower[col]
-                
-            if col == 'acc':
-                df_delta[col]=df[col]-df_lower[col]
-                
-            if col == 'npv':
-                df_delta[col]=df[col]-df_lower[col]
-                
-            if col == 'LR+':
-                df_delta[col]=df[col]-df_lower[col]
-                
-            if col == 'LR-':
-                df_delta[col]=df_lower[col]-df[col]
+        df_delta = ((df_upper-df_lower)/2).abs()
         
 
     df_=dfthis.join(df_delta,rsuffix='_cb')
