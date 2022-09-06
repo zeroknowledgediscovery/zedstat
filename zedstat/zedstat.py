@@ -58,6 +58,7 @@ class zedstat(object):
         from sklearn.metrics import auc
         self._auc['nominal']=auc(self.df.index.values,self.df.tpr.values)
         return
+
     
     def auc(self,
             total_samples=None,
@@ -77,6 +78,7 @@ class zedstat(object):
                 positive_samples=positive_samples,
                 alpha=alpha)
         return self._auc['nominal'], self._auc['U'].min(), self._auc['L'].max()
+
     
     def convexify(self):
         '''
@@ -136,6 +138,7 @@ class zedstat(object):
             self.convexify()
         return 
 
+    
     def allmeasures(self,prevalence=None,interpolate=False):
         '''
         compute accuracy, PPV, NPV, positive and negative likelihood ratios
@@ -221,6 +224,8 @@ class zedstat(object):
             self.df=df___
 
         return df___
+
+
     
     def getDelta(self,
                  total_samples=None,
@@ -256,6 +261,7 @@ class zedstat(object):
             self.delta_=delta_
         return 
 
+    
     def getBounds(self,
                   total_samples=None,
                   positive_samples=None,
@@ -281,12 +287,11 @@ class zedstat(object):
 
             if direction=='U':
                 df__.tpr=df__.tpr+self.delta_.tprdel
-                df__.fpr=df__.fpr-self.delta_.fprdel
+                #df__.fpr=df__.fpr-self.delta_.fprdel
             else:
                 df__.tpr=df__.tpr-self.delta_.tprdel
-                df__.fpr=df__.fpr+self.delta_.fprdel
+                #df__.fpr=df__.fpr+self.delta_.fprdel
                 
-
             df__['ppv']=1/(1+((df__.fpr/df__.tpr)*((1/p)-1)))
             df__['acc']=p*df__.tpr + (1-p)*(1-df__.fpr)
             df__['npv']=1/(1+((1-df__.tpr)/(1-df__.fpr))*(1/((1/p)-1)))
@@ -344,6 +349,7 @@ class zedstat(object):
 
         return
 
+    
     def operating_zone(self,
                        n=1,
                        LRplus=10,
