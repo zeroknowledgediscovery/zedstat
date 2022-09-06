@@ -325,7 +325,7 @@ class zedstat(object):
 
 
             # adjust datframe to cneter of upper and lowwr bounds    
-            self.df=(self.df_lim['U']+ self.df_lim['L'] )/2
+        self.df=(self.df_lim['U']+ self.df_lim['L'] )/2
         return 
 
 
