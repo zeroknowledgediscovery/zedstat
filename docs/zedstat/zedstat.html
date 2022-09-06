@@ -43,8 +43,22 @@ class processRoc(object):
                  order=2,
                  total_samples=None,
                  positive_samples=None,
-                 alpha=0.01,
-                 random_state=None):
+                 alpha=0.05):
+
+        &#34;&#34;&#34;Initialization
+
+        Args:
+            df (pandas.DataFrame): dataframe with columns tabulating fpr, tpr, and optionally threshold values
+            fprcol (str): string name of fpr column
+            tprcol (str): string name of tpr column
+            thresholdcol (str): string name of threshold column
+            prevalence (float): prevalence of positive cases in population (need not be the data ratio)
+            order (int): order of polynomial/spline for smoothing
+            total_samples (int): total number of samples in the original data
+            positive samples (int): number of positive cases in the original data
+            alpha (float): significance level e.g. 0.05
+        &#34;&#34;&#34;
+        
         
         if df.index.name==fprcol:
             self.df=df.copy()
@@ -75,7 +89,10 @@ class processRoc(object):
         
     def get(self):
         &#39;&#39;&#39;
-        return dataframe
+        return dataframe currently in class
+
+        Returns:
+            pandas.DataFrame 
         &#39;&#39;&#39;
         return self.df.copy()
     
@@ -94,7 +111,18 @@ class processRoc(object):
             positive_samples=None,
             alpha=None):
         &#39;&#39;&#39;
-        calculate auc with confidence bounds
+        calculate auc with confidence bounds. As default, the arguments are read from class initializtion.
+
+        Args:
+            total_samples (int): total number fo samples, default None
+            positive_samples (int): number fo positive samples, default None
+            alpha (float): significance level, default None
+
+        Returns:
+            float: nominal auc
+            float: upper bound
+            float: lower bound
+        
         &#39;&#39;&#39;
         self.nominal_auc()
         self._auc[&#39;U&#39;]=[]
@@ -510,10 +538,31 @@ class processRoc(object):
 <dl>
 <dt id="zedstat.zedstat.processRoc"><code class="flex name class">
 <span>class <span class="ident">processRoc</span></span>
-<span>(</span><span>df=None, fprcol='fpr', tprcol='tpr', thresholdcol='threshold', prevalence=None, order=2, total_samples=None, positive_samples=None, alpha=0.01, random_state=None)</span>
+<span>(</span><span>df=None, fprcol='fpr', tprcol='tpr', thresholdcol='threshold', prevalence=None, order=2, total_samples=None, positive_samples=None, alpha=0.05)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>process ROC datafile</p></div>
+<div class="desc"><p>process ROC datafile</p>
+<p>Initialization</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>df</code></strong> :&ensp;<code>pandas.DataFrame</code></dt>
+<dd>dataframe with columns tabulating fpr, tpr, and optionally threshold values</dd>
+<dt><strong><code>fprcol</code></strong> :&ensp;<code>str</code></dt>
+<dd>string name of fpr column</dd>
+<dt><strong><code>tprcol</code></strong> :&ensp;<code>str</code></dt>
+<dd>string name of tpr column</dd>
+<dt><strong><code>thresholdcol</code></strong> :&ensp;<code>str</code></dt>
+<dd>string name of threshold column</dd>
+<dt><strong><code>prevalence</code></strong> :&ensp;<code>float</code></dt>
+<dd>prevalence of positive cases in population (need not be the data ratio)</dd>
+<dt><strong><code>order</code></strong> :&ensp;<code>int</code></dt>
+<dd>order of polynomial/spline for smoothing</dd>
+<dt><strong><code>total_samples</code></strong> :&ensp;<code>int</code></dt>
+<dd>total number of samples in the original data</dd>
+<dt>positive samples (int): number of positive cases in the original data</dt>
+<dt><strong><code>alpha</code></strong> :&ensp;<code>float</code></dt>
+<dd>significance level e.g. 0.05</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -530,8 +579,22 @@ class processRoc(object):
                  order=2,
                  total_samples=None,
                  positive_samples=None,
-                 alpha=0.01,
-                 random_state=None):
+                 alpha=0.05):
+
+        &#34;&#34;&#34;Initialization
+
+        Args:
+            df (pandas.DataFrame): dataframe with columns tabulating fpr, tpr, and optionally threshold values
+            fprcol (str): string name of fpr column
+            tprcol (str): string name of tpr column
+            thresholdcol (str): string name of threshold column
+            prevalence (float): prevalence of positive cases in population (need not be the data ratio)
+            order (int): order of polynomial/spline for smoothing
+            total_samples (int): total number of samples in the original data
+            positive samples (int): number of positive cases in the original data
+            alpha (float): significance level e.g. 0.05
+        &#34;&#34;&#34;
+        
         
         if df.index.name==fprcol:
             self.df=df.copy()
@@ -562,7 +625,10 @@ class processRoc(object):
         
     def get(self):
         &#39;&#39;&#39;
-        return dataframe
+        return dataframe currently in class
+
+        Returns:
+            pandas.DataFrame 
         &#39;&#39;&#39;
         return self.df.copy()
     
@@ -581,7 +647,18 @@ class processRoc(object):
             positive_samples=None,
             alpha=None):
         &#39;&#39;&#39;
-        calculate auc with confidence bounds
+        calculate auc with confidence bounds. As default, the arguments are read from class initializtion.
+
+        Args:
+            total_samples (int): total number fo samples, default None
+            positive_samples (int): number fo positive samples, default None
+            alpha (float): significance level, default None
+
+        Returns:
+            float: nominal auc
+            float: upper bound
+            float: lower bound
+        
         &#39;&#39;&#39;
         self.nominal_auc()
         self._auc[&#39;U&#39;]=[]
@@ -1037,7 +1114,25 @@ class processRoc(object):
 <span>def <span class="ident">auc</span></span>(<span>self, total_samples=None, positive_samples=None, alpha=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>calculate auc with confidence bounds</p></div>
+<div class="desc"><p>calculate auc with confidence bounds. As default, the arguments are read from class initializtion.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>total_samples</code></strong> :&ensp;<code>int</code></dt>
+<dd>total number fo samples, default None</dd>
+<dt><strong><code>positive_samples</code></strong> :&ensp;<code>int</code></dt>
+<dd>number fo positive samples, default None</dd>
+<dt><strong><code>alpha</code></strong> :&ensp;<code>float</code></dt>
+<dd>significance level, default None</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>nominal auc</dd>
+<dt><code>float</code></dt>
+<dd>upper bound</dd>
+<dt><code>float</code></dt>
+<dd>lower bound</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1047,7 +1142,18 @@ class processRoc(object):
         positive_samples=None,
         alpha=None):
     &#39;&#39;&#39;
-    calculate auc with confidence bounds
+    calculate auc with confidence bounds. As default, the arguments are read from class initializtion.
+
+    Args:
+        total_samples (int): total number fo samples, default None
+        positive_samples (int): number fo positive samples, default None
+        alpha (float): significance level, default None
+
+    Returns:
+        float: nominal auc
+        float: upper bound
+        float: lower bound
+    
     &#39;&#39;&#39;
     self.nominal_auc()
     self._auc[&#39;U&#39;]=[]
@@ -1192,14 +1298,19 @@ class processRoc(object):
 <span>def <span class="ident">get</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>return dataframe</p></div>
+<div class="desc"><p>return dataframe currently in class</p>
+<h2 id="returns">Returns</h2>
+<p>pandas.DataFrame</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get(self):
     &#39;&#39;&#39;
-    return dataframe
+    return dataframe currently in class
+
+    Returns:
+        pandas.DataFrame 
     &#39;&#39;&#39;
     return self.df.copy()</code></pre>
 </details>
