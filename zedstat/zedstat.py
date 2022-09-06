@@ -199,7 +199,13 @@ class zedstat(object):
             else:
                 a_.append(arr[i])
         a_.append(arr[-1])
+
+        
         df__.ppv=a_
+        df__.loc[0].ppv=1.0
+        df__.loc[1].ppv=0.0
+        
+        
         return 
 
     
@@ -307,7 +313,7 @@ class zedstat(object):
             df__[df__ < 0] = 0
 
             self.correctPPV(df__)
-
+            
             
             self.df_lim[direction]=df__
 
