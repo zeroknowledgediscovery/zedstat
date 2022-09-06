@@ -176,16 +176,22 @@ class zedstat(object):
         return #self.df
 
 
-    def correctPPV(self):
+    def correctPPV(self,df=None):
         '''
         make ppv monotonic
         '''
         if 'ppv' not in self.df.columns:
             return
+
+        if df is None:
+            df__=self.df
+        else:
+            df__=df.copy()
+            
         
-        self.df.loc[0].ppv=1.0
-        self.df.loc[1].ppv=0.0
-        arr=self.df.ppv.values
+        df__.loc[0].ppv=1.0
+        df__.loc[1].ppv=0.0
+        arr=df__.ppv.values
         a_=[]
         for i in np.arange(len(arr)-1):
             if arr[i+1]>arr[i]:
@@ -193,8 +199,8 @@ class zedstat(object):
             else:
                 a_.append(arr[i])
         a_.append(arr[-1])
-        self.df.ppv=a_
-        return #self.df
+        df__.ppv=a_
+        return 
 
     
     def usample(self,
@@ -226,7 +232,6 @@ class zedstat(object):
         return df___
 
 
-    
     def getDelta(self,
                  total_samples=None,
                  positive_samples=None,
@@ -300,6 +305,10 @@ class zedstat(object):
             df__=df__.interpolate(limit_direction='both',method='spline',
                                   order=self.order).set_index(self.fprcol)
             df__[df__ < 0] = 0
+
+            self.correctPPV(df__)
+
+            
             self.df_lim[direction]=df__
 
             if direction=='U':

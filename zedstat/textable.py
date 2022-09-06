@@ -47,7 +47,7 @@ def tablewithbounds(df,
                     thresholdcolname='threshold',
                     width=5):
     '''
-    get datafraem with bounds displayed
+    get dataframe with bounds displayed
     '''
 
     dfthis=df.copy()

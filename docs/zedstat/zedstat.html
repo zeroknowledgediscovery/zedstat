@@ -205,16 +205,22 @@ class zedstat(object):
         return #self.df
 
 
-    def correctPPV(self):
+    def correctPPV(self,df=None):
         &#39;&#39;&#39;
         make ppv monotonic
         &#39;&#39;&#39;
         if &#39;ppv&#39; not in self.df.columns:
             return
+
+        if df is None:
+            df__=self.df
+        else:
+            df__=df.copy()
+            
         
-        self.df.loc[0].ppv=1.0
-        self.df.loc[1].ppv=0.0
-        arr=self.df.ppv.values
+        df__.loc[0].ppv=1.0
+        df__.loc[1].ppv=0.0
+        arr=df__.ppv.values
         a_=[]
         for i in np.arange(len(arr)-1):
             if arr[i+1]&gt;arr[i]:
@@ -222,8 +228,8 @@ class zedstat(object):
             else:
                 a_.append(arr[i])
         a_.append(arr[-1])
-        self.df.ppv=a_
-        return #self.df
+        df__.ppv=a_
+        return 
 
     
     def usample(self,
@@ -255,7 +261,6 @@ class zedstat(object):
         return df___
 
 
-    
     def getDelta(self,
                  total_samples=None,
                  positive_samples=None,
@@ -329,6 +334,10 @@ class zedstat(object):
             df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,
                                   order=self.order).set_index(self.fprcol)
             df__[df__ &lt; 0] = 0
+
+            self.correctPPV(df__)
+
+            
             self.df_lim[direction]=df__
 
             if direction==&#39;U&#39;:
@@ -676,16 +685,22 @@ class zedstat(object):
         return #self.df
 
 
-    def correctPPV(self):
+    def correctPPV(self,df=None):
         &#39;&#39;&#39;
         make ppv monotonic
         &#39;&#39;&#39;
         if &#39;ppv&#39; not in self.df.columns:
             return
+
+        if df is None:
+            df__=self.df
+        else:
+            df__=df.copy()
+            
         
-        self.df.loc[0].ppv=1.0
-        self.df.loc[1].ppv=0.0
-        arr=self.df.ppv.values
+        df__.loc[0].ppv=1.0
+        df__.loc[1].ppv=0.0
+        arr=df__.ppv.values
         a_=[]
         for i in np.arange(len(arr)-1):
             if arr[i+1]&gt;arr[i]:
@@ -693,8 +708,8 @@ class zedstat(object):
             else:
                 a_.append(arr[i])
         a_.append(arr[-1])
-        self.df.ppv=a_
-        return #self.df
+        df__.ppv=a_
+        return 
 
     
     def usample(self,
@@ -726,7 +741,6 @@ class zedstat(object):
         return df___
 
 
-    
     def getDelta(self,
                  total_samples=None,
                  positive_samples=None,
@@ -800,6 +814,10 @@ class zedstat(object):
             df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,
                                   order=self.order).set_index(self.fprcol)
             df__[df__ &lt; 0] = 0
+
+            self.correctPPV(df__)
+
+            
             self.df_lim[direction]=df__
 
             if direction==&#39;U&#39;:
@@ -1115,7 +1133,7 @@ class zedstat(object):
 </details>
 </dd>
 <dt id="zedstat.zedstat.zedstat.correctPPV"><code class="name flex">
-<span>def <span class="ident">correctPPV</span></span>(<span>self)</span>
+<span>def <span class="ident">correctPPV</span></span>(<span>self, df=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>make ppv monotonic</p></div>
@@ -1123,16 +1141,22 @@ class zedstat(object):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def correctPPV(self):
+<pre><code class="python">def correctPPV(self,df=None):
     &#39;&#39;&#39;
     make ppv monotonic
     &#39;&#39;&#39;
     if &#39;ppv&#39; not in self.df.columns:
         return
+
+    if df is None:
+        df__=self.df
+    else:
+        df__=df.copy()
+        
     
-    self.df.loc[0].ppv=1.0
-    self.df.loc[1].ppv=0.0
-    arr=self.df.ppv.values
+    df__.loc[0].ppv=1.0
+    df__.loc[1].ppv=0.0
+    arr=df__.ppv.values
     a_=[]
     for i in np.arange(len(arr)-1):
         if arr[i+1]&gt;arr[i]:
@@ -1140,8 +1164,8 @@ class zedstat(object):
         else:
             a_.append(arr[i])
     a_.append(arr[-1])
-    self.df.ppv=a_
-    return #self.df</code></pre>
+    df__.ppv=a_
+    return </code></pre>
 </details>
 </dd>
 <dt id="zedstat.zedstat.zedstat.get"><code class="name flex">
@@ -1207,6 +1231,10 @@ class zedstat(object):
         df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,
                               order=self.order).set_index(self.fprcol)
         df__[df__ &lt; 0] = 0
+
+        self.correctPPV(df__)
+
+        
         self.df_lim[direction]=df__
 
         if direction==&#39;U&#39;:
