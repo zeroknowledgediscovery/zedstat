@@ -322,6 +322,10 @@ class zedstat(object):
                 self._auc[direction]=np.array([np.append(self._auc[direction],
                                                 auc(df__.index.values,
                                                     df__.tpr.values)).max()])
+
+
+            # adjust datframe to cneter of upper and lowwr bounds    
+            self.df=(self.df_lim['U']+ self.df_lim['L'] )/2
         return 
 
 
