@@ -47,7 +47,6 @@ class processRoc(object):
             
         self.fprcol = fprcol
         self.tprcol = tprcol
-        self.random_state = random_state
         self.raw_df = self.df.copy()
         self.prevalence = prevalence
         self.order = order
