@@ -607,10 +607,10 @@ def pipeline(df,
             prevalence=.002,
             precision=3,
             outfile=None):
-    rf,total_samples,positive_samples=genroc(pf,risk=risk,
+    rf,total_samples,positive_samples=genroc(df,risk=risk,
                                              target=target,
                                              TARGET=TARGET)
-    zt=processRoc(df=rf,
+    zt=processRoc(rf,
                   order=order, 
                   total_samples=total_samples,
                   positive_samples=positive_samples,
