@@ -142,7 +142,12 @@ class processRoc(object):
                interpolate=True,
                convexify=True):
         '''
-        smooth roc curves
+        smooth roc curves and update processRoc.df which is accessible using processRoc.get()
+
+        Args:
+            STEP (float): smooting step, default 0.0001
+            interpolate (bool): if True, interpolate missing values, default True
+            convexify (bool): if True, replace ROC with convex hull, default True
         '''
         self.df=self.raw_df.copy()
         VAR=self.fprcol
@@ -168,7 +173,11 @@ class processRoc(object):
     
     def allmeasures(self,prevalence=None,interpolate=False):
         '''
-        compute accuracy, PPV, NPV, positive and negative likelihood ratios
+        compute accuracy, PPV, NPV, positive and negative likelihood ratios, and update processRoc.df, which can be accessed using processRoc.get()
+
+        Args:
+            prevalence (float): prevalence od positive cases in population
+            interpolate (bool): if True interpolate missing values, default False
         '''
         if prevalence is not None:
             p=prevalence
@@ -444,11 +453,19 @@ class processRoc(object):
 
     
     def samplesize(self,
-                   delta_auc,
+                   delta_auc=0.1,
                    target_auc=None,
                    alpha=None):
         '''
         estimate sample size for atataing auc bound under given significance level
+
+        Args:
+            delta_auc (float): maximum perturbation from estimated auc, default 0.1
+            target_auc (float): if None, using estimate current nominal auc
+            alpha (float): significanec level. If None use processRoc.alpha
+
+        Returns:
+            float: minimum sample size
         '''
         if alpha is None:
             alpha=self.alpha
@@ -469,6 +486,13 @@ class processRoc(object):
                twosided=True):
         '''
         compute p-value for given auc bounds
+
+        Args:
+            delta_auc (float): maximum perturbation from estimated auc, default 0.1
+            twosided (bool): one sided or twosided confidence bounds
+
+        Returns:
+            float: pvalue for the null hypothesis that estimated nominal auc is lower by more than delta_auc
         '''
         if 'nominal' not in self._auc.keys():
             self.auc()

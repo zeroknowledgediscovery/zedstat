@@ -171,7 +171,12 @@ class processRoc(object):
                interpolate=True,
                convexify=True):
         &#39;&#39;&#39;
-        smooth roc curves
+        smooth roc curves and update processRoc.df which is accessible using processRoc.get()
+
+        Args:
+            STEP (float): smooting step, default 0.0001
+            interpolate (bool): if True, interpolate missing values, default True
+            convexify (bool): if True, replace ROC with convex hull, default True
         &#39;&#39;&#39;
         self.df=self.raw_df.copy()
         VAR=self.fprcol
@@ -197,7 +202,11 @@ class processRoc(object):
     
     def allmeasures(self,prevalence=None,interpolate=False):
         &#39;&#39;&#39;
-        compute accuracy, PPV, NPV, positive and negative likelihood ratios
+        compute accuracy, PPV, NPV, positive and negative likelihood ratios, and update processRoc.df, which can be accessed using processRoc.get()
+
+        Args:
+            prevalence (float): prevalence od positive cases in population
+            interpolate (bool): if True interpolate missing values, default False
         &#39;&#39;&#39;
         if prevalence is not None:
             p=prevalence
@@ -473,11 +482,19 @@ class processRoc(object):
 
     
     def samplesize(self,
-                   delta_auc,
+                   delta_auc=0.1,
                    target_auc=None,
                    alpha=None):
         &#39;&#39;&#39;
         estimate sample size for atataing auc bound under given significance level
+
+        Args:
+            delta_auc (float): maximum perturbation from estimated auc, default 0.1
+            target_auc (float): if None, using estimate current nominal auc
+            alpha (float): significanec level. If None use processRoc.alpha
+
+        Returns:
+            float: minimum sample size
         &#39;&#39;&#39;
         if alpha is None:
             alpha=self.alpha
@@ -498,6 +515,13 @@ class processRoc(object):
                twosided=True):
         &#39;&#39;&#39;
         compute p-value for given auc bounds
+
+        Args:
+            delta_auc (float): maximum perturbation from estimated auc, default 0.1
+            twosided (bool): one sided or twosided confidence bounds
+
+        Returns:
+            float: pvalue for the null hypothesis that estimated nominal auc is lower by more than delta_auc
         &#39;&#39;&#39;
         if &#39;nominal&#39; not in self._auc.keys():
             self.auc()
@@ -861,7 +885,12 @@ def genroc(df,
                interpolate=True,
                convexify=True):
         &#39;&#39;&#39;
-        smooth roc curves
+        smooth roc curves and update processRoc.df which is accessible using processRoc.get()
+
+        Args:
+            STEP (float): smooting step, default 0.0001
+            interpolate (bool): if True, interpolate missing values, default True
+            convexify (bool): if True, replace ROC with convex hull, default True
         &#39;&#39;&#39;
         self.df=self.raw_df.copy()
         VAR=self.fprcol
@@ -887,7 +916,11 @@ def genroc(df,
     
     def allmeasures(self,prevalence=None,interpolate=False):
         &#39;&#39;&#39;
-        compute accuracy, PPV, NPV, positive and negative likelihood ratios
+        compute accuracy, PPV, NPV, positive and negative likelihood ratios, and update processRoc.df, which can be accessed using processRoc.get()
+
+        Args:
+            prevalence (float): prevalence od positive cases in population
+            interpolate (bool): if True interpolate missing values, default False
         &#39;&#39;&#39;
         if prevalence is not None:
             p=prevalence
@@ -1163,11 +1196,19 @@ def genroc(df,
 
     
     def samplesize(self,
-                   delta_auc,
+                   delta_auc=0.1,
                    target_auc=None,
                    alpha=None):
         &#39;&#39;&#39;
         estimate sample size for atataing auc bound under given significance level
+
+        Args:
+            delta_auc (float): maximum perturbation from estimated auc, default 0.1
+            target_auc (float): if None, using estimate current nominal auc
+            alpha (float): significanec level. If None use processRoc.alpha
+
+        Returns:
+            float: minimum sample size
         &#39;&#39;&#39;
         if alpha is None:
             alpha=self.alpha
@@ -1188,6 +1229,13 @@ def genroc(df,
                twosided=True):
         &#39;&#39;&#39;
         compute p-value for given auc bounds
+
+        Args:
+            delta_auc (float): maximum perturbation from estimated auc, default 0.1
+            twosided (bool): one sided or twosided confidence bounds
+
+        Returns:
+            float: pvalue for the null hypothesis that estimated nominal auc is lower by more than delta_auc
         &#39;&#39;&#39;
         if &#39;nominal&#39; not in self._auc.keys():
             self.auc()
@@ -1250,14 +1298,25 @@ def genroc(df,
 <span>def <span class="ident">allmeasures</span></span>(<span>self, prevalence=None, interpolate=False)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>compute accuracy, PPV, NPV, positive and negative likelihood ratios</p></div>
+<div class="desc"><p>compute accuracy, PPV, NPV, positive and negative likelihood ratios, and update processRoc.df, which can be accessed using processRoc.get()</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>prevalence</code></strong> :&ensp;<code>float</code></dt>
+<dd>prevalence od positive cases in population</dd>
+<dt><strong><code>interpolate</code></strong> :&ensp;<code>bool</code></dt>
+<dd>if True interpolate missing values, default False</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def allmeasures(self,prevalence=None,interpolate=False):
     &#39;&#39;&#39;
-    compute accuracy, PPV, NPV, positive and negative likelihood ratios
+    compute accuracy, PPV, NPV, positive and negative likelihood ratios, and update processRoc.df, which can be accessed using processRoc.get()
+
+    Args:
+        prevalence (float): prevalence od positive cases in population
+        interpolate (bool): if True interpolate missing values, default False
     &#39;&#39;&#39;
     if prevalence is not None:
         p=prevalence
@@ -1585,7 +1644,19 @@ one for maximizing precions, and one for maximizing sensitivity</p>
 <span>def <span class="ident">pvalue</span></span>(<span>self, delta_auc=0.1, twosided=True)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>compute p-value for given auc bounds</p></div>
+<div class="desc"><p>compute p-value for given auc bounds</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>delta_auc</code></strong> :&ensp;<code>float</code></dt>
+<dd>maximum perturbation from estimated auc, default 0.1</dd>
+<dt><strong><code>twosided</code></strong> :&ensp;<code>bool</code></dt>
+<dd>one sided or twosided confidence bounds</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>pvalue for the null hypothesis that estimated nominal auc is lower by more than delta_auc</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1595,6 +1666,13 @@ one for maximizing precions, and one for maximizing sensitivity</p>
            twosided=True):
     &#39;&#39;&#39;
     compute p-value for given auc bounds
+
+    Args:
+        delta_auc (float): maximum perturbation from estimated auc, default 0.1
+        twosided (bool): one sided or twosided confidence bounds
+
+    Returns:
+        float: pvalue for the null hypothesis that estimated nominal auc is lower by more than delta_auc
     &#39;&#39;&#39;
     if &#39;nominal&#39; not in self._auc.keys():
         self.auc()
@@ -1610,20 +1688,42 @@ one for maximizing precions, and one for maximizing sensitivity</p>
 </details>
 </dd>
 <dt id="zedstat.zedstat.processRoc.samplesize"><code class="name flex">
-<span>def <span class="ident">samplesize</span></span>(<span>self, delta_auc, target_auc=None, alpha=None)</span>
+<span>def <span class="ident">samplesize</span></span>(<span>self, delta_auc=0.1, target_auc=None, alpha=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>estimate sample size for atataing auc bound under given significance level</p></div>
+<div class="desc"><p>estimate sample size for atataing auc bound under given significance level</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>delta_auc</code></strong> :&ensp;<code>float</code></dt>
+<dd>maximum perturbation from estimated auc, default 0.1</dd>
+<dt><strong><code>target_auc</code></strong> :&ensp;<code>float</code></dt>
+<dd>if None, using estimate current nominal auc</dd>
+<dt><strong><code>alpha</code></strong> :&ensp;<code>float</code></dt>
+<dd>significanec level. If None use processRoc.alpha</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>minimum sample size</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def samplesize(self,
-               delta_auc,
+               delta_auc=0.1,
                target_auc=None,
                alpha=None):
     &#39;&#39;&#39;
     estimate sample size for atataing auc bound under given significance level
+
+    Args:
+        delta_auc (float): maximum perturbation from estimated auc, default 0.1
+        target_auc (float): if None, using estimate current nominal auc
+        alpha (float): significanec level. If None use processRoc.alpha
+
+    Returns:
+        float: minimum sample size
     &#39;&#39;&#39;
     if alpha is None:
         alpha=self.alpha
@@ -1644,7 +1744,16 @@ one for maximizing precions, and one for maximizing sensitivity</p>
 <span>def <span class="ident">smooth</span></span>(<span>self, STEP=0.0001, interpolate=True, convexify=True)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>smooth roc curves</p></div>
+<div class="desc"><p>smooth roc curves and update processRoc.df which is accessible using processRoc.get()</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>STEP</code></strong> :&ensp;<code>float</code></dt>
+<dd>smooting step, default 0.0001</dd>
+<dt><strong><code>interpolate</code></strong> :&ensp;<code>bool</code></dt>
+<dd>if True, interpolate missing values, default True</dd>
+<dt><strong><code>convexify</code></strong> :&ensp;<code>bool</code></dt>
+<dd>if True, replace ROC with convex hull, default True</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1654,7 +1763,12 @@ one for maximizing precions, and one for maximizing sensitivity</p>
            interpolate=True,
            convexify=True):
     &#39;&#39;&#39;
-    smooth roc curves
+    smooth roc curves and update processRoc.df which is accessible using processRoc.get()
+
+    Args:
+        STEP (float): smooting step, default 0.0001
+        interpolate (bool): if True, interpolate missing values, default True
+        convexify (bool): if True, replace ROC with convex hull, default True
     &#39;&#39;&#39;
     self.df=self.raw_df.copy()
     VAR=self.fprcol
