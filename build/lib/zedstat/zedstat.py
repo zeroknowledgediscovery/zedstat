@@ -631,4 +631,4 @@ def pipeline(df,
     if outfile is not None:
         df_.to_csv(outfile)
 
-    return df_
+    return df_,zt.auc()
