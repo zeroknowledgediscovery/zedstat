@@ -655,7 +655,7 @@ def pipeline(df,
     df_u=zt.df_lim[&#39;U&#39;]
     df_l=zt.df_lim[&#39;L&#39;]
 
-    df_=df_.join(df_u,rsuffix=&#39;_upper&#39;).join(df+j,rsuffix=&#39;_lower&#39;)
+    df_=df_.join(df_u,rsuffix=&#39;_upper&#39;).join(df_l,rsuffix=&#39;_lower&#39;)
 
     if outfile is not None:
         df_.to_csv(outfile)
@@ -785,7 +785,7 @@ def pipeline(df,
     df_u=zt.df_lim[&#39;U&#39;]
     df_l=zt.df_lim[&#39;L&#39;]
 
-    df_=df_.join(df_u,rsuffix=&#39;_upper&#39;).join(df+j,rsuffix=&#39;_lower&#39;)
+    df_=df_.join(df_u,rsuffix=&#39;_upper&#39;).join(df_l,rsuffix=&#39;_lower&#39;)
 
     if outfile is not None:
         df_.to_csv(outfile)
