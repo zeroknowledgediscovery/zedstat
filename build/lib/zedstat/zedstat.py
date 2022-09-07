@@ -594,3 +594,41 @@ def genroc(df,
     if outfile is not None:
         xf.to_csv(outfile)
     return xf,df_.index.size,df_[df_.target.isin(TARGET)].index.size    
+
+
+
+def pipeline(df,
+            risk='predicted_risk',
+            target='target',
+            steps=1000,
+            TARGET=[1],
+            order=3,
+            alpha=0.05,
+            prevalence=.002,
+            precision=3,
+            outfile=None):
+    rf,total_samples,positive_samples=genroc(pf,risk=risk,
+                                             target=target,
+                                             TARGET=TARGET)
+    zt=processRoc(df=rf,
+                  order=order, 
+                  total_samples=total_samples,
+                  positive_samples=positive_samples,
+                  alpha=alpha,
+                  prevalence=prevalence)
+    
+    zt.smooth(STEP=0.001)
+    zt.allmeasures(interpolate=True)
+    zt.usample(precision=precision)
+    zt.getBounds()
+
+    df_=zt.get()
+    df_u=zt.df_lim['U']
+    df_l=zt.df_lim['L']
+
+    df_=df_.join(df_u,rsuffix='_upper').join(df+j,rsuffix='_lower')
+
+    if outfile is not None:
+        df_.to_csv(outfile)
+
+    return df_

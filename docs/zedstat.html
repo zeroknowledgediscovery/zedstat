@@ -622,7 +622,45 @@ def genroc(df,
     
     if outfile is not None:
         xf.to_csv(outfile)
-    return xf,df_.index.size,df_[df_.target.isin(TARGET)].index.size    </code></pre>
+    return xf,df_.index.size,df_[df_.target.isin(TARGET)].index.size    
+
+
+
+def pipeline(df,
+            risk=&#39;predicted_risk&#39;,
+            target=&#39;target&#39;,
+            steps=1000,
+            TARGET=[1],
+            order=3,
+            alpha=0.05,
+            prevalence=.002,
+            precision=3,
+            outfile=None):
+    rf,total_samples,positive_samples=genroc(pf,risk=risk,
+                                             target=target,
+                                             TARGET=TARGET)
+    zt=processRoc(df=rf,
+                  order=order, 
+                  total_samples=total_samples,
+                  positive_samples=positive_samples,
+                  alpha=alpha,
+                  prevalence=prevalence)
+    
+    zt.smooth(STEP=0.001)
+    zt.allmeasures(interpolate=True)
+    zt.usample(precision=precision)
+    zt.getBounds()
+
+    df_=zt.get()
+    df_u=zt.df_lim[&#39;U&#39;]
+    df_l=zt.df_lim[&#39;L&#39;]
+
+    df_=df_.join(df_u,rsuffix=&#39;_upper&#39;).join(df+j,rsuffix=&#39;_lower&#39;)
+
+    if outfile is not None:
+        df_.to_csv(outfile)
+
+    return df_</code></pre>
 </details>
 </section>
 <section>
@@ -707,6 +745,52 @@ def genroc(df,
     if outfile is not None:
         xf.to_csv(outfile)
     return xf,df_.index.size,df_[df_.target.isin(TARGET)].index.size    </code></pre>
+</details>
+</dd>
+<dt id="zedstat.zedstat.pipeline"><code class="name flex">
+<span>def <span class="ident">pipeline</span></span>(<span>df, risk='predicted_risk', target='target', steps=1000, TARGET=[1], order=3, alpha=0.05, prevalence=0.002, precision=3, outfile=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pipeline(df,
+            risk=&#39;predicted_risk&#39;,
+            target=&#39;target&#39;,
+            steps=1000,
+            TARGET=[1],
+            order=3,
+            alpha=0.05,
+            prevalence=.002,
+            precision=3,
+            outfile=None):
+    rf,total_samples,positive_samples=genroc(pf,risk=risk,
+                                             target=target,
+                                             TARGET=TARGET)
+    zt=processRoc(df=rf,
+                  order=order, 
+                  total_samples=total_samples,
+                  positive_samples=positive_samples,
+                  alpha=alpha,
+                  prevalence=prevalence)
+    
+    zt.smooth(STEP=0.001)
+    zt.allmeasures(interpolate=True)
+    zt.usample(precision=precision)
+    zt.getBounds()
+
+    df_=zt.get()
+    df_u=zt.df_lim[&#39;U&#39;]
+    df_l=zt.df_lim[&#39;L&#39;]
+
+    df_=df_.join(df_u,rsuffix=&#39;_upper&#39;).join(df+j,rsuffix=&#39;_lower&#39;)
+
+    if outfile is not None:
+        df_.to_csv(outfile)
+
+    return df_</code></pre>
 </details>
 </dd>
 </dl>
@@ -1869,6 +1953,7 @@ one for maximizing precions, and one for maximizing sensitivity</p>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="zedstat.zedstat.genroc" href="#zedstat.zedstat.genroc">genroc</a></code></li>
+<li><code><a title="zedstat.zedstat.pipeline" href="#zedstat.zedstat.pipeline">pipeline</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
