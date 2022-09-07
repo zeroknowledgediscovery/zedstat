@@ -525,3 +525,36 @@ class processRoc(object):
              f"{fn} cases are missed"]
 
         return rf,txt
+
+
+
+
+def genroc(df,
+           risk='predicted_risk',
+           target='target',
+           steps=1000,
+           TARGET=[1],
+           outfile=None):
+    '''
+    compute roc curve from raw observation of risk-target information on samples
+    '''
+    threshold={}
+    df_=df[[risk,target]].rename(columns={risk:'risk',target:'target'})
+    delta=(df_.risk.max()-df_.risk.min())/steps
+    for r in np.arange(df_.risk.min(),df_.risk.max()+delta,delta):
+        #print(r)
+        fn=df_[(df_.risk<r) & df_.target.isin(TARGET)].index.size
+        tp=df_[(df_.risk>=r) & df_.target.isin(TARGET)].index.size
+        fp=df_[(df_.risk>=r) & ~df_.target.isin(TARGET)].index.size
+        tn=df_[(df_.risk<r) & ~df_.target.isin(TARGET)].index.size
+        threshold[r]={'tp':tp,'fp':fp,'tn':tn,'fn':fn}
+        
+    xf=pd.DataFrame.from_dict(threshold).transpose()
+    xf.index.name='threshold'
+    
+    xf=xf.assign(tpr=(xf.tp)/(xf.tp+xf.fn)).assign(fpr=(xf.fp)/(xf.fp+xf.tn))
+    xf=xf[['fpr','tpr']].reset_index()#.set_index('fpr')
+    
+    if outfile is not None:
+        xf.to_csv(outfile)
+    return xf,df_.index.size,df_[df_.target.isin(TARGET)].index.size    

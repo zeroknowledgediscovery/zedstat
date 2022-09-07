@@ -553,7 +553,40 @@ class processRoc(object):
              f&#34;{fp} are false alarms&#34;,
              f&#34;{fn} cases are missed&#34;]
 
-        return rf,txt</code></pre>
+        return rf,txt
+
+
+
+
+def genroc(df,
+           risk=&#39;predicted_risk&#39;,
+           target=&#39;target&#39;,
+           steps=1000,
+           TARGET=[1],
+           outfile=None):
+    &#39;&#39;&#39;
+    compute roc curve from raw observation of risk-target information on samples
+    &#39;&#39;&#39;
+    threshold={}
+    df_=df[[risk,target]].rename(columns={risk:&#39;risk&#39;,target:&#39;target&#39;})
+    delta=(df_.risk.max()-df_.risk.min())/steps
+    for r in np.arange(df_.risk.min(),df_.risk.max()+delta,delta):
+        #print(r)
+        fn=df_[(df_.risk&lt;r) &amp; df_.target.isin(TARGET)].index.size
+        tp=df_[(df_.risk&gt;=r) &amp; df_.target.isin(TARGET)].index.size
+        fp=df_[(df_.risk&gt;=r) &amp; ~df_.target.isin(TARGET)].index.size
+        tn=df_[(df_.risk&lt;r) &amp; ~df_.target.isin(TARGET)].index.size
+        threshold[r]={&#39;tp&#39;:tp,&#39;fp&#39;:fp,&#39;tn&#39;:tn,&#39;fn&#39;:fn}
+        
+    xf=pd.DataFrame.from_dict(threshold).transpose()
+    xf.index.name=&#39;threshold&#39;
+    
+    xf=xf.assign(tpr=(xf.tp)/(xf.tp+xf.fn)).assign(fpr=(xf.fp)/(xf.fp+xf.tn))
+    xf=xf[[&#39;fpr&#39;,&#39;tpr&#39;]].reset_index()#.set_index(&#39;fpr&#39;)
+    
+    if outfile is not None:
+        xf.to_csv(outfile)
+    return xf,df_.index.size,df_[df_.target.isin(TARGET)].index.size    </code></pre>
 </details>
 </section>
 <section>
@@ -561,6 +594,49 @@ class processRoc(object):
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="zedstat.zedstat.genroc"><code class="name flex">
+<span>def <span class="ident">genroc</span></span>(<span>df, risk='predicted_risk', target='target', steps=1000, TARGET=[1], outfile=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>compute roc curve from raw observation of risk-target information on samples</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def genroc(df,
+           risk=&#39;predicted_risk&#39;,
+           target=&#39;target&#39;,
+           steps=1000,
+           TARGET=[1],
+           outfile=None):
+    &#39;&#39;&#39;
+    compute roc curve from raw observation of risk-target information on samples
+    &#39;&#39;&#39;
+    threshold={}
+    df_=df[[risk,target]].rename(columns={risk:&#39;risk&#39;,target:&#39;target&#39;})
+    delta=(df_.risk.max()-df_.risk.min())/steps
+    for r in np.arange(df_.risk.min(),df_.risk.max()+delta,delta):
+        #print(r)
+        fn=df_[(df_.risk&lt;r) &amp; df_.target.isin(TARGET)].index.size
+        tp=df_[(df_.risk&gt;=r) &amp; df_.target.isin(TARGET)].index.size
+        fp=df_[(df_.risk&gt;=r) &amp; ~df_.target.isin(TARGET)].index.size
+        tn=df_[(df_.risk&lt;r) &amp; ~df_.target.isin(TARGET)].index.size
+        threshold[r]={&#39;tp&#39;:tp,&#39;fp&#39;:fp,&#39;tn&#39;:tn,&#39;fn&#39;:fn}
+        
+    xf=pd.DataFrame.from_dict(threshold).transpose()
+    xf.index.name=&#39;threshold&#39;
+    
+    xf=xf.assign(tpr=(xf.tp)/(xf.tp+xf.fn)).assign(fpr=(xf.fp)/(xf.fp+xf.tn))
+    xf=xf[[&#39;fpr&#39;,&#39;tpr&#39;]].reset_index()#.set_index(&#39;fpr&#39;)
+    
+    if outfile is not None:
+        xf.to_csv(outfile)
+    return xf,df_.index.size,df_[df_.target.isin(TARGET)].index.size    </code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -1626,6 +1702,11 @@ one for maximizing precions, and one for maximizing sensitivity</p>
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="zedstat" href="index.html">zedstat</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="zedstat.zedstat.genroc" href="#zedstat.zedstat.genroc">genroc</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
