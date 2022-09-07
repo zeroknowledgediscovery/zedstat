@@ -565,6 +565,19 @@ def genroc(df,
            outfile=None):
     &#39;&#39;&#39;
     compute roc curve from raw observation of risk-target information on samples
+
+    Args:
+        df (pandas.DataFrame): dataframe of raw samples identified as positive or negative with computed risk
+        target (str): name of target column
+        risk (str): name of risk column
+        TARGET (list): list of values of target column that define the positive case, default [1]
+        steps (int): steps between max and min of risk value, default 1000
+        outfile (str): write datafraem with fpr tpr threshold, default None
+
+    Returns:
+        pandas.DataFrame: roc dataframe
+        int: total number of samples
+        int: total number of positive samples
     &#39;&#39;&#39;
     threshold={}
     df_=df[[risk,target]].rename(columns={risk:&#39;risk&#39;,target:&#39;target&#39;})
@@ -599,7 +612,31 @@ def genroc(df,
 <span>def <span class="ident">genroc</span></span>(<span>df, risk='predicted_risk', target='target', steps=1000, TARGET=[1], outfile=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>compute roc curve from raw observation of risk-target information on samples</p></div>
+<div class="desc"><p>compute roc curve from raw observation of risk-target information on samples</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>df</code></strong> :&ensp;<code>pandas.DataFrame</code></dt>
+<dd>dataframe of raw samples identified as positive or negative with computed risk</dd>
+<dt><strong><code>target</code></strong> :&ensp;<code>str</code></dt>
+<dd>name of target column</dd>
+<dt><strong><code>risk</code></strong> :&ensp;<code>str</code></dt>
+<dd>name of risk column</dd>
+<dt><strong><code>TARGET</code></strong> :&ensp;<code>list</code></dt>
+<dd>list of values of target column that define the positive case, default [1]</dd>
+<dt><strong><code>steps</code></strong> :&ensp;<code>int</code></dt>
+<dd>steps between max and min of risk value, default 1000</dd>
+<dt><strong><code>outfile</code></strong> :&ensp;<code>str</code></dt>
+<dd>write datafraem with fpr tpr threshold, default None</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pandas.DataFrame</code></dt>
+<dd>roc dataframe</dd>
+<dt><code>int</code></dt>
+<dd>total number of samples</dd>
+<dt><code>int</code></dt>
+<dd>total number of positive samples</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -612,6 +649,19 @@ def genroc(df,
            outfile=None):
     &#39;&#39;&#39;
     compute roc curve from raw observation of risk-target information on samples
+
+    Args:
+        df (pandas.DataFrame): dataframe of raw samples identified as positive or negative with computed risk
+        target (str): name of target column
+        risk (str): name of risk column
+        TARGET (list): list of values of target column that define the positive case, default [1]
+        steps (int): steps between max and min of risk value, default 1000
+        outfile (str): write datafraem with fpr tpr threshold, default None
+
+    Returns:
+        pandas.DataFrame: roc dataframe
+        int: total number of samples
+        int: total number of positive samples
     &#39;&#39;&#39;
     threshold={}
     df_=df[[risk,target]].rename(columns={risk:&#39;risk&#39;,target:&#39;target&#39;})
