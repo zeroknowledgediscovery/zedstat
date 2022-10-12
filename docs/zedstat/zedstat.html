@@ -229,7 +229,10 @@ class processRoc(object):
             
         df__=df__.set_index(self.fprcol)
         if interpolate:
-            df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,order=self.order)
+            try:
+                df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,order=self.order)
+            except:
+                print(&#39;interpolation failed&#39;)
             
         if self.thresholdcol is not None:
             if self.thresholdcol not in df__.columns:
@@ -1027,7 +1030,10 @@ def pipeline(df,
             
         df__=df__.set_index(self.fprcol)
         if interpolate:
-            df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,order=self.order)
+            try:
+                df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,order=self.order)
+            except:
+                print(&#39;interpolation failed&#39;)
             
         if self.thresholdcol is not None:
             if self.thresholdcol not in df__.columns:
@@ -1423,7 +1429,10 @@ def pipeline(df,
         
     df__=df__.set_index(self.fprcol)
     if interpolate:
-        df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,order=self.order)
+        try:
+            df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,order=self.order)
+        except:
+            print(&#39;interpolation failed&#39;)
         
     if self.thresholdcol is not None:
         if self.thresholdcol not in df__.columns:

@@ -200,7 +200,10 @@ class processRoc(object):
             
         df__=df__.set_index(self.fprcol)
         if interpolate:
-            df__=df__.interpolate(limit_direction='both',method='spline',order=self.order)
+            try:
+                df__=df__.interpolate(limit_direction='both',method='spline',order=self.order)
+            except:
+                print('interpolation failed')
             
         if self.thresholdcol is not None:
             if self.thresholdcol not in df__.columns:
