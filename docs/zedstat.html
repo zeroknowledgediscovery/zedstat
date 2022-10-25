@@ -148,9 +148,17 @@ class processRoc(object):
                 rf=self.df.set_index(self.fprcol)#.drop(&#39;threshold&#39;,axis=1)
             else:
                 raise(&#39;fpr not in columns or index&#39;)
-        pts=rf.reset_index()[[self.fprcol,self.tprcol]].values
+
+        rf = rf.reset_index()
+        rf = rf.append({&#39;fpr&#39;:0, &#39;tpr&#39;:0}, ignore_index=True)
+        rf = rf.append({&#39;fpr&#39;:1, &#39;tpr&#39;:1}, ignore_index=True)
+        rf=rf.drop_duplicates()
+        rf=rf.sort_values(&#39;fpr&#39;)
+        rf=rf.sort_values(&#39;tpr&#39;)
+
+        pts=rf[[self.fprcol,self.tprcol]].values
         if len(pts)&lt;3:
-            rf_=rf.reset_index()
+            rf_=rf.copy()
             rf_.columns=[&#39;tpr&#39;,&#39;fpr&#39;]
             rf_=rf_.sort_values(&#39;fpr&#39;)
             rf_=rf_.sort_values(&#39;tpr&#39;)
@@ -949,9 +957,17 @@ def pipeline(df,
                 rf=self.df.set_index(self.fprcol)#.drop(&#39;threshold&#39;,axis=1)
             else:
                 raise(&#39;fpr not in columns or index&#39;)
-        pts=rf.reset_index()[[self.fprcol,self.tprcol]].values
+
+        rf = rf.reset_index()
+        rf = rf.append({&#39;fpr&#39;:0, &#39;tpr&#39;:0}, ignore_index=True)
+        rf = rf.append({&#39;fpr&#39;:1, &#39;tpr&#39;:1}, ignore_index=True)
+        rf=rf.drop_duplicates()
+        rf=rf.sort_values(&#39;fpr&#39;)
+        rf=rf.sort_values(&#39;tpr&#39;)
+
+        pts=rf[[self.fprcol,self.tprcol]].values
         if len(pts)&lt;3:
-            rf_=rf.reset_index()
+            rf_=rf.copy()
             rf_.columns=[&#39;tpr&#39;,&#39;fpr&#39;]
             rf_=rf_.sort_values(&#39;fpr&#39;)
             rf_=rf_.sort_values(&#39;tpr&#39;)

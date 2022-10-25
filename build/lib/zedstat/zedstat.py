@@ -119,9 +119,17 @@ class processRoc(object):
                 rf=self.df.set_index(self.fprcol)#.drop('threshold',axis=1)
             else:
                 raise('fpr not in columns or index')
-        pts=rf.reset_index()[[self.fprcol,self.tprcol]].values
+
+        rf = rf.reset_index()
+        rf = rf.append({'fpr':0, 'tpr':0}, ignore_index=True)
+        rf = rf.append({'fpr':1, 'tpr':1}, ignore_index=True)
+        rf=rf.drop_duplicates()
+        rf=rf.sort_values('fpr')
+        rf=rf.sort_values('tpr')
+
+        pts=rf[[self.fprcol,self.tprcol]].values
         if len(pts)<3:
-            rf_=rf.reset_index()
+            rf_=rf.copy()
             rf_.columns=['tpr','fpr']
             rf_=rf_.sort_values('fpr')
             rf_=rf_.sort_values('tpr')
