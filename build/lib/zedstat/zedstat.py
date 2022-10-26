@@ -30,6 +30,7 @@ class processRoc(object):
             alpha (float): significance level e.g. 0.05
         """
         
+        #print('local version 1')
         
         if df.index.name==fprcol:
             self.df=df.copy()
@@ -56,6 +57,8 @@ class processRoc(object):
         self.positive_samples = positive_samples
         self.alpha = alpha
         
+        self.df=self.df.groupby(self.fprcol).max().reset_index()
+
         
     def get(self):
         '''
@@ -121,28 +124,33 @@ class processRoc(object):
                 raise('fpr not in columns or index')
 
         rf = rf.reset_index()
-        rf = rf.append({'fpr':0, 'tpr':0}, ignore_index=True)
-        rf = rf.append({'fpr':1, 'tpr':1}, ignore_index=True)
+        rf=pd.concat([rf,pd.DataFrame({self.fprcol:0, self.tprcol:0},index=[0])])
+        rf=pd.concat([rf,pd.DataFrame({self.fprcol:1, self.tprcol:0},index=[0])])
+        rf=pd.concat([rf,pd.DataFrame({self.fprcol:1, self.tprcol:1},index=[0])])
+        
         rf=rf.drop_duplicates()
-        rf=rf.sort_values('fpr')
-        rf=rf.sort_values('tpr')
+        rf=rf.sort_values(self.fprcol)
+        rf=rf.sort_values(self.tprcol)
 
         pts=rf[[self.fprcol,self.tprcol]].values
         if len(pts)<3:
             rf_=rf.copy()
-            rf_.columns=['tpr','fpr']
-            rf_=rf_.sort_values('fpr')
-            rf_=rf_.sort_values('tpr')
+            rf_.columns=[self.tprcol,self.fprcol]
+            rf_=rf_.sort_values(self.fprcol)
+            rf_=rf_.sort_values(self.tprcol)
             self.df=rf_.set_index(self.fprcol).copy()
             return #self.df
         
         hull = ConvexHull(pts)
         rf_=pd.DataFrame(pts[hull.vertices, 0], pts[hull.vertices, 1]).reset_index()
-        rf_.columns=['tpr','fpr']
-        rf_=rf_.sort_values('fpr')
-        rf_=rf_.sort_values('tpr')
-        self.df=rf_.set_index(self.fprcol).sort_index().copy()
-        return #self.df
+        rf_.columns=[self.tprcol,self.fprcol]
+        rf_ = rf_.set_index(self.fprcol)
+        
+        rf_ = rf_.drop(1.0).sort_index()
+        rf_.loc[1.0]=1.0
+        
+        self.df=rf_.copy()
+        return 
 
 
     def smooth(self,

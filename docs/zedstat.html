@@ -59,6 +59,7 @@ class processRoc(object):
             alpha (float): significance level e.g. 0.05
         &#34;&#34;&#34;
         
+        #print(&#39;local version 1&#39;)
         
         if df.index.name==fprcol:
             self.df=df.copy()
@@ -85,6 +86,8 @@ class processRoc(object):
         self.positive_samples = positive_samples
         self.alpha = alpha
         
+        self.df=self.df.groupby(self.fprcol).max().reset_index()
+
         
     def get(self):
         &#39;&#39;&#39;
@@ -150,28 +153,33 @@ class processRoc(object):
                 raise(&#39;fpr not in columns or index&#39;)
 
         rf = rf.reset_index()
-        rf = rf.append({&#39;fpr&#39;:0, &#39;tpr&#39;:0}, ignore_index=True)
-        rf = rf.append({&#39;fpr&#39;:1, &#39;tpr&#39;:1}, ignore_index=True)
+        rf=pd.concat([rf,pd.DataFrame({self.fprcol:0, self.tprcol:0},index=[0])])
+        rf=pd.concat([rf,pd.DataFrame({self.fprcol:1, self.tprcol:0},index=[0])])
+        rf=pd.concat([rf,pd.DataFrame({self.fprcol:1, self.tprcol:1},index=[0])])
+        
         rf=rf.drop_duplicates()
-        rf=rf.sort_values(&#39;fpr&#39;)
-        rf=rf.sort_values(&#39;tpr&#39;)
+        rf=rf.sort_values(self.fprcol)
+        rf=rf.sort_values(self.tprcol)
 
         pts=rf[[self.fprcol,self.tprcol]].values
         if len(pts)&lt;3:
             rf_=rf.copy()
-            rf_.columns=[&#39;tpr&#39;,&#39;fpr&#39;]
-            rf_=rf_.sort_values(&#39;fpr&#39;)
-            rf_=rf_.sort_values(&#39;tpr&#39;)
+            rf_.columns=[self.tprcol,self.fprcol]
+            rf_=rf_.sort_values(self.fprcol)
+            rf_=rf_.sort_values(self.tprcol)
             self.df=rf_.set_index(self.fprcol).copy()
             return #self.df
         
         hull = ConvexHull(pts)
         rf_=pd.DataFrame(pts[hull.vertices, 0], pts[hull.vertices, 1]).reset_index()
-        rf_.columns=[&#39;tpr&#39;,&#39;fpr&#39;]
-        rf_=rf_.sort_values(&#39;fpr&#39;)
-        rf_=rf_.sort_values(&#39;tpr&#39;)
-        self.df=rf_.set_index(self.fprcol).sort_index().copy()
-        return #self.df
+        rf_.columns=[self.tprcol,self.fprcol]
+        rf_ = rf_.set_index(self.fprcol)
+        
+        rf_ = rf_.drop(1.0).sort_index()
+        rf_.loc[1.0]=1.0
+        
+        self.df=rf_.copy()
+        return 
 
 
     def smooth(self,
@@ -868,6 +876,7 @@ def pipeline(df,
             alpha (float): significance level e.g. 0.05
         &#34;&#34;&#34;
         
+        #print(&#39;local version 1&#39;)
         
         if df.index.name==fprcol:
             self.df=df.copy()
@@ -894,6 +903,8 @@ def pipeline(df,
         self.positive_samples = positive_samples
         self.alpha = alpha
         
+        self.df=self.df.groupby(self.fprcol).max().reset_index()
+
         
     def get(self):
         &#39;&#39;&#39;
@@ -959,28 +970,33 @@ def pipeline(df,
                 raise(&#39;fpr not in columns or index&#39;)
 
         rf = rf.reset_index()
-        rf = rf.append({&#39;fpr&#39;:0, &#39;tpr&#39;:0}, ignore_index=True)
-        rf = rf.append({&#39;fpr&#39;:1, &#39;tpr&#39;:1}, ignore_index=True)
+        rf=pd.concat([rf,pd.DataFrame({self.fprcol:0, self.tprcol:0},index=[0])])
+        rf=pd.concat([rf,pd.DataFrame({self.fprcol:1, self.tprcol:0},index=[0])])
+        rf=pd.concat([rf,pd.DataFrame({self.fprcol:1, self.tprcol:1},index=[0])])
+        
         rf=rf.drop_duplicates()
-        rf=rf.sort_values(&#39;fpr&#39;)
-        rf=rf.sort_values(&#39;tpr&#39;)
+        rf=rf.sort_values(self.fprcol)
+        rf=rf.sort_values(self.tprcol)
 
         pts=rf[[self.fprcol,self.tprcol]].values
         if len(pts)&lt;3:
             rf_=rf.copy()
-            rf_.columns=[&#39;tpr&#39;,&#39;fpr&#39;]
-            rf_=rf_.sort_values(&#39;fpr&#39;)
-            rf_=rf_.sort_values(&#39;tpr&#39;)
+            rf_.columns=[self.tprcol,self.fprcol]
+            rf_=rf_.sort_values(self.fprcol)
+            rf_=rf_.sort_values(self.tprcol)
             self.df=rf_.set_index(self.fprcol).copy()
             return #self.df
         
         hull = ConvexHull(pts)
         rf_=pd.DataFrame(pts[hull.vertices, 0], pts[hull.vertices, 1]).reset_index()
-        rf_.columns=[&#39;tpr&#39;,&#39;fpr&#39;]
-        rf_=rf_.sort_values(&#39;fpr&#39;)
-        rf_=rf_.sort_values(&#39;tpr&#39;)
-        self.df=rf_.set_index(self.fprcol).sort_index().copy()
-        return #self.df
+        rf_.columns=[self.tprcol,self.fprcol]
+        rf_ = rf_.set_index(self.fprcol)
+        
+        rf_ = rf_.drop(1.0).sort_index()
+        rf_.loc[1.0]=1.0
+        
+        self.df=rf_.copy()
+        return 
 
 
     def smooth(self,
