@@ -30,7 +30,7 @@ class processRoc(object):
             alpha (float): significance level e.g. 0.05
         """
         
-        #print('local version 1')
+        print('local version 1')
         
         if df.index.name==fprcol:
             self.df=df.copy()
@@ -113,7 +113,8 @@ class processRoc(object):
     def __convexify(self):
         '''
         compute convex hull of the roc curve
-        '''   
+        '''
+        #print(self.df)
         from scipy.spatial import ConvexHull
         if self.df.index.name==self.fprcol:
             rf=self.df
@@ -133,6 +134,9 @@ class processRoc(object):
         rf=rf.sort_values(self.tprcol)
 
         pts=rf[[self.fprcol,self.tprcol]].values
+
+        #print(pts)
+        
         if len(pts)<3:
             rf_=rf.copy()
             rf_.columns=[self.tprcol,self.fprcol]
@@ -215,18 +219,30 @@ class processRoc(object):
             
             
         df__=df__.set_index(self.fprcol)
+
+        #display(df__)
+        df__=df__.replace(np.inf,np.nan)
+        #display(df__)
+
+
+        
         if interpolate:
             try:
                 df__=df__.interpolate(limit_direction='both',method='spline',order=self.order)
             except:
                 print('interpolation failed')
-            
+
+
+        #display(df__)
+        
         if self.thresholdcol is not None:
             if self.thresholdcol not in df__.columns:
                 df__=df__.join(self.raw_df[self.thresholdcol])
         self.df=df__
         self.__correctPPV()
         self.df[self.df < 0] = 0
+
+        #display(self.df)
         
         return #self.df
 
@@ -377,6 +393,10 @@ class processRoc(object):
             df__['npv']=1/(1+((1-df__.tpr)/(1-df__.fpr))*(1/((1/p)-1)))
             df__['LR+']=(df__.tpr)/(df__.fpr)
             df__['LR-']=(1-df__.tpr)/(1-df__.fpr)
+
+            df__=df__.replace(np.inf,np.nan)
+
+            
             df__=df__.interpolate(limit_direction='both',method='spline',
                                   order=self.order).set_index(self.fprcol)
             df__[df__ < 0] = 0
@@ -395,9 +415,18 @@ class processRoc(object):
 
             # adjust datframe to cneter of upper and lowwr bounds    
         self.df=(self.df_lim['U']+ self.df_lim['L'] )/2
+        self.__correctvalues()
         return 
 
-
+    def __correctvalues(self):
+        #ppv
+        if 'ppv' in self.df.columns:
+            self.df.ppv[self.df.ppv>1]=1.0
+        if 'npv' in self.df.columns:
+            self.df.npv[self.df.npv>1]=1.0
+        if 'LR-' in self.df.columns:
+            self.df['LR-'][self.df['LR-']>1]=1.0
+            
 
     def __auc_cb2(self,
                 total_samples=None,

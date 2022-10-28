@@ -59,7 +59,7 @@ class processRoc(object):
             alpha (float): significance level e.g. 0.05
         &#34;&#34;&#34;
         
-        #print(&#39;local version 1&#39;)
+        print(&#39;local version 1&#39;)
         
         if df.index.name==fprcol:
             self.df=df.copy()
@@ -142,7 +142,8 @@ class processRoc(object):
     def __convexify(self):
         &#39;&#39;&#39;
         compute convex hull of the roc curve
-        &#39;&#39;&#39;   
+        &#39;&#39;&#39;
+        #print(self.df)
         from scipy.spatial import ConvexHull
         if self.df.index.name==self.fprcol:
             rf=self.df
@@ -162,6 +163,9 @@ class processRoc(object):
         rf=rf.sort_values(self.tprcol)
 
         pts=rf[[self.fprcol,self.tprcol]].values
+
+        #print(pts)
+        
         if len(pts)&lt;3:
             rf_=rf.copy()
             rf_.columns=[self.tprcol,self.fprcol]
@@ -244,18 +248,30 @@ class processRoc(object):
             
             
         df__=df__.set_index(self.fprcol)
+
+        #display(df__)
+        df__=df__.replace(np.inf,np.nan)
+        #display(df__)
+
+
+        
         if interpolate:
             try:
                 df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,order=self.order)
             except:
                 print(&#39;interpolation failed&#39;)
-            
+
+
+        #display(df__)
+        
         if self.thresholdcol is not None:
             if self.thresholdcol not in df__.columns:
                 df__=df__.join(self.raw_df[self.thresholdcol])
         self.df=df__
         self.__correctPPV()
         self.df[self.df &lt; 0] = 0
+
+        #display(self.df)
         
         return #self.df
 
@@ -406,6 +422,10 @@ class processRoc(object):
             df__[&#39;npv&#39;]=1/(1+((1-df__.tpr)/(1-df__.fpr))*(1/((1/p)-1)))
             df__[&#39;LR+&#39;]=(df__.tpr)/(df__.fpr)
             df__[&#39;LR-&#39;]=(1-df__.tpr)/(1-df__.fpr)
+
+            df__=df__.replace(np.inf,np.nan)
+
+            
             df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,
                                   order=self.order).set_index(self.fprcol)
             df__[df__ &lt; 0] = 0
@@ -424,9 +444,18 @@ class processRoc(object):
 
             # adjust datframe to cneter of upper and lowwr bounds    
         self.df=(self.df_lim[&#39;U&#39;]+ self.df_lim[&#39;L&#39;] )/2
+        self.__correctvalues()
         return 
 
-
+    def __correctvalues(self):
+        #ppv
+        if &#39;ppv&#39; in self.df.columns:
+            self.df.ppv[self.df.ppv&gt;1]=1.0
+        if &#39;npv&#39; in self.df.columns:
+            self.df.npv[self.df.npv&gt;1]=1.0
+        if &#39;LR-&#39; in self.df.columns:
+            self.df[&#39;LR-&#39;][self.df[&#39;LR-&#39;]&gt;1]=1.0
+            
 
     def __auc_cb2(self,
                 total_samples=None,
@@ -876,7 +905,7 @@ def pipeline(df,
             alpha (float): significance level e.g. 0.05
         &#34;&#34;&#34;
         
-        #print(&#39;local version 1&#39;)
+        print(&#39;local version 1&#39;)
         
         if df.index.name==fprcol:
             self.df=df.copy()
@@ -959,7 +988,8 @@ def pipeline(df,
     def __convexify(self):
         &#39;&#39;&#39;
         compute convex hull of the roc curve
-        &#39;&#39;&#39;   
+        &#39;&#39;&#39;
+        #print(self.df)
         from scipy.spatial import ConvexHull
         if self.df.index.name==self.fprcol:
             rf=self.df
@@ -979,6 +1009,9 @@ def pipeline(df,
         rf=rf.sort_values(self.tprcol)
 
         pts=rf[[self.fprcol,self.tprcol]].values
+
+        #print(pts)
+        
         if len(pts)&lt;3:
             rf_=rf.copy()
             rf_.columns=[self.tprcol,self.fprcol]
@@ -1061,18 +1094,30 @@ def pipeline(df,
             
             
         df__=df__.set_index(self.fprcol)
+
+        #display(df__)
+        df__=df__.replace(np.inf,np.nan)
+        #display(df__)
+
+
+        
         if interpolate:
             try:
                 df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,order=self.order)
             except:
                 print(&#39;interpolation failed&#39;)
-            
+
+
+        #display(df__)
+        
         if self.thresholdcol is not None:
             if self.thresholdcol not in df__.columns:
                 df__=df__.join(self.raw_df[self.thresholdcol])
         self.df=df__
         self.__correctPPV()
         self.df[self.df &lt; 0] = 0
+
+        #display(self.df)
         
         return #self.df
 
@@ -1223,6 +1268,10 @@ def pipeline(df,
             df__[&#39;npv&#39;]=1/(1+((1-df__.tpr)/(1-df__.fpr))*(1/((1/p)-1)))
             df__[&#39;LR+&#39;]=(df__.tpr)/(df__.fpr)
             df__[&#39;LR-&#39;]=(1-df__.tpr)/(1-df__.fpr)
+
+            df__=df__.replace(np.inf,np.nan)
+
+            
             df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,
                                   order=self.order).set_index(self.fprcol)
             df__[df__ &lt; 0] = 0
@@ -1241,9 +1290,18 @@ def pipeline(df,
 
             # adjust datframe to cneter of upper and lowwr bounds    
         self.df=(self.df_lim[&#39;U&#39;]+ self.df_lim[&#39;L&#39;] )/2
+        self.__correctvalues()
         return 
 
-
+    def __correctvalues(self):
+        #ppv
+        if &#39;ppv&#39; in self.df.columns:
+            self.df.ppv[self.df.ppv&gt;1]=1.0
+        if &#39;npv&#39; in self.df.columns:
+            self.df.npv[self.df.npv&gt;1]=1.0
+        if &#39;LR-&#39; in self.df.columns:
+            self.df[&#39;LR-&#39;][self.df[&#39;LR-&#39;]&gt;1]=1.0
+            
 
     def __auc_cb2(self,
                 total_samples=None,
@@ -1460,18 +1518,30 @@ def pipeline(df,
         
         
     df__=df__.set_index(self.fprcol)
+
+    #display(df__)
+    df__=df__.replace(np.inf,np.nan)
+    #display(df__)
+
+
+    
     if interpolate:
         try:
             df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,order=self.order)
         except:
             print(&#39;interpolation failed&#39;)
-        
+
+
+    #display(df__)
+    
     if self.thresholdcol is not None:
         if self.thresholdcol not in df__.columns:
             df__=df__.join(self.raw_df[self.thresholdcol])
     self.df=df__
     self.__correctPPV()
     self.df[self.df &lt; 0] = 0
+
+    #display(self.df)
     
     return #self.df</code></pre>
 </details>
@@ -1617,6 +1687,10 @@ def pipeline(df,
         df__[&#39;npv&#39;]=1/(1+((1-df__.tpr)/(1-df__.fpr))*(1/((1/p)-1)))
         df__[&#39;LR+&#39;]=(df__.tpr)/(df__.fpr)
         df__[&#39;LR-&#39;]=(1-df__.tpr)/(1-df__.fpr)
+
+        df__=df__.replace(np.inf,np.nan)
+
+        
         df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,
                               order=self.order).set_index(self.fprcol)
         df__[df__ &lt; 0] = 0
@@ -1635,6 +1709,7 @@ def pipeline(df,
 
         # adjust datframe to cneter of upper and lowwr bounds    
     self.df=(self.df_lim[&#39;U&#39;]+ self.df_lim[&#39;L&#39;] )/2
+    self.__correctvalues()
     return </code></pre>
 </details>
 </dd>
