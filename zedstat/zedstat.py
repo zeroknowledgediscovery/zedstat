@@ -31,7 +31,7 @@ class processRoc(object):
             alpha (float): significance level e.g. 0.05
         """
         
-        print('local version 1')
+        #print('local version 1')
         
         if df.index.name==fprcol:
             self.df=df.copy()
