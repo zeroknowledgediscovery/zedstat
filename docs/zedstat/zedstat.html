@@ -30,6 +30,7 @@
 <pre><code class="python">import pandas as pd
 import numpy as np
 from sklearn.metrics import auc
+from scipy.interpolate import UnivariateSpline
 
 class processRoc(object):
     &#34;&#34;&#34;process ROC datafile&#34;&#34;&#34;
@@ -59,7 +60,7 @@ class processRoc(object):
             alpha (float): significance level e.g. 0.05
         &#34;&#34;&#34;
         
-        #print(&#39;local version 1&#39;)
+        print(&#39;local version 1&#39;)
         
         if df.index.name==fprcol:
             self.df=df.copy()
@@ -68,7 +69,7 @@ class processRoc(object):
                 self.df=df.set_index(fprcol).copy()
             else:
                 raise(&#39;fpr not in columns or index&#39;)
-            self.thresholdcol = thresholdcol
+        self.thresholdcol = thresholdcol
             
         if thresholdcol not in self.df.columns:
             self.thresholdcol=None
@@ -261,7 +262,7 @@ class processRoc(object):
             except:
                 print(&#39;interpolation failed&#39;)
 
-
+ 
         #display(df__)
         
         if self.thresholdcol is not None:
@@ -270,6 +271,10 @@ class processRoc(object):
         self.df=df__
         self.__correctPPV()
         self.df[self.df &lt; 0] = 0
+
+
+        self.df=self.df.reset_index().groupby(&#39;fpr&#39;).max()
+        self.df.ppv=UnivariateSpline(self.df.index.values,self.df.ppv.values,k=1,s=None)(self.df.index.values)
 
         #display(self.df)
         
@@ -289,8 +294,8 @@ class processRoc(object):
             df__=df.copy()
             
         
-        df__.loc[0].ppv=1.0
-        df__.loc[1].ppv=0.0
+        #df__.loc[0].ppv=1.0
+        #df__.loc[1].ppv=0.0
         arr=df__.ppv.values
         a_=[]
         for i in np.arange(len(arr)-1):
@@ -302,8 +307,8 @@ class processRoc(object):
 
         
         df__.ppv=a_
-        df__.loc[0].ppv=1.0
-        df__.loc[1].ppv=0.0
+        #df__.loc[0].ppv=1.0
+        #df__.loc[1].ppv=0.0
         
         
         return df__
@@ -443,8 +448,8 @@ class processRoc(object):
 
 
             # adjust datframe to cneter of upper and lowwr bounds    
-        self.df=(self.df_lim[&#39;U&#39;]+ self.df_lim[&#39;L&#39;] )/2
-        self.__correctvalues()
+        #self.df=(self.df_lim[&#39;U&#39;]+ self.df_lim[&#39;L&#39;] )/2
+        #self.__correctvalues()
         return 
 
     def __correctvalues(self):
@@ -905,7 +910,7 @@ def pipeline(df,
             alpha (float): significance level e.g. 0.05
         &#34;&#34;&#34;
         
-        #print(&#39;local version 1&#39;)
+        print(&#39;local version 1&#39;)
         
         if df.index.name==fprcol:
             self.df=df.copy()
@@ -914,7 +919,7 @@ def pipeline(df,
                 self.df=df.set_index(fprcol).copy()
             else:
                 raise(&#39;fpr not in columns or index&#39;)
-            self.thresholdcol = thresholdcol
+        self.thresholdcol = thresholdcol
             
         if thresholdcol not in self.df.columns:
             self.thresholdcol=None
@@ -1107,7 +1112,7 @@ def pipeline(df,
             except:
                 print(&#39;interpolation failed&#39;)
 
-
+ 
         #display(df__)
         
         if self.thresholdcol is not None:
@@ -1116,6 +1121,10 @@ def pipeline(df,
         self.df=df__
         self.__correctPPV()
         self.df[self.df &lt; 0] = 0
+
+
+        self.df=self.df.reset_index().groupby(&#39;fpr&#39;).max()
+        self.df.ppv=UnivariateSpline(self.df.index.values,self.df.ppv.values,k=1,s=None)(self.df.index.values)
 
         #display(self.df)
         
@@ -1135,8 +1144,8 @@ def pipeline(df,
             df__=df.copy()
             
         
-        df__.loc[0].ppv=1.0
-        df__.loc[1].ppv=0.0
+        #df__.loc[0].ppv=1.0
+        #df__.loc[1].ppv=0.0
         arr=df__.ppv.values
         a_=[]
         for i in np.arange(len(arr)-1):
@@ -1148,8 +1157,8 @@ def pipeline(df,
 
         
         df__.ppv=a_
-        df__.loc[0].ppv=1.0
-        df__.loc[1].ppv=0.0
+        #df__.loc[0].ppv=1.0
+        #df__.loc[1].ppv=0.0
         
         
         return df__
@@ -1289,8 +1298,8 @@ def pipeline(df,
 
 
             # adjust datframe to cneter of upper and lowwr bounds    
-        self.df=(self.df_lim[&#39;U&#39;]+ self.df_lim[&#39;L&#39;] )/2
-        self.__correctvalues()
+        #self.df=(self.df_lim[&#39;U&#39;]+ self.df_lim[&#39;L&#39;] )/2
+        #self.__correctvalues()
         return 
 
     def __correctvalues(self):
@@ -1541,6 +1550,10 @@ def pipeline(df,
     self.__correctPPV()
     self.df[self.df &lt; 0] = 0
 
+
+    self.df=self.df.reset_index().groupby(&#39;fpr&#39;).max()
+    self.df.ppv=UnivariateSpline(self.df.index.values,self.df.ppv.values,k=1,s=None)(self.df.index.values)
+
     #display(self.df)
     
     return #self.df</code></pre>
@@ -1708,8 +1721,8 @@ def pipeline(df,
 
 
         # adjust datframe to cneter of upper and lowwr bounds    
-    self.df=(self.df_lim[&#39;U&#39;]+ self.df_lim[&#39;L&#39;] )/2
-    self.__correctvalues()
+    #self.df=(self.df_lim[&#39;U&#39;]+ self.df_lim[&#39;L&#39;] )/2
+    #self.__correctvalues()
     return </code></pre>
 </details>
 </dd>

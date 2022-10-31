@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.metrics import auc
+from scipy.interpolate import UnivariateSpline
 
 class processRoc(object):
     """process ROC datafile"""
@@ -30,7 +31,7 @@ class processRoc(object):
             alpha (float): significance level e.g. 0.05
         """
         
-        #print('local version 1')
+        print('local version 1')
         
         if df.index.name==fprcol:
             self.df=df.copy()
@@ -39,7 +40,7 @@ class processRoc(object):
                 self.df=df.set_index(fprcol).copy()
             else:
                 raise('fpr not in columns or index')
-            self.thresholdcol = thresholdcol
+        self.thresholdcol = thresholdcol
             
         if thresholdcol not in self.df.columns:
             self.thresholdcol=None
@@ -232,7 +233,7 @@ class processRoc(object):
             except:
                 print('interpolation failed')
 
-
+ 
         #display(df__)
         
         if self.thresholdcol is not None:
@@ -241,6 +242,10 @@ class processRoc(object):
         self.df=df__
         self.__correctPPV()
         self.df[self.df < 0] = 0
+
+
+        self.df=self.df.reset_index().groupby('fpr').max()
+        self.df.ppv=UnivariateSpline(self.df.index.values,self.df.ppv.values,k=1,s=None)(self.df.index.values)
 
         #display(self.df)
         
@@ -260,8 +265,8 @@ class processRoc(object):
             df__=df.copy()
             
         
-        df__.loc[0].ppv=1.0
-        df__.loc[1].ppv=0.0
+        #df__.loc[0].ppv=1.0
+        #df__.loc[1].ppv=0.0
         arr=df__.ppv.values
         a_=[]
         for i in np.arange(len(arr)-1):
@@ -273,8 +278,8 @@ class processRoc(object):
 
         
         df__.ppv=a_
-        df__.loc[0].ppv=1.0
-        df__.loc[1].ppv=0.0
+        #df__.loc[0].ppv=1.0
+        #df__.loc[1].ppv=0.0
         
         
         return df__
@@ -414,8 +419,8 @@ class processRoc(object):
 
 
             # adjust datframe to cneter of upper and lowwr bounds    
-        self.df=(self.df_lim['U']+ self.df_lim['L'] )/2
-        self.__correctvalues()
+        #self.df=(self.df_lim['U']+ self.df_lim['L'] )/2
+        #self.__correctvalues()
         return 
 
     def __correctvalues(self):

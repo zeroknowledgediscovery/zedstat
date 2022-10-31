@@ -3,6 +3,7 @@ MANIFEST.in
 README.rst
 setup.py
 version.py
+zedstat/Untitled-Copy1.ipynb
 zedstat/Untitled.ipynb
 zedstat/__init__.py
 zedstat/mwauc.py
@@ -13,4 +14,5 @@ zedstat.egg-info/SOURCES.txt
 zedstat.egg-info/dependency_links.txt
 zedstat.egg-info/requires.txt
 zedstat.egg-info/top_level.txt
+zedstat/.ipynb_checkpoints/Untitled-Copy1-checkpoint.ipynb
 zedstat/.ipynb_checkpoints/Untitled-checkpoint.ipynb
