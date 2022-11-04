@@ -246,6 +246,7 @@ class processRoc(object):
 
         self.df=self.df.reset_index().groupby('fpr').max()
         self.df.ppv=UnivariateSpline(self.df.index.values,self.df.ppv.values,k=1,s=None)(self.df.index.values)
+        self.df[self.df < 0] = 0
 
         #display(self.df)
         
