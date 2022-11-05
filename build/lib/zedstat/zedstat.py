@@ -570,9 +570,10 @@ class processRoc(object):
             number_of_positives (int): interpret assuming this many positive cases, default 10
         '''
         wf=self.df.copy()
-        wf=wf.dropna()
+                
         wf.loc[fpr]=pd.Series([],dtype=float)
-        wf=wf.sort_index().interpolate(method='spline',order=self.order)
+        wf=wf.sort_index().interpolate(method='spline',order=self.order,limit_direction='both')
+        
         row=wf.loc[fpr]
 
         POS=number_of_positives
@@ -583,6 +584,8 @@ class processRoc(object):
         FN=POS-TP
         TN=POS/self.prevalence
 
+        print(POS,TP,FP,NEG,TOTALFLAGS,FN,TN)
+        
         rf=pd.DataFrame({'pos':np.round(POS),
                       'flags':int(np.round(TOTALFLAGS)),
                       'tp':int(np.round(TP)),
