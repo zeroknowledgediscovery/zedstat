@@ -570,6 +570,7 @@ class processRoc(object):
             number_of_positives (int): interpret assuming this many positive cases, default 10
         '''
         wf=self.df.copy()
+        wf=wf.dropna()
         wf.loc[fpr]=pd.Series([],dtype=float)
         wf=wf.sort_index().interpolate(method='spline',order=self.order)
         row=wf.loc[fpr]
