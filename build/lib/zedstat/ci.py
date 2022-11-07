@@ -16,7 +16,7 @@ def ci(df,xvar,yvar,alpha=.05):
         float: aic (aic of OLS estimator)
         statsmodels.regression.linear_model.OLSResults
     '''
-    import pandas as pd
+    import pandas as pd  
     import statsmodels.api as sm
     
     df = rf.sort_values(xvar)
