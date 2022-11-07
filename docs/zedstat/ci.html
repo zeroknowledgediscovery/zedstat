@@ -43,6 +43,7 @@ def ci(df,xvar,yvar,alpha=.05):
         pandas.DataFrame: x, pred,ub,lb
         float: pvalue (f_pvalue of OLS estimator)
         float: aic (aic of OLS estimator)
+        float: correlation (numpy corrcoeff with predicted values)
         statsmodels.regression.linear_model.OLSResults
     &#39;&#39;&#39;
     import pandas as pd  
@@ -62,7 +63,8 @@ def ci(df,xvar,yvar,alpha=.05):
                         &#39;lb&#39;:pred[&#39;mean_ci_lower&#39;].values,
                         &#39;ub&#39;:pred[&#39;mean_ci_upper&#39;].values},
                        index=x_pred)
-    return predf,est.f_pvalue,est.aic,est</code></pre>
+    corr=np.corrcoeff(predf.pred,df[yvar])[0,1]
+    return predf,est.f_pvalue,est.aic,corr,est</code></pre>
 </details>
 </section>
 <section>
@@ -96,6 +98,8 @@ def ci(df,xvar,yvar,alpha=.05):
 <dd>pvalue (f_pvalue of OLS estimator)</dd>
 <dt><code>float</code></dt>
 <dd>aic (aic of OLS estimator)</dd>
+<dt><code>float</code></dt>
+<dd>correlation (numpy corrcoeff with predicted values)</dd>
 </dl>
 <p>statsmodels.regression.linear_model.OLSResults</p></div>
 <details class="source">
@@ -115,6 +119,7 @@ def ci(df,xvar,yvar,alpha=.05):
         pandas.DataFrame: x, pred,ub,lb
         float: pvalue (f_pvalue of OLS estimator)
         float: aic (aic of OLS estimator)
+        float: correlation (numpy corrcoeff with predicted values)
         statsmodels.regression.linear_model.OLSResults
     &#39;&#39;&#39;
     import pandas as pd  
@@ -134,7 +139,8 @@ def ci(df,xvar,yvar,alpha=.05):
                         &#39;lb&#39;:pred[&#39;mean_ci_lower&#39;].values,
                         &#39;ub&#39;:pred[&#39;mean_ci_upper&#39;].values},
                        index=x_pred)
-    return predf,est.f_pvalue,est.aic,est</code></pre>
+    corr=np.corrcoeff(predf.pred,df[yvar])[0,1]
+    return predf,est.f_pvalue,est.aic,corr,est</code></pre>
 </details>
 </dd>
 </dl>
