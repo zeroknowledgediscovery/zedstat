@@ -63,7 +63,7 @@ def ci(df,xvar,yvar,alpha=.05):
                         &#39;lb&#39;:pred[&#39;mean_ci_lower&#39;].values,
                         &#39;ub&#39;:pred[&#39;mean_ci_upper&#39;].values},
                        index=x_pred)
-    corr=np.corrcoeff(predf.pred,df[yvar])[0,1]
+    corr=np.corrcoef(predf.pred,df[yvar])[0,1]
     return predf,est.f_pvalue,est.aic,corr,est</code></pre>
 </details>
 </section>
@@ -139,7 +139,7 @@ def ci(df,xvar,yvar,alpha=.05):
                         &#39;lb&#39;:pred[&#39;mean_ci_lower&#39;].values,
                         &#39;ub&#39;:pred[&#39;mean_ci_upper&#39;].values},
                        index=x_pred)
-    corr=np.corrcoeff(predf.pred,df[yvar])[0,1]
+    corr=np.corrcoef(predf.pred,df[yvar])[0,1]
     return predf,est.f_pvalue,est.aic,corr,est</code></pre>
 </details>
 </dd>

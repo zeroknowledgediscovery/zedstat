@@ -34,5 +34,5 @@ def ci(df,xvar,yvar,alpha=.05):
                         'lb':pred['mean_ci_lower'].values,
                         'ub':pred['mean_ci_upper'].values},
                        index=x_pred)
-    corr=np.corrcoeff(predf.pred,df[yvar])[0,1]
+    corr=np.corrcoef(predf.pred,df[yvar])[0,1]
     return predf,est.f_pvalue,est.aic,corr,est
