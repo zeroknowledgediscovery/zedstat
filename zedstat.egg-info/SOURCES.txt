@@ -6,6 +6,7 @@ version.py
 zedstat/Untitled-Copy1.ipynb
 zedstat/Untitled.ipynb
 zedstat/__init__.py
+zedstat/ci.py
 zedstat/mwauc.py
 zedstat/textable.py
 zedstat/zedstat.py
