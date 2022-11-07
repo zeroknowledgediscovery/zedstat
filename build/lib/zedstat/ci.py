@@ -19,7 +19,7 @@ def ci(df,xvar,yvar,alpha=.05):
     import pandas as pd  
     import statsmodels.api as sm
     
-    df = rf.sort_values(xvar)
+    df = df.sort_values(xvar)
     X = sm.add_constant(df[xvar].values)
     ols_model = sm.OLS(df[yvar].values, X)
     est = ols_model.fit()
