@@ -24,8 +24,6 @@ def ci(df,xvar,yvar,alpha=.05):
     X = sm.add_constant(df[xvar].values)
     ols_model = sm.OLS(df[yvar].values, X)
     est = ols_model.fit()
-    #print(est.f_test(np.identity(2))) 
-    #print(est.t_test([1, 0]))
     out = est.conf_int(alpha=alpha, cols=None)
     y_pred = est.predict(X)
     x_pred = df[xvar].values
