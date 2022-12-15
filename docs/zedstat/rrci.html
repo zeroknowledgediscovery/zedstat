@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
-<title>zedstat API documentation</title>
-<meta name="description" content="zedstat …" />
+<title>zedstat.rrci API documentation</title>
+<meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -20,75 +20,166 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Package <code>zedstat</code></h1>
+<h1 class="title">Module <code>zedstat.rrci</code></h1>
 </header>
 <section id="section-intro">
-<h1 id="zedstat">zedstat</h1>
-<p>Description:
-<br>
-Utilities for uncertainty quantification and deployment of ML models
-</p>
-<hr>
-<p>Installation:
-<br>
-<code>pip install zedstat</code>
-<br>
-Notes:
-<br>
-Useful for calculation of likelihood ratios, confidence intervals on AUC,
-simple performance interpretation (list to be expanded)</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;                                                                                                                        
-# zedstat                                                                                                                   
-                                                                                                                           
-Description:                                                                                                               
-    Utilities for uncertainty quantification and deployment of ML models                                                                  
-                                                                                                                           
----                                                                                                                        
-                                                                                                                           
-Installation:                                                                                                              
-   ```                                                                                                                     
-      pip install zedstat                                                                                                   
-   ```                                                                                                                                                                                                      
-Notes:                                                                                                                     
-   Useful for calculation of likelihood ratios, confidence intervals on AUC,
-   simple performance interpretation (list to be expanded)
+<pre><code class="python">import pandas as pd
+import numpy as np
+from scipy.stats import norm
+
+def rrci(epos,eneg,cpos,cneg,alpha=.05,ZERO_POLICY=&#39;ADDONE&#39;):
+    &#39;&#39;&#39;Get CI bounds for risk ratio
+    
+    Args:
+        epos (int): exposed group with outcome
+        eneg (int): exposed group without oucome
+        cpos (int): control group with outcome
+        cneg (int): control group without oucome
+        alpha (float): significance level float
+        ZERO_POLICY (str): How to handle zeropositives (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8196730/)
+
+    Returns:
+        float: risk ratio
+        float: lower confidence bound
+        float: wpper confidence bound
+    &#39;&#39;&#39;
+    import pandas as pd  
+    import statsmodels.api as sm
 
 
-&#34;&#34;&#34;</code></pre>
+    if ZERO_POLICY==&#34;ADDONE&#34;:
+        if epos == 0:
+            epos=epos+1
+            eneg=eneg+1
+            cneg=cneg+1
+            cpos=cpos+1
+
+    if epos &gt; 0:
+        rr = (epos/(epos+eneg))/(cpos/(cpos+cneg))
+    else:
+        rr = (eneg/(epos+eneg))/(cneg/(cpos+cneg))
+
+
+    
+    lrr = np.log(rr)
+    
+    if epos&gt;0:
+        V=np.sqrt(1/(epos+eneg) + 1/(cpos+cneg) + 1/epos + 1/cpos)
+    else:
+        V=np.sqrt(1/(epos+eneg) + 1/(cpos+cneg) + 1/eneg + 1/cneg )
+
+    
+    n_sided=1
+    z=norm.ppf(1-alpha/n_sided)
+    del_ = z*V
+
+    lrrlb = (lrr-del_)
+    lrrub = lrr+del_
+
+    
+
+    return  rr, np.exp(lrrlb)*float(lrrlb&gt;0), np.exp(lrrub)</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="zedstat.ci" href="ci.html">zedstat.ci</a></code></dt>
+<dt id="zedstat.rrci.rrci"><code class="name flex">
+<span>def <span class="ident">rrci</span></span>(<span>epos, eneg, cpos, cneg, alpha=0.05, ZERO_POLICY='ADDONE')</span>
+</code></dt>
 <dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="zedstat.mwauc" href="mwauc.html">zedstat.mwauc</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="zedstat.rrci" href="rrci.html">zedstat.rrci</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="zedstat.textable" href="textable.html">zedstat.textable</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="zedstat.zedstat" href="zedstat.html">zedstat.zedstat</a></code></dt>
-<dd>
-<div class="desc"></div>
+<div class="desc"><p>Get CI bounds for risk ratio</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>epos</code></strong> :&ensp;<code>int</code></dt>
+<dd>exposed group with outcome</dd>
+<dt><strong><code>eneg</code></strong> :&ensp;<code>int</code></dt>
+<dd>exposed group without oucome</dd>
+<dt><strong><code>cpos</code></strong> :&ensp;<code>int</code></dt>
+<dd>control group with outcome</dd>
+<dt><strong><code>cneg</code></strong> :&ensp;<code>int</code></dt>
+<dd>control group without oucome</dd>
+<dt><strong><code>alpha</code></strong> :&ensp;<code>float</code></dt>
+<dd>significance level float</dd>
+<dt><strong><code>ZERO_POLICY</code></strong> :&ensp;<code>str</code></dt>
+<dd>How to handle zeropositives (<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8196730/">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8196730/</a>)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>risk ratio</dd>
+<dt><code>float</code></dt>
+<dd>lower confidence bound</dd>
+<dt><code>float</code></dt>
+<dd>wpper confidence bound</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def rrci(epos,eneg,cpos,cneg,alpha=.05,ZERO_POLICY=&#39;ADDONE&#39;):
+    &#39;&#39;&#39;Get CI bounds for risk ratio
+    
+    Args:
+        epos (int): exposed group with outcome
+        eneg (int): exposed group without oucome
+        cpos (int): control group with outcome
+        cneg (int): control group without oucome
+        alpha (float): significance level float
+        ZERO_POLICY (str): How to handle zeropositives (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8196730/)
+
+    Returns:
+        float: risk ratio
+        float: lower confidence bound
+        float: wpper confidence bound
+    &#39;&#39;&#39;
+    import pandas as pd  
+    import statsmodels.api as sm
+
+
+    if ZERO_POLICY==&#34;ADDONE&#34;:
+        if epos == 0:
+            epos=epos+1
+            eneg=eneg+1
+            cneg=cneg+1
+            cpos=cpos+1
+
+    if epos &gt; 0:
+        rr = (epos/(epos+eneg))/(cpos/(cpos+cneg))
+    else:
+        rr = (eneg/(epos+eneg))/(cneg/(cpos+cneg))
+
+
+    
+    lrr = np.log(rr)
+    
+    if epos&gt;0:
+        V=np.sqrt(1/(epos+eneg) + 1/(cpos+cneg) + 1/epos + 1/cpos)
+    else:
+        V=np.sqrt(1/(epos+eneg) + 1/(cpos+cneg) + 1/eneg + 1/cneg )
+
+    
+    n_sided=1
+    z=norm.ppf(1-alpha/n_sided)
+    del_ = z*V
+
+    lrrlb = (lrr-del_)
+    lrrub = lrr+del_
+
+    
+
+    return  rr, np.exp(lrrlb)*float(lrrlb&gt;0), np.exp(lrrub)</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -97,18 +188,17 @@ Notes:
 <img src="logozed_nowhite.png" alt="drawing" style="width:400px;"/>
 <h1>Index</h1>
 <div class="toc">
-<ul>
-<li><a href="#zedstat">zedstat</a></li>
-</ul>
+<ul></ul>
 </div>
 <ul id="index">
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<li><h3>Super-module</h3>
 <ul>
-<li><code><a title="zedstat.ci" href="ci.html">zedstat.ci</a></code></li>
-<li><code><a title="zedstat.mwauc" href="mwauc.html">zedstat.mwauc</a></code></li>
-<li><code><a title="zedstat.rrci" href="rrci.html">zedstat.rrci</a></code></li>
-<li><code><a title="zedstat.textable" href="textable.html">zedstat.textable</a></code></li>
-<li><code><a title="zedstat.zedstat" href="zedstat.html">zedstat.zedstat</a></code></li>
+<li><code><a title="zedstat" href="index.html">zedstat</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="zedstat.rrci.rrci" href="#zedstat.rrci.rrci">rrci</a></code></li>
 </ul>
 </li>
 </ul>

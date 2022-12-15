@@ -8,6 +8,7 @@ zedstat/Untitled.ipynb
 zedstat/__init__.py
 zedstat/ci.py
 zedstat/mwauc.py
+zedstat/rrci.py
 zedstat/textable.py
 zedstat/zedstat.py
 zedstat.egg-info/PKG-INFO
