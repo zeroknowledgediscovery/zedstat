@@ -53,4 +53,4 @@ def rrci(epos,eneg,cpos,cneg,alpha=.05,ZERO_POLICY='ADDONE'):
 
     
 
-    return  rr, np.exp(lrrlb)*float(lrrlb>0), np.exp(lrrub)
+    return  rr, np.exp(lrrlb), np.exp(lrrub)
