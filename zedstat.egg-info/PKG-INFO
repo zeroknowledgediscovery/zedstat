@@ -1,14 +1,13 @@
 Metadata-Version: 2.1
 Name: zedstat
-Version: 0.0.114
+Version: 0.0.115
 Summary: Statistics tools for ML models and deployment
 Home-page: https://github.com/zeroknowledgediscovery/zedstat
+Download-URL: https://github.com/zeroknowledgediscovery/zedstat/archive/0.0.115.tar.gz
 Author: zed.uchicago.edu
 Author-email: ishanu@uchicago.edu
 License: LICENSE
-Download-URL: https://github.com/zeroknowledgediscovery/zedstat/archive/0.0.114.tar.gz
 Keywords: machine learning,statistics
-Platform: UNKNOWN
 Classifier: Development Status :: 4 - Beta
 Classifier: Intended Audience :: Developers
 Classifier: Intended Audience :: Science/Research
@@ -64,5 +63,3 @@ zedstat
    display(zt._operating_zone)
    print('high precision operation:\n','\n '.join(txt0))
    print('high recall operation:\n','\n '.join(txt1))
-
-

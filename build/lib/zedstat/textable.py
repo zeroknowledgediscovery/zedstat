@@ -29,9 +29,20 @@ def textable(df,tabname='tmp.tex',
     STR='\\begin{tabular}{'+TABFORMAT+'}\\hline\n'        
     with open(tabname,'w') as f:
         f.write(STR)
-    df.to_csv(tabname,float_format=FORMAT,
-              line_terminator=LNTERM,
-              sep='&',quotechar=' ',index=None,mode='a')
+    #df.to_csv(tabname,float_format=FORMAT,
+    #          line_terminator=LNTERM,
+    #          sep='&',quotechar=' ',index=None,mode='a')
+
+    # Convert DataFrame to CSV string
+    csv_string = df.to_csv(sep='&', quotechar=' ', index=False, float_format=FORMAT)
+    
+    # Replace newline character with your desired line terminator
+    csv_string = csv_string.replace('\n', LNTERM)
+    
+    # Write to file
+    with open(tabname, 'a') as file:
+        file.write(csv_string)
+
     
     with open(tabname,'a') as f:
         f.write('\\hline\\end{tabular}\n')

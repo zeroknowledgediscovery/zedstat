@@ -58,9 +58,20 @@ def textable(df,tabname=&#39;tmp.tex&#39;,
     STR=&#39;\\begin{tabular}{&#39;+TABFORMAT+&#39;}\\hline\n&#39;        
     with open(tabname,&#39;w&#39;) as f:
         f.write(STR)
-    df.to_csv(tabname,float_format=FORMAT,
-              line_terminator=LNTERM,
-              sep=&#39;&amp;&#39;,quotechar=&#39; &#39;,index=None,mode=&#39;a&#39;)
+    #df.to_csv(tabname,float_format=FORMAT,
+    #          line_terminator=LNTERM,
+    #          sep=&#39;&amp;&#39;,quotechar=&#39; &#39;,index=None,mode=&#39;a&#39;)
+
+    # Convert DataFrame to CSV string
+    csv_string = df.to_csv(sep=&#39;&amp;&#39;, quotechar=&#39; &#39;, index=False, float_format=FORMAT)
+    
+    # Replace newline character with your desired line terminator
+    csv_string = csv_string.replace(&#39;\n&#39;, LNTERM)
+    
+    # Write to file
+    with open(tabname, &#39;a&#39;) as file:
+        file.write(csv_string)
+
     
     with open(tabname,&#39;a&#39;) as f:
         f.write(&#39;\\hline\\end{tabular}\n&#39;)
@@ -222,9 +233,20 @@ def tablewithbounds(df,
     STR=&#39;\\begin{tabular}{&#39;+TABFORMAT+&#39;}\\hline\n&#39;        
     with open(tabname,&#39;w&#39;) as f:
         f.write(STR)
-    df.to_csv(tabname,float_format=FORMAT,
-              line_terminator=LNTERM,
-              sep=&#39;&amp;&#39;,quotechar=&#39; &#39;,index=None,mode=&#39;a&#39;)
+    #df.to_csv(tabname,float_format=FORMAT,
+    #          line_terminator=LNTERM,
+    #          sep=&#39;&amp;&#39;,quotechar=&#39; &#39;,index=None,mode=&#39;a&#39;)
+
+    # Convert DataFrame to CSV string
+    csv_string = df.to_csv(sep=&#39;&amp;&#39;, quotechar=&#39; &#39;, index=False, float_format=FORMAT)
+    
+    # Replace newline character with your desired line terminator
+    csv_string = csv_string.replace(&#39;\n&#39;, LNTERM)
+    
+    # Write to file
+    with open(tabname, &#39;a&#39;) as file:
+        file.write(csv_string)
+
     
     with open(tabname,&#39;a&#39;) as f:
         f.write(&#39;\\hline\\end{tabular}\n&#39;)</code></pre>
