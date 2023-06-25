@@ -605,7 +605,14 @@ class processRoc(object):
         else:
             NNS=np.nan
 
-        print(POS,TP,FP,NEG,TOTALFLAGS,FN,TN,NNS)
+            
+        resdf=pd.DataFrame.from_dict({"POS":np.round(POS),"TP":np.round(TP),
+                                      "FP":np.round(FP),"NEG":np.round(NEG),
+                                      "FLAGS":np.round(TOTALFLAGS),"FN":np.round(FN),
+                                      "TN":np.round(TN),
+                                      "NNS":np.round(NNS),
+                                      "flagged_fraction":np.round(TOTALFLAGS/(POS+NEG),
+                                                                  2)},orient='index',columns=['estimates'])
         
         rf=pd.DataFrame({'pos':np.round(POS),
                       'flags':int(np.round(TOTALFLAGS)),
@@ -630,7 +637,7 @@ class processRoc(object):
         
             
 
-        return rf,txt
+        return rf,txt,resdf
 
 
 

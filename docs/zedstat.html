@@ -634,7 +634,14 @@ class processRoc(object):
         else:
             NNS=np.nan
 
-        print(POS,TP,FP,NEG,TOTALFLAGS,FN,TN,NNS)
+            
+        resdf=pd.DataFrame.from_dict({&#34;POS&#34;:np.round(POS),&#34;TP&#34;:np.round(TP),
+                                      &#34;FP&#34;:np.round(FP),&#34;NEG&#34;:np.round(NEG),
+                                      &#34;FLAGS&#34;:np.round(TOTALFLAGS),&#34;FN&#34;:np.round(FN),
+                                      &#34;TN&#34;:np.round(TN),
+                                      &#34;NNS&#34;:np.round(NNS),
+                                      &#34;flagged_fraction&#34;:np.round(TOTALFLAGS/(POS+NEG),
+                                                                  2)},orient=&#39;index&#39;,columns=[&#39;estimates&#39;])
         
         rf=pd.DataFrame({&#39;pos&#39;:np.round(POS),
                       &#39;flags&#39;:int(np.round(TOTALFLAGS)),
@@ -659,7 +666,7 @@ class processRoc(object):
         
             
 
-        return rf,txt
+        return rf,txt,resdf
 
 
 
@@ -1514,7 +1521,14 @@ def pipeline(df,
         else:
             NNS=np.nan
 
-        print(POS,TP,FP,NEG,TOTALFLAGS,FN,TN,NNS)
+            
+        resdf=pd.DataFrame.from_dict({&#34;POS&#34;:np.round(POS),&#34;TP&#34;:np.round(TP),
+                                      &#34;FP&#34;:np.round(FP),&#34;NEG&#34;:np.round(NEG),
+                                      &#34;FLAGS&#34;:np.round(TOTALFLAGS),&#34;FN&#34;:np.round(FN),
+                                      &#34;TN&#34;:np.round(TN),
+                                      &#34;NNS&#34;:np.round(NNS),
+                                      &#34;flagged_fraction&#34;:np.round(TOTALFLAGS/(POS+NEG),
+                                                                  2)},orient=&#39;index&#39;,columns=[&#39;estimates&#39;])
         
         rf=pd.DataFrame({&#39;pos&#39;:np.round(POS),
                       &#39;flags&#39;:int(np.round(TOTALFLAGS)),
@@ -1539,7 +1553,7 @@ def pipeline(df,
         
             
 
-        return rf,txt</code></pre>
+        return rf,txt,resdf</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -1851,7 +1865,14 @@ def pipeline(df,
         else:
             NNS=np.nan
 
-        print(POS,TP,FP,NEG,TOTALFLAGS,FN,TN,NNS)
+            
+        resdf=pd.DataFrame.from_dict({&#34;POS&#34;:np.round(POS),&#34;TP&#34;:np.round(TP),
+                                      &#34;FP&#34;:np.round(FP),&#34;NEG&#34;:np.round(NEG),
+                                      &#34;FLAGS&#34;:np.round(TOTALFLAGS),&#34;FN&#34;:np.round(FN),
+                                      &#34;TN&#34;:np.round(TN),
+                                      &#34;NNS&#34;:np.round(NNS),
+                                      &#34;flagged_fraction&#34;:np.round(TOTALFLAGS/(POS+NEG),
+                                                                  2)},orient=&#39;index&#39;,columns=[&#39;estimates&#39;])
         
         rf=pd.DataFrame({&#39;pos&#39;:np.round(POS),
                       &#39;flags&#39;:int(np.round(TOTALFLAGS)),
@@ -1876,7 +1897,7 @@ def pipeline(df,
         
             
 
-        return rf,txt</code></pre>
+        return rf,txt,resdf</code></pre>
 </details>
 </dd>
 <dt id="zedstat.zedstat.processRoc.nominal_auc"><code class="name flex">
