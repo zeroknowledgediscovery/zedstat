@@ -561,13 +561,19 @@ class processRoc(object):
         return pvalue
     
     
-    def interpret(self,fpr=0.01,number_of_positives=10):
+    def interpret(self,
+                  fpr=0.01,
+                  number_of_positives=10,
+                  five_yr_survival=None,
+                  factor=1):
         '''
         generate simple interpretation of inferred model, based on a number of positive cases
 
         Args:
-            fpr (float): teh false psotive rate or 1-specificity of the operating point
+            fpr (float): the false psotive rate or 1-specificity of the operating point
             number_of_positives (int): interpret assuming this many positive cases, default 10
+            five_yr_survival (float): fraction not experiencing severe event after 5 years (default: None)
+            factor (float): fraction of TP who avert the severe outcome due to correct screen
         '''
         wf=self.df.copy()
                 
@@ -576,15 +582,30 @@ class processRoc(object):
         
         row=wf.loc[fpr]
 
-        POS=number_of_positives
-        TP=POS*row.tpr
-        FP = TP*((1/row.ppv) -1)
-        NEG=FP/fpr
-        TOTALFLAGS=TP+FP
-        FN=POS-TP
-        TN=POS/self.prevalence
+#        POS=number_of_positives
+#        TP=POS*row.tpr
+#        FP = TP*((1/row.ppv) -1)
+#        NEG=FP/fpr
+#        TOTALFLAGS=TP+FP
+#        FN=POS-TP
+#        TN=POS/self.prevalence
 
-        print(POS,TP,FP,NEG,TOTALFLAGS,FN,TN)
+        #factor=0.21*(0.95-0.69) + 0.08*(0.95-0.17)
+        #factor=0.33*(0.95-0.17)
+
+        POS=number_of_positives
+        NEG=POS*(1-self.prevalence)*(1/self.prevalence)
+        TP=POS*row.tpr
+        TOTALFLAGS=TP/row.ppv
+        FP=TOTALFLAGS-TP
+        FN=POS-TP
+        TN=NEG-FP
+        if five_yr_survival is not None:
+            NNS=int(np.ceil(TOTALFLAGS/((TP*factor)*(1- five_yr_survival))))
+        else:
+            NNS=np.nan
+
+        print(POS,TP,FP,NEG,TOTALFLAGS,FN,TN,NNS)
         
         rf=pd.DataFrame({'pos':np.round(POS),
                       'flags':int(np.round(TOTALFLAGS)),
@@ -604,6 +625,10 @@ class processRoc(object):
              f"out of which {tp} are true positives",
              f"{fp} are false alarms",
              f"{fn} cases are missed"]
+        if five_yr_survival is not None:
+            txt.append(f"Number needed to screen is {NNS}")
+        
+            
 
         return rf,txt
 
