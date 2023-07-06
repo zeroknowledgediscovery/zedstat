@@ -630,7 +630,7 @@ class processRoc(object):
         FN=POS-TP
         TN=NEG-FP
         if five_yr_survival is not None:
-            NNS=int(np.ceil(TOTALFLAGS/((TP*factor)*(1- five_yr_survival))))
+            NNS=TOTALFLAGS/(TP*factor*(1- five_yr_survival))
         else:
             NNS=np.nan
 
@@ -640,7 +640,7 @@ class processRoc(object):
                                       &#34;FLAGS&#34;:np.round(TOTALFLAGS),&#34;FN&#34;:np.round(FN),
                                       &#34;TN&#34;:np.round(TN),
                                       &#34;NNS&#34;:np.round(NNS),
-                                      &#34;flagged_fraction&#34;:np.round(TOTALFLAGS/(POS+NEG),
+                                      &#34;FLAGGED_FRACTION&#34;:np.round(TOTALFLAGS/(POS+NEG),
                                                                   2)},orient=&#39;index&#39;,columns=[&#39;estimates&#39;])
         
         rf=pd.DataFrame({&#39;pos&#39;:np.round(POS),
@@ -1517,7 +1517,7 @@ def pipeline(df,
         FN=POS-TP
         TN=NEG-FP
         if five_yr_survival is not None:
-            NNS=int(np.ceil(TOTALFLAGS/((TP*factor)*(1- five_yr_survival))))
+            NNS=TOTALFLAGS/(TP*factor*(1- five_yr_survival))
         else:
             NNS=np.nan
 
@@ -1527,7 +1527,7 @@ def pipeline(df,
                                       &#34;FLAGS&#34;:np.round(TOTALFLAGS),&#34;FN&#34;:np.round(FN),
                                       &#34;TN&#34;:np.round(TN),
                                       &#34;NNS&#34;:np.round(NNS),
-                                      &#34;flagged_fraction&#34;:np.round(TOTALFLAGS/(POS+NEG),
+                                      &#34;FLAGGED_FRACTION&#34;:np.round(TOTALFLAGS/(POS+NEG),
                                                                   2)},orient=&#39;index&#39;,columns=[&#39;estimates&#39;])
         
         rf=pd.DataFrame({&#39;pos&#39;:np.round(POS),
@@ -1861,7 +1861,7 @@ def pipeline(df,
         FN=POS-TP
         TN=NEG-FP
         if five_yr_survival is not None:
-            NNS=int(np.ceil(TOTALFLAGS/((TP*factor)*(1- five_yr_survival))))
+            NNS=TOTALFLAGS/(TP*factor*(1- five_yr_survival))
         else:
             NNS=np.nan
 
@@ -1871,7 +1871,7 @@ def pipeline(df,
                                       &#34;FLAGS&#34;:np.round(TOTALFLAGS),&#34;FN&#34;:np.round(FN),
                                       &#34;TN&#34;:np.round(TN),
                                       &#34;NNS&#34;:np.round(NNS),
-                                      &#34;flagged_fraction&#34;:np.round(TOTALFLAGS/(POS+NEG),
+                                      &#34;FLAGGED_FRACTION&#34;:np.round(TOTALFLAGS/(POS+NEG),
                                                                   2)},orient=&#39;index&#39;,columns=[&#39;estimates&#39;])
         
         rf=pd.DataFrame({&#39;pos&#39;:np.round(POS),

@@ -601,7 +601,7 @@ class processRoc(object):
         FN=POS-TP
         TN=NEG-FP
         if five_yr_survival is not None:
-            NNS=int(np.ceil(TOTALFLAGS/((TP*factor)*(1- five_yr_survival))))
+            NNS=TOTALFLAGS/(TP*factor*(1- five_yr_survival))
         else:
             NNS=np.nan
 
@@ -611,7 +611,7 @@ class processRoc(object):
                                       "FLAGS":np.round(TOTALFLAGS),"FN":np.round(FN),
                                       "TN":np.round(TN),
                                       "NNS":np.round(NNS),
-                                      "flagged_fraction":np.round(TOTALFLAGS/(POS+NEG),
+                                      "FLAGGED_FRACTION":np.round(TOTALFLAGS/(POS+NEG),
                                                                   2)},orient='index',columns=['estimates'])
         
         rf=pd.DataFrame({'pos':np.round(POS),
