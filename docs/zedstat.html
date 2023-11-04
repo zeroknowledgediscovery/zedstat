@@ -316,7 +316,15 @@ class processRoc(object):
 
     def scoretoprobability(self,score,regen=False,STEP=0.01,precision=3,interpolate=True):
         &#39;&#39;&#39;
-        map computed score to probability of sample being in the positive class. This is simply the PPV corresponding to the threshold which equals the score
+        map computed score to probability of sample being in the positive class.
+        This is simply the PPV corresponding to the threshold which equals the score
+        Args:
+            score (float): computed score
+            regen (bool): if True, regenerate roc curve
+
+        Return:
+            float representing probability of being in positive cohort
+
         &#39;&#39;&#39;
 
         if regen:
@@ -332,8 +340,13 @@ class processRoc(object):
 
 
         if score &gt; df.threshold.max():
-            return df.ppv.values.max()
-        return df[df.threshold&gt;score].ppv.tail(1).values[0]
+            val= df.ppv.values.max()
+        else:
+            val = df[df.threshold&gt;score].ppv.tail(1).values[0]
+
+        valmax=df.sort_values(&#39;threshold&#39;).tail(1).ppv.values[0]
+
+        return val/valmax
     
     def usample(self,
                 df=None,
@@ -1223,7 +1236,15 @@ def pipeline(df,
 
     def scoretoprobability(self,score,regen=False,STEP=0.01,precision=3,interpolate=True):
         &#39;&#39;&#39;
-        map computed score to probability of sample being in the positive class. This is simply the PPV corresponding to the threshold which equals the score
+        map computed score to probability of sample being in the positive class.
+        This is simply the PPV corresponding to the threshold which equals the score
+        Args:
+            score (float): computed score
+            regen (bool): if True, regenerate roc curve
+
+        Return:
+            float representing probability of being in positive cohort
+
         &#39;&#39;&#39;
 
         if regen:
@@ -1239,8 +1260,13 @@ def pipeline(df,
 
 
         if score &gt; df.threshold.max():
-            return df.ppv.values.max()
-        return df[df.threshold&gt;score].ppv.tail(1).values[0]
+            val= df.ppv.values.max()
+        else:
+            val = df[df.threshold&gt;score].ppv.tail(1).values[0]
+
+        valmax=df.sort_values(&#39;threshold&#39;).tail(1).ppv.values[0]
+
+        return val/valmax
     
     def usample(self,
                 df=None,
@@ -2112,14 +2138,32 @@ one for maximizing precions, and one for maximizing sensitivity</p>
 <span>def <span class="ident">scoretoprobability</span></span>(<span>self, score, regen=False, STEP=0.01, precision=3, interpolate=True)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>map computed score to probability of sample being in the positive class. This is simply the PPV corresponding to the threshold which equals the score</p></div>
+<div class="desc"><p>map computed score to probability of sample being in the positive class.
+This is simply the PPV corresponding to the threshold which equals the score</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>score</code></strong> :&ensp;<code>float</code></dt>
+<dd>computed score</dd>
+<dt><strong><code>regen</code></strong> :&ensp;<code>bool</code></dt>
+<dd>if True, regenerate roc curve</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>float representing probability of being in positive cohort</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def scoretoprobability(self,score,regen=False,STEP=0.01,precision=3,interpolate=True):
     &#39;&#39;&#39;
-    map computed score to probability of sample being in the positive class. This is simply the PPV corresponding to the threshold which equals the score
+    map computed score to probability of sample being in the positive class.
+    This is simply the PPV corresponding to the threshold which equals the score
+    Args:
+        score (float): computed score
+        regen (bool): if True, regenerate roc curve
+
+    Return:
+        float representing probability of being in positive cohort
+
     &#39;&#39;&#39;
 
     if regen:
@@ -2135,8 +2179,13 @@ one for maximizing precions, and one for maximizing sensitivity</p>
 
 
     if score &gt; df.threshold.max():
-        return df.ppv.values.max()
-    return df[df.threshold&gt;score].ppv.tail(1).values[0]</code></pre>
+        val= df.ppv.values.max()
+    else:
+        val = df[df.threshold&gt;score].ppv.tail(1).values[0]
+
+    valmax=df.sort_values(&#39;threshold&#39;).tail(1).ppv.values[0]
+
+    return val/valmax</code></pre>
 </details>
 </dd>
 <dt id="zedstat.zedstat.processRoc.smooth"><code class="name flex">

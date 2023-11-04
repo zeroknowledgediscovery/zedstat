@@ -311,8 +311,13 @@ class processRoc(object):
 
 
         if score > df.threshold.max():
-            return df.ppv.values.max()
-        return df[df.threshold>score].ppv.tail(1).values[0]
+            val= df.ppv.values.max()
+        else:
+            val = df[df.threshold>score].ppv.tail(1).values[0]
+
+        valmax=df.sort_values('threshold').tail(1).ppv.values[0]
+
+        return val/valmax
     
     def usample(self,
                 df=None,
