@@ -285,11 +285,16 @@ class processRoc(object):
         
         return df__
 
-    def scoretoprobability(self,score):
+    def scoretoprobability(self,score,regen=False,STEP=0.01,precision=3,interpolate=True):
         '''
         map computed score to probability of sample being in the positive class. This is simply the PPV corresponding to the threshold which equals the score
         '''
 
+        if regen:
+            self.smooth(STEP=STEP)
+            self.allmeasures(interpolate=interpolate)
+            self.usample(precision=precision)
+            
         df=self.get()
         if 'threshold' not in df.columns:
             raise('thershold not in columns or index')
