@@ -287,7 +287,15 @@ class processRoc(object):
 
     def scoretoprobability(self,score,regen=False,STEP=0.01,precision=3,interpolate=True):
         '''
-        map computed score to probability of sample being in the positive class. This is simply the PPV corresponding to the threshold which equals the score
+        map computed score to probability of sample being in the positive class.
+        This is simply the PPV corresponding to the threshold which equals the score
+        Args:
+            score (float): computed score
+            regen (bool): if True, regenerate roc curve
+
+        Return:
+            float representing probability of being in positive cohort
+
         '''
 
         if regen:
