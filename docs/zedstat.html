@@ -314,6 +314,18 @@ class processRoc(object):
         
         return df__
 
+    def scoretoprobability(self,score):
+        &#39;&#39;&#39;
+        map computed score to probability of sample being in the positive class. This is simply the PPV corresponding to the threshold which equals the score
+        &#39;&#39;&#39;
+
+        df=self.get()
+        if &#39;threshold&#39; not in df.columns:
+            raise(&#39;thershold not in columns or index&#39;)
+        if &#39;ppv&#39; not in df.columns:
+            raise(&#39;ppv not in columns or index&#39;)
+
+        return df[df.threshold&gt;score].ppv.tail(1).values[0]
     
     def usample(self,
                 df=None,
@@ -715,15 +727,6 @@ def genroc(df,
     return xf,df_.index.size,df_[df_.target.isin(TARGET)].index.size    
 
 
-    def scoretoprobability(self,score):
-
-        df=self.get()
-        if &#39;threshold&#39; not in df.columns:
-            raise(&#39;thershold not in columns or index&#39;)
-        if &#39;ppv&#39; not in df.columns:
-            raise(&#39;ppv not in columns or index&#39;)
-
-        return df[df.threshold&gt;score].ppv.tail(1).values[0]
 
 def pipeline(df,
             risk=&#39;predicted_risk&#39;,
@@ -843,18 +846,7 @@ def pipeline(df,
     
     if outfile is not None:
         xf.to_csv(outfile)
-    return xf,df_.index.size,df_[df_.target.isin(TARGET)].index.size    
-
-
-    def scoretoprobability(self,score):
-
-        df=self.get()
-        if &#39;threshold&#39; not in df.columns:
-            raise(&#39;thershold not in columns or index&#39;)
-        if &#39;ppv&#39; not in df.columns:
-            raise(&#39;ppv not in columns or index&#39;)
-
-        return df[df.threshold&gt;score].ppv.tail(1).values[0]</code></pre>
+    return xf,df_.index.size,df_[df_.target.isin(TARGET)].index.size    </code></pre>
 </details>
 </dd>
 <dt id="zedstat.zedstat.pipeline"><code class="name flex">
@@ -1221,6 +1213,18 @@ def pipeline(df,
         
         return df__
 
+    def scoretoprobability(self,score):
+        &#39;&#39;&#39;
+        map computed score to probability of sample being in the positive class. This is simply the PPV corresponding to the threshold which equals the score
+        &#39;&#39;&#39;
+
+        df=self.get()
+        if &#39;threshold&#39; not in df.columns:
+            raise(&#39;thershold not in columns or index&#39;)
+        if &#39;ppv&#39; not in df.columns:
+            raise(&#39;ppv not in columns or index&#39;)
+
+        return df[df.threshold&gt;score].ppv.tail(1).values[0]
     
     def usample(self,
                 df=None,
@@ -2088,6 +2092,29 @@ one for maximizing precions, and one for maximizing sensitivity</p>
     return required_npos</code></pre>
 </details>
 </dd>
+<dt id="zedstat.zedstat.processRoc.scoretoprobability"><code class="name flex">
+<span>def <span class="ident">scoretoprobability</span></span>(<span>self, score)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>map computed score to probability of sample being in the positive class. This is simply the PPV corresponding to the threshold which equals the score</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def scoretoprobability(self,score):
+    &#39;&#39;&#39;
+    map computed score to probability of sample being in the positive class. This is simply the PPV corresponding to the threshold which equals the score
+    &#39;&#39;&#39;
+
+    df=self.get()
+    if &#39;threshold&#39; not in df.columns:
+        raise(&#39;thershold not in columns or index&#39;)
+    if &#39;ppv&#39; not in df.columns:
+        raise(&#39;ppv not in columns or index&#39;)
+
+    return df[df.threshold&gt;score].ppv.tail(1).values[0]</code></pre>
+</details>
+</dd>
 <dt id="zedstat.zedstat.processRoc.smooth"><code class="name flex">
 <span>def <span class="ident">smooth</span></span>(<span>self, STEP=0.0001, interpolate=True, convexify=True)</span>
 </code></dt>
@@ -2234,6 +2261,7 @@ one for maximizing precions, and one for maximizing sensitivity</p>
 <li><code><a title="zedstat.zedstat.processRoc.operating_zone" href="#zedstat.zedstat.processRoc.operating_zone">operating_zone</a></code></li>
 <li><code><a title="zedstat.zedstat.processRoc.pvalue" href="#zedstat.zedstat.processRoc.pvalue">pvalue</a></code></li>
 <li><code><a title="zedstat.zedstat.processRoc.samplesize" href="#zedstat.zedstat.processRoc.samplesize">samplesize</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.scoretoprobability" href="#zedstat.zedstat.processRoc.scoretoprobability">scoretoprobability</a></code></li>
 <li><code><a title="zedstat.zedstat.processRoc.smooth" href="#zedstat.zedstat.processRoc.smooth">smooth</a></code></li>
 <li><code><a title="zedstat.zedstat.processRoc.usample" href="#zedstat.zedstat.processRoc.usample">usample</a></code></li>
 </ul>

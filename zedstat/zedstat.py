@@ -285,6 +285,18 @@ class processRoc(object):
         
         return df__
 
+    def scoretoprobability(self,score):
+        '''
+        map computed score to probability of sample being in the positive class. This is simply the PPV corresponding to the threshold which equals the score
+        '''
+
+        df=self.get()
+        if 'threshold' not in df.columns:
+            raise('thershold not in columns or index')
+        if 'ppv' not in df.columns:
+            raise('ppv not in columns or index')
+
+        return df[df.threshold>score].ppv.tail(1).values[0]
     
     def usample(self,
                 df=None,
@@ -686,15 +698,6 @@ def genroc(df,
     return xf,df_.index.size,df_[df_.target.isin(TARGET)].index.size    
 
 
-    def scoretoprobability(self,score):
-
-        df=self.get()
-        if 'threshold' not in df.columns:
-            raise('thershold not in columns or index')
-        if 'ppv' not in df.columns:
-            raise('ppv not in columns or index')
-
-        return df[df.threshold>score].ppv.tail(1).values[0]
 
 def pipeline(df,
             risk='predicted_risk',
