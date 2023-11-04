@@ -686,6 +686,15 @@ def genroc(df,
     return xf,df_.index.size,df_[df_.target.isin(TARGET)].index.size    
 
 
+    def scoretoprobability(self,score):
+
+        df=self.get()
+        if 'threshold' not in df.columns:
+            raise('thershold not in columns or index')
+        if 'ppv' not in df.columns:
+            raise('ppv not in columns or index')
+
+        return df[df.threshold>score].ppv.tail(1).values[0]
 
 def pipeline(df,
             risk='predicted_risk',
@@ -722,3 +731,5 @@ def pipeline(df,
         df_.to_csv(outfile)
 
     return df_,zt.auc()
+
+

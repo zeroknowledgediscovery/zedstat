@@ -715,6 +715,15 @@ def genroc(df,
     return xf,df_.index.size,df_[df_.target.isin(TARGET)].index.size    
 
 
+    def scoretoprobability(self,score):
+
+        df=self.get()
+        if &#39;threshold&#39; not in df.columns:
+            raise(&#39;thershold not in columns or index&#39;)
+        if &#39;ppv&#39; not in df.columns:
+            raise(&#39;ppv not in columns or index&#39;)
+
+        return df[df.threshold&gt;score].ppv.tail(1).values[0]
 
 def pipeline(df,
             risk=&#39;predicted_risk&#39;,
@@ -834,7 +843,18 @@ def pipeline(df,
     
     if outfile is not None:
         xf.to_csv(outfile)
-    return xf,df_.index.size,df_[df_.target.isin(TARGET)].index.size    </code></pre>
+    return xf,df_.index.size,df_[df_.target.isin(TARGET)].index.size    
+
+
+    def scoretoprobability(self,score):
+
+        df=self.get()
+        if &#39;threshold&#39; not in df.columns:
+            raise(&#39;thershold not in columns or index&#39;)
+        if &#39;ppv&#39; not in df.columns:
+            raise(&#39;ppv not in columns or index&#39;)
+
+        return df[df.threshold&gt;score].ppv.tail(1).values[0]</code></pre>
 </details>
 </dd>
 <dt id="zedstat.zedstat.pipeline"><code class="name flex">
