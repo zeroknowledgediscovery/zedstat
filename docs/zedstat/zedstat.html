@@ -344,9 +344,7 @@ class processRoc(object):
         else:
             val = df[df.threshold&gt;score].ppv.tail(1).values[0]
 
-        valmax=df.sort_values(&#39;threshold&#39;).tail(1).ppv.values[0]
-
-        return val/valmax
+        return val/df.ppv.values.max()
     
     def usample(self,
                 df=None,
@@ -1264,9 +1262,7 @@ def pipeline(df,
         else:
             val = df[df.threshold&gt;score].ppv.tail(1).values[0]
 
-        valmax=df.sort_values(&#39;threshold&#39;).tail(1).ppv.values[0]
-
-        return val/valmax
+        return val/df.ppv.values.max()
     
     def usample(self,
                 df=None,
@@ -2183,9 +2179,7 @@ This is simply the PPV corresponding to the threshold which equals the score</p>
     else:
         val = df[df.threshold&gt;score].ppv.tail(1).values[0]
 
-    valmax=df.sort_values(&#39;threshold&#39;).tail(1).ppv.values[0]
-
-    return val/valmax</code></pre>
+    return val/df.ppv.values.max()</code></pre>
 </details>
 </dd>
 <dt id="zedstat.zedstat.processRoc.smooth"><code class="name flex">
