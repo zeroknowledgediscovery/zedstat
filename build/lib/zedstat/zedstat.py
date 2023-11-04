@@ -301,6 +301,9 @@ class processRoc(object):
         if 'ppv' not in df.columns:
             raise('ppv not in columns or index')
 
+
+        if score > df.threshold.max():
+            return df.ppv.values.max()
         return df[df.threshold>score].ppv.tail(1).values[0]
     
     def usample(self,

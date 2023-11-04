@@ -330,6 +330,9 @@ class processRoc(object):
         if &#39;ppv&#39; not in df.columns:
             raise(&#39;ppv not in columns or index&#39;)
 
+
+        if score &gt; df.threshold.max():
+            return df.ppv.values.max()
         return df[df.threshold&gt;score].ppv.tail(1).values[0]
     
     def usample(self,
@@ -1234,6 +1237,9 @@ def pipeline(df,
         if &#39;ppv&#39; not in df.columns:
             raise(&#39;ppv not in columns or index&#39;)
 
+
+        if score &gt; df.threshold.max():
+            return df.ppv.values.max()
         return df[df.threshold&gt;score].ppv.tail(1).values[0]
     
     def usample(self,
@@ -2127,6 +2133,9 @@ one for maximizing precions, and one for maximizing sensitivity</p>
     if &#39;ppv&#39; not in df.columns:
         raise(&#39;ppv not in columns or index&#39;)
 
+
+    if score &gt; df.threshold.max():
+        return df.ppv.values.max()
     return df[df.threshold&gt;score].ppv.tail(1).values[0]</code></pre>
 </details>
 </dd>
