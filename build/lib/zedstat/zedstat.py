@@ -285,7 +285,7 @@ class processRoc(object):
         
         return df__
 
-    def scoretoprobability(self,score,regen=False,**kwargs):
+    def scoretoprobability(self,score,regen=True,**kwargs):
         '''
         map computed score to probability of sample being in the positive class.
         This is simply the PPV corresponding to the threshold which equals the score

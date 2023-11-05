@@ -314,7 +314,7 @@ class processRoc(object):
         
         return df__
 
-    def scoretoprobability(self,score,regen=False,**kwargs):
+    def scoretoprobability(self,score,regen=True,**kwargs):
         &#39;&#39;&#39;
         map computed score to probability of sample being in the positive class.
         This is simply the PPV corresponding to the threshold which equals the score
@@ -1244,7 +1244,7 @@ def pipeline(df,
         
         return df__
 
-    def scoretoprobability(self,score,regen=False,**kwargs):
+    def scoretoprobability(self,score,regen=True,**kwargs):
         &#39;&#39;&#39;
         map computed score to probability of sample being in the positive class.
         This is simply the PPV corresponding to the threshold which equals the score
@@ -2155,7 +2155,7 @@ one for maximizing precions, and one for maximizing sensitivity</p>
 </details>
 </dd>
 <dt id="zedstat.zedstat.processRoc.scoretoprobability"><code class="name flex">
-<span>def <span class="ident">scoretoprobability</span></span>(<span>self, score, regen=False, **kwargs)</span>
+<span>def <span class="ident">scoretoprobability</span></span>(<span>self, score, regen=True, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>map computed score to probability of sample being in the positive class.
@@ -2175,7 +2175,7 @@ This is simply the PPV corresponding to the threshold which equals the score</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def scoretoprobability(self,score,regen=False,**kwargs):
+<pre><code class="python">def scoretoprobability(self,score,regen=True,**kwargs):
     &#39;&#39;&#39;
     map computed score to probability of sample being in the positive class.
     This is simply the PPV corresponding to the threshold which equals the score
