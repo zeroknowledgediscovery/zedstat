@@ -314,13 +314,14 @@ class processRoc(object):
         
         return df__
 
-    def scoretoprobability(self,score,regen=False,STEP=0.01,precision=3,interpolate=True):
+    def scoretoprobability(self,score,regen=False,**kwargs):
         &#39;&#39;&#39;
         map computed score to probability of sample being in the positive class.
         This is simply the PPV corresponding to the threshold which equals the score
         Args:
             score (float): computed score
             regen (bool): if True, regenerate roc curve
+            kwargs (dict): values passed for regeneration of smoothed roc
 
         Return:
             float representing probability of being in positive cohort
@@ -328,6 +329,17 @@ class processRoc(object):
         &#39;&#39;&#39;
 
         if regen:
+            STEP=0.01
+            precision=3
+            interpolate=True
+
+            if &#39;STEP&#39; in kwargs.items():
+                STEP=kwargs[&#39;STEP&#39;]
+            if &#39;precision&#39; in kwargs.items():
+                precision=kwargs[&#39;precision&#39;]
+            if &#39;interpolate&#39; in kwargs.items():
+                interpolate=kwargs[&#39;interpolate&#39;]
+
             self.smooth(STEP=STEP)
             self.allmeasures(interpolate=interpolate)
             self.usample(precision=precision)
@@ -344,7 +356,7 @@ class processRoc(object):
         else:
             val = df[df.threshold&gt;score].ppv.tail(1).values[0]
 
-        return val/df.ppv.values.max()
+        return (val-df.ppv.values.min())/(df.ppv.values.max()-df.ppv.values.min())
     
     def usample(self,
                 df=None,
@@ -1232,13 +1244,14 @@ def pipeline(df,
         
         return df__
 
-    def scoretoprobability(self,score,regen=False,STEP=0.01,precision=3,interpolate=True):
+    def scoretoprobability(self,score,regen=False,**kwargs):
         &#39;&#39;&#39;
         map computed score to probability of sample being in the positive class.
         This is simply the PPV corresponding to the threshold which equals the score
         Args:
             score (float): computed score
             regen (bool): if True, regenerate roc curve
+            kwargs (dict): values passed for regeneration of smoothed roc
 
         Return:
             float representing probability of being in positive cohort
@@ -1246,6 +1259,17 @@ def pipeline(df,
         &#39;&#39;&#39;
 
         if regen:
+            STEP=0.01
+            precision=3
+            interpolate=True
+
+            if &#39;STEP&#39; in kwargs.items():
+                STEP=kwargs[&#39;STEP&#39;]
+            if &#39;precision&#39; in kwargs.items():
+                precision=kwargs[&#39;precision&#39;]
+            if &#39;interpolate&#39; in kwargs.items():
+                interpolate=kwargs[&#39;interpolate&#39;]
+
             self.smooth(STEP=STEP)
             self.allmeasures(interpolate=interpolate)
             self.usample(precision=precision)
@@ -1262,7 +1286,7 @@ def pipeline(df,
         else:
             val = df[df.threshold&gt;score].ppv.tail(1).values[0]
 
-        return val/df.ppv.values.max()
+        return (val-df.ppv.values.min())/(df.ppv.values.max()-df.ppv.values.min())
     
     def usample(self,
                 df=None,
@@ -2131,7 +2155,7 @@ one for maximizing precions, and one for maximizing sensitivity</p>
 </details>
 </dd>
 <dt id="zedstat.zedstat.processRoc.scoretoprobability"><code class="name flex">
-<span>def <span class="ident">scoretoprobability</span></span>(<span>self, score, regen=False, STEP=0.01, precision=3, interpolate=True)</span>
+<span>def <span class="ident">scoretoprobability</span></span>(<span>self, score, regen=False, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>map computed score to probability of sample being in the positive class.
@@ -2142,6 +2166,8 @@ This is simply the PPV corresponding to the threshold which equals the score</p>
 <dd>computed score</dd>
 <dt><strong><code>regen</code></strong> :&ensp;<code>bool</code></dt>
 <dd>if True, regenerate roc curve</dd>
+<dt><strong><code>kwargs</code></strong> :&ensp;<code>dict</code></dt>
+<dd>values passed for regeneration of smoothed roc</dd>
 </dl>
 <h2 id="return">Return</h2>
 <p>float representing probability of being in positive cohort</p></div>
@@ -2149,13 +2175,14 @@ This is simply the PPV corresponding to the threshold which equals the score</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def scoretoprobability(self,score,regen=False,STEP=0.01,precision=3,interpolate=True):
+<pre><code class="python">def scoretoprobability(self,score,regen=False,**kwargs):
     &#39;&#39;&#39;
     map computed score to probability of sample being in the positive class.
     This is simply the PPV corresponding to the threshold which equals the score
     Args:
         score (float): computed score
         regen (bool): if True, regenerate roc curve
+        kwargs (dict): values passed for regeneration of smoothed roc
 
     Return:
         float representing probability of being in positive cohort
@@ -2163,6 +2190,17 @@ This is simply the PPV corresponding to the threshold which equals the score</p>
     &#39;&#39;&#39;
 
     if regen:
+        STEP=0.01
+        precision=3
+        interpolate=True
+
+        if &#39;STEP&#39; in kwargs.items():
+            STEP=kwargs[&#39;STEP&#39;]
+        if &#39;precision&#39; in kwargs.items():
+            precision=kwargs[&#39;precision&#39;]
+        if &#39;interpolate&#39; in kwargs.items():
+            interpolate=kwargs[&#39;interpolate&#39;]
+
         self.smooth(STEP=STEP)
         self.allmeasures(interpolate=interpolate)
         self.usample(precision=precision)
@@ -2179,7 +2217,7 @@ This is simply the PPV corresponding to the threshold which equals the score</p>
     else:
         val = df[df.threshold&gt;score].ppv.tail(1).values[0]
 
-    return val/df.ppv.values.max()</code></pre>
+    return (val-df.ppv.values.min())/(df.ppv.values.max()-df.ppv.values.min())</code></pre>
 </details>
 </dd>
 <dt id="zedstat.zedstat.processRoc.smooth"><code class="name flex">

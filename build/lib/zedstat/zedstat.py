@@ -285,13 +285,14 @@ class processRoc(object):
         
         return df__
 
-    def scoretoprobability(self,score,regen=False,STEP=0.01,precision=3,interpolate=True):
+    def scoretoprobability(self,score,regen=False,**kwargs):
         '''
         map computed score to probability of sample being in the positive class.
         This is simply the PPV corresponding to the threshold which equals the score
         Args:
             score (float): computed score
             regen (bool): if True, regenerate roc curve
+            kwargs (dict): values passed for regeneration of smoothed roc
 
         Return:
             float representing probability of being in positive cohort
@@ -299,6 +300,17 @@ class processRoc(object):
         '''
 
         if regen:
+            STEP=0.01
+            precision=3
+            interpolate=True
+
+            if 'STEP' in kwargs.items():
+                STEP=kwargs['STEP']
+            if 'precision' in kwargs.items():
+                precision=kwargs['precision']
+            if 'interpolate' in kwargs.items():
+                interpolate=kwargs['interpolate']
+
             self.smooth(STEP=STEP)
             self.allmeasures(interpolate=interpolate)
             self.usample(precision=precision)
@@ -315,7 +327,7 @@ class processRoc(object):
         else:
             val = df[df.threshold>score].ppv.tail(1).values[0]
 
-        return val/df.ppv.values.max()
+        return (val-df.ppv.values.min())/(df.ppv.values.max()-df.ppv.values.min())
     
     def usample(self,
                 df=None,
