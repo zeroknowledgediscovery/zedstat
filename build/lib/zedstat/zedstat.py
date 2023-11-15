@@ -285,49 +285,54 @@ class processRoc(object):
         
         return df__
 
-    def scoretoprobability(self,score,regen=True,**kwargs):
-        '''
-        map computed score to probability of sample being in the positive class.
-        This is simply the PPV corresponding to the threshold which equals the score
-        Args:
-            score (float): computed score
-            regen (bool): if True, regenerate roc curve
-            kwargs (dict): values passed for regeneration of smoothed roc
+import numpy as np
 
-        Return:
-            float representing probability of being in positive cohort
+def scoretoprobability(self, score, regen=True, **kwargs):
+    '''
+    Map computed score to probability of sample being in the positive class.
+    This is simply the PPV corresponding to the threshold which equals the score.
+    Now supports both single scores and lists/numpy arrays of scores.
 
-        '''
+    Args:
+        score (float or list or numpy.ndarray): computed score(s)
+        regen (bool): if True, regenerate roc curve
+        kwargs (dict): values passed for regeneration of smoothed roc
 
-        if regen:
-            STEP=0.01
-            precision=3
-            interpolate=True
+    Return:
+        float or numpy.ndarray representing probability of being in positive cohort
+    '''
 
-            if 'STEP' in kwargs.items():
-                STEP=kwargs['STEP']
-            if 'precision' in kwargs.items():
-                precision=kwargs['precision']
-            if 'interpolate' in kwargs.items():
-                interpolate=kwargs['interpolate']
+    if regen:
+        STEP = 0.01
+        precision = 3
+        interpolate = True
 
-            self.smooth(STEP=STEP)
-            self.allmeasures(interpolate=interpolate)
-            self.usample(precision=precision)
-            
-        df=self.get()
-        if 'threshold' not in df.columns:
-            raise('thershold not in columns or index')
-        if 'ppv' not in df.columns:
-            raise('ppv not in columns or index')
+        STEP = kwargs.get('STEP', STEP)
+        precision = kwargs.get('precision', precision)
+        interpolate = kwargs.get('interpolate', interpolate)
 
+        self.smooth(STEP=STEP)
+        self.allmeasures(interpolate=interpolate)
+        self.usample(precision=precision)
+        
+    df = self.get()
+    if 'threshold' not in df.columns:
+        raise ValueError('Threshold not in columns or index')
+    if 'ppv' not in df.columns:
+        raise ValueError('PPV not in columns or index')
 
+    def compute_val(score):
         if score > df.threshold.max():
-            val= df.ppv.values.max()
+            val = df.ppv.values.max()
         else:
-            val = df[df.threshold>score].ppv.tail(1).values[0]
+            val = df[df.threshold > score].ppv.tail(1).values[0]
+        return (val - df.ppv.values.min()) / (df.ppv.values.max() - df.ppv.values.min())
 
-        return (val-df.ppv.values.min())/(df.ppv.values.max()-df.ppv.values.min())
+    if isinstance(score, (list, np.ndarray)):
+        return np.array([compute_val(s) for s in score])
+    else:
+        return compute_val(score)
+
     
     def usample(self,
                 df=None,
