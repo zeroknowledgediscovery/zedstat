@@ -314,53 +314,52 @@ class processRoc(object):
         
         return df__
 
-import numpy as np
 
-def scoretoprobability(self, score, regen=True, **kwargs):
-    &#39;&#39;&#39;
-    Map computed score to probability of sample being in the positive class.
-    This is simply the PPV corresponding to the threshold which equals the score.
-    Now supports both single scores and lists/numpy arrays of scores.
+    def scoretoprobability(self, score, regen=True, **kwargs):
+        &#39;&#39;&#39;
+        Map computed score to probability of sample being in the positive class.
+        This is simply the PPV corresponding to the threshold which equals the score.
+        Now supports both single scores and lists/numpy arrays of scores.
 
-    Args:
-        score (float or list or numpy.ndarray): computed score(s)
-        regen (bool): if True, regenerate roc curve
-        kwargs (dict): values passed for regeneration of smoothed roc
+        Args:
+            score (float or list or numpy.ndarray): computed score(s)
+            regen (bool): if True, regenerate roc curve
+            kwargs (dict): values passed for regeneration of smoothed roc
 
-    Return:
-        float or numpy.ndarray representing probability of being in positive cohort
-    &#39;&#39;&#39;
+        Return:
+            float or numpy.ndarray representing probability of being in positive cohort
+        &#39;&#39;&#39;
 
-    if regen:
-        STEP = 0.01
-        precision = 3
-        interpolate = True
+        if regen:
+            STEP = 0.01
+            precision = 3
+            interpolate = True
 
-        STEP = kwargs.get(&#39;STEP&#39;, STEP)
-        precision = kwargs.get(&#39;precision&#39;, precision)
-        interpolate = kwargs.get(&#39;interpolate&#39;, interpolate)
+            STEP = kwargs.get(&#39;STEP&#39;, STEP)
+            precision = kwargs.get(&#39;precision&#39;, precision)
+            interpolate = kwargs.get(&#39;interpolate&#39;, interpolate)
 
-        self.smooth(STEP=STEP)
-        self.allmeasures(interpolate=interpolate)
-        self.usample(precision=precision)
-        
-    df = self.get()
-    if &#39;threshold&#39; not in df.columns:
-        raise ValueError(&#39;Threshold not in columns or index&#39;)
-    if &#39;ppv&#39; not in df.columns:
-        raise ValueError(&#39;PPV not in columns or index&#39;)
+            self.smooth(STEP=STEP)
+            self.allmeasures(interpolate=interpolate)
+            self.usample(precision=precision)
 
-    def compute_val(score):
-        if score &gt; df.threshold.max():
-            val = df.ppv.values.max()
+        df = self.get()
+        if &#39;threshold&#39; not in df.columns:
+            raise ValueError(&#39;Threshold not in columns or index&#39;)
+        if &#39;ppv&#39; not in df.columns:
+            raise ValueError(&#39;PPV not in columns or index&#39;)
+
+        def compute_val(score):
+            if score &gt; df.threshold.max():
+                val = df.ppv.values.max()
+            else:
+                val = df[df.threshold &gt; score].ppv.tail(1).values[0]
+            return (val - df.ppv.values.min()) / (df.ppv.values.max() - df.ppv.values.min())
+
+        if isinstance(score, (list, np.ndarray)):
+            return np.array([compute_val(s) for s in score])
         else:
-            val = df[df.threshold &gt; score].ppv.tail(1).values[0]
-        return (val - df.ppv.values.min()) / (df.ppv.values.max() - df.ppv.values.min())
-
-    if isinstance(score, (list, np.ndarray)):
-        return np.array([compute_val(s) for s in score])
-    else:
-        return compute_val(score)
+            return compute_val(score)
 
     
     def usample(self,
@@ -931,73 +930,370 @@ def pipeline(df,
     return df_,zt.auc()</code></pre>
 </details>
 </dd>
-<dt id="zedstat.zedstat.scoretoprobability"><code class="name flex">
-<span>def <span class="ident">scoretoprobability</span></span>(<span>self, score, regen=True, **kwargs)</span>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="zedstat.zedstat.processRoc"><code class="flex name class">
+<span>class <span class="ident">processRoc</span></span>
+<span>(</span><span>df=None, fprcol='fpr', tprcol='tpr', thresholdcol='threshold', prevalence=None, order=2, total_samples=None, positive_samples=None, alpha=0.05)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Map computed score to probability of sample being in the positive class.
-This is simply the PPV corresponding to the threshold which equals the score.
-Now supports both single scores and lists/numpy arrays of scores.</p>
+<div class="desc"><p>process ROC datafile</p>
+<p>Initialization</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>score</code></strong> :&ensp;<code>float</code> or <code>list</code> or <code>numpy.ndarray</code></dt>
-<dd>computed score(s)</dd>
-<dt><strong><code>regen</code></strong> :&ensp;<code>bool</code></dt>
-<dd>if True, regenerate roc curve</dd>
-<dt><strong><code>kwargs</code></strong> :&ensp;<code>dict</code></dt>
-<dd>values passed for regeneration of smoothed roc</dd>
-</dl>
-<h2 id="return">Return</h2>
-<p>float or numpy.ndarray representing probability of being in positive cohort</p></div>
+<dt><strong><code>df</code></strong> :&ensp;<code>pandas.DataFrame</code></dt>
+<dd>dataframe with columns tabulating fpr, tpr, and optionally threshold values</dd>
+<dt><strong><code>fprcol</code></strong> :&ensp;<code>str</code></dt>
+<dd>string name of fpr column</dd>
+<dt><strong><code>tprcol</code></strong> :&ensp;<code>str</code></dt>
+<dd>string name of tpr column</dd>
+<dt><strong><code>thresholdcol</code></strong> :&ensp;<code>str</code></dt>
+<dd>string name of threshold column</dd>
+<dt><strong><code>prevalence</code></strong> :&ensp;<code>float</code></dt>
+<dd>prevalence of positive cases in population (need not be the data ratio)</dd>
+<dt><strong><code>order</code></strong> :&ensp;<code>int</code></dt>
+<dd>order of polynomial/spline for smoothing</dd>
+<dt><strong><code>total_samples</code></strong> :&ensp;<code>int</code></dt>
+<dd>total number of samples in the original data</dd>
+<dt>positive samples (int): number of positive cases in the original data</dt>
+<dt><strong><code>alpha</code></strong> :&ensp;<code>float</code></dt>
+<dd>significance level e.g. 0.05</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def scoretoprobability(self, score, regen=True, **kwargs):
-    &#39;&#39;&#39;
-    Map computed score to probability of sample being in the positive class.
-    This is simply the PPV corresponding to the threshold which equals the score.
-    Now supports both single scores and lists/numpy arrays of scores.
+<pre><code class="python">class processRoc(object):
+    &#34;&#34;&#34;process ROC datafile&#34;&#34;&#34;
 
-    Args:
-        score (float or list or numpy.ndarray): computed score(s)
-        regen (bool): if True, regenerate roc curve
-        kwargs (dict): values passed for regeneration of smoothed roc
+    def __init__(self,
+                 df=None,
+                 fprcol=&#39;fpr&#39;,
+                 tprcol=&#39;tpr&#39;,
+                 thresholdcol=&#39;threshold&#39;,
+                 prevalence=None,
+                 order=2,
+                 total_samples=None,
+                 positive_samples=None,
+                 alpha=0.05):
 
-    Return:
-        float or numpy.ndarray representing probability of being in positive cohort
-    &#39;&#39;&#39;
+        &#34;&#34;&#34;Initialization
 
-    if regen:
-        STEP = 0.01
-        precision = 3
-        interpolate = True
-
-        STEP = kwargs.get(&#39;STEP&#39;, STEP)
-        precision = kwargs.get(&#39;precision&#39;, precision)
-        interpolate = kwargs.get(&#39;interpolate&#39;, interpolate)
-
-        self.smooth(STEP=STEP)
-        self.allmeasures(interpolate=interpolate)
-        self.usample(precision=precision)
+        Args:
+            df (pandas.DataFrame): dataframe with columns tabulating fpr, tpr, and optionally threshold values
+            fprcol (str): string name of fpr column
+            tprcol (str): string name of tpr column
+            thresholdcol (str): string name of threshold column
+            prevalence (float): prevalence of positive cases in population (need not be the data ratio)
+            order (int): order of polynomial/spline for smoothing
+            total_samples (int): total number of samples in the original data
+            positive samples (int): number of positive cases in the original data
+            alpha (float): significance level e.g. 0.05
+        &#34;&#34;&#34;
         
-    df = self.get()
-    if &#39;threshold&#39; not in df.columns:
-        raise ValueError(&#39;Threshold not in columns or index&#39;)
-    if &#39;ppv&#39; not in df.columns:
-        raise ValueError(&#39;PPV not in columns or index&#39;)
-
-    def compute_val(score):
-        if score &gt; df.threshold.max():
-            val = df.ppv.values.max()
+        #print(&#39;local version 1&#39;)
+        
+        if df.index.name==fprcol:
+            self.df=df.copy()
         else:
-            val = df[df.threshold &gt; score].ppv.tail(1).values[0]
-        return (val - df.ppv.values.min()) / (df.ppv.values.max() - df.ppv.values.min())
+            if fprcol in df.columns:
+                self.df=df.set_index(fprcol).copy()
+            else:
+                raise(&#39;fpr not in columns or index&#39;)
+        self.thresholdcol = thresholdcol
+            
+        if thresholdcol not in self.df.columns:
+            self.thresholdcol=None
 
-    if isinstance(score, (list, np.ndarray)):
-        return np.array([compute_val(s) for s in score])
-    else:
-        return compute_val(score)
+        self.df = self.df.sort_values(&#39;fpr&#39;)
+            
+        self.fprcol = fprcol
+        self.tprcol = tprcol
+        self.raw_df = self.df.copy()
+        self.prevalence = prevalence
+        self.order = order
+        self.df_lim = {}
+        self._auc = {&#39;U&#39;:[],&#39;L&#39;:[]}
+        self.total_samples = total_samples
+        self.positive_samples = positive_samples
+        self.alpha = alpha
+        
+        self.df=self.df.groupby(self.fprcol).max().reset_index()
+
+        
+    def get(self):
+        &#39;&#39;&#39;
+        return dataframe currently in class
+
+        Returns:
+            pandas.DataFrame 
+        &#39;&#39;&#39;
+        return self.df.copy()
+    
+
+    def nominal_auc(self):
+        &#39;&#39;&#39;
+        calculate nominal auc
+        &#39;&#39;&#39;
+        from sklearn.metrics import auc
+        self._auc[&#39;nominal&#39;]=auc(self.df.index.values,self.df.tpr.values)
+        return
+
+    
+    def auc(self,
+            total_samples=None,
+            positive_samples=None,
+            alpha=None):
+        &#39;&#39;&#39;
+        calculate auc with confidence bounds. As default, the arguments are read from class initializtion.
+
+        Args:
+            total_samples (int): total number fo samples, default None
+            positive_samples (int): number fo positive samples, default None
+            alpha (float): significance level, default None
+
+        Returns:
+            float: nominal auc
+            float: upper bound
+            float: lower bound
+        
+        &#39;&#39;&#39;
+        self.nominal_auc()
+        self._auc[&#39;U&#39;]=[]
+        self._auc[&#39;L&#39;]=[]
+        
+        self.getBounds(total_samples=total_samples,
+                positive_samples=positive_samples,
+                alpha=alpha)
+        self.__auc_cb2(total_samples=total_samples,
+                positive_samples=positive_samples,
+                alpha=alpha)
+        return self._auc[&#39;nominal&#39;], self._auc[&#39;U&#39;].min(), self._auc[&#39;L&#39;].max()
+
+    
+    def __convexify(self):
+        &#39;&#39;&#39;
+        compute convex hull of the roc curve
+        &#39;&#39;&#39;
+        #print(self.df)
+        from scipy.spatial import ConvexHull
+        if self.df.index.name==self.fprcol:
+            rf=self.df
+        else:
+            if self.fprcol in self.df.columns:
+                rf=self.df.set_index(self.fprcol)#.drop(&#39;threshold&#39;,axis=1)
+            else:
+                raise(&#39;fpr not in columns or index&#39;)
+
+        rf = rf.reset_index()
+        rf=pd.concat([rf,pd.DataFrame({self.fprcol:0, self.tprcol:0},index=[0])])
+        rf=pd.concat([rf,pd.DataFrame({self.fprcol:1, self.tprcol:0},index=[0])])
+        rf=pd.concat([rf,pd.DataFrame({self.fprcol:1, self.tprcol:1},index=[0])])
+        
+        rf=rf.drop_duplicates()
+        rf=rf.sort_values(self.fprcol)
+        rf=rf.sort_values(self.tprcol)
+
+        pts=rf[[self.fprcol,self.tprcol]].values
+
+        #print(pts)
+        
+        if len(pts)&lt;3:
+            rf_=rf.copy()
+            rf_.columns=[self.tprcol,self.fprcol]
+            rf_=rf_.sort_values(self.fprcol)
+            rf_=rf_.sort_values(self.tprcol)
+            self.df=rf_.set_index(self.fprcol).copy()
+            return #self.df
+        
+        hull = ConvexHull(pts)
+        rf_=pd.DataFrame(pts[hull.vertices, 0], pts[hull.vertices, 1]).reset_index()
+        rf_.columns=[self.tprcol,self.fprcol]
+        rf_ = rf_.set_index(self.fprcol)
+        
+        rf_ = rf_.drop(1.0).sort_index()
+        rf_.loc[1.0]=1.0
+        
+        self.df=rf_.copy()
+        return 
+
+
+    def smooth(self,
+               STEP=0.0001,
+               interpolate=True,
+               convexify=True):
+        &#39;&#39;&#39;
+        smooth roc curves and update processRoc.df which is accessible using processRoc.get()
+
+        Args:
+            STEP (float): smooting step, default 0.0001
+            interpolate (bool): if True, interpolate missing values, default True
+            convexify (bool): if True, replace ROC with convex hull, default True
+        &#39;&#39;&#39;
+        self.df=self.raw_df.copy()
+        VAR=self.fprcol
+        df_=self.df.reset_index()
+        DF=pd.concat([pd.DataFrame(
+            df_[df_[VAR].between(i,i+STEP)].max()).transpose()
+                      for i in np.arange(0,1,STEP)]).set_index(VAR)
+        DF=DF.dropna()
+        DF.loc[0]=pd.Series([],dtype=float) 
+        DF.loc[1]=pd.Series([],dtype=float) 
+        DF.loc[0,&#39;tpr&#39;]=0
+        DF.loc[1,&#39;tpr&#39;]=1
+        
+        DF=DF.sort_index()
+        if interpolate:
+            DF=DF.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,order=self.order)
+            DF[DF &lt; 0] = 0
+            self.df=DF
+        if convexify:
+            self.__convexify()
+        return 
+
+    
+    def allmeasures(self,prevalence=None,interpolate=False):
+        &#39;&#39;&#39;
+        compute accuracy, PPV, NPV, positive and negative likelihood ratios, and update processRoc.df, which can be accessed using processRoc.get()
+
+        Args:
+            prevalence (float): prevalence od positive cases in population
+            interpolate (bool): if True interpolate missing values, default False
+        &#39;&#39;&#39;
+        if prevalence is not None:
+            p=prevalence
+            self.prevalence=p
+        else:
+            p=self.prevalence
+        if p is None:
+            raise(&#39;prevalence undefined&#39;)
+        df__=self.df.copy()
+        if self.fprcol == df__.index.name:
+            df__=df__.reset_index()
+            df__[&#39;ppv&#39;]=1/(1+((df__.fpr/df__.tpr)*((1/p)-1)))
+            df__[&#39;acc&#39;]=p*df__.tpr + (1-p)*(1-df__.fpr)
+            df__[&#39;npv&#39;]=1/(1+((1-df__.tpr)/(1-df__.fpr))*(1/((1/p)-1)))
+            df__[&#39;LR+&#39;]=(df__.tpr)/(df__.fpr)
+            df__[&#39;LR-&#39;]=(1-df__.tpr)/(1-df__.fpr)
+        else:
+            assert(&#39;set fpr as index&#39;)
+            
+            
+        df__=df__.set_index(self.fprcol)
+
+        #display(df__)
+        df__=df__.replace(np.inf,np.nan)
+        #display(df__)
+
+
+        
+        if interpolate:
+            try:
+                df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,order=self.order)
+            except:
+                print(&#39;interpolation failed&#39;)
+
+ 
+        #display(df__)
+        
+        if self.thresholdcol is not None:
+            if self.thresholdcol not in df__.columns:
+                df__=df__.join(self.raw_df[self.thresholdcol])
+        self.df=df__
+        self.__correctPPV()
+        self.df[self.df &lt; 0] = 0
+
+
+        self.df=self.df.reset_index().groupby(&#39;fpr&#39;).max()
+        self.df.ppv=UnivariateSpline(self.df.index.values,self.df.ppv.values,k=1,s=None)(self.df.index.values)
+        self.df[self.df &lt; 0] = 0
+
+        #display(self.df)
+        
+        return #self.df
+
+
+    def __correctPPV(self,df=None):
+        &#39;&#39;&#39;
+        make ppv monotonic
+        &#39;&#39;&#39;
+        if &#39;ppv&#39; not in self.df.columns:
+            return
+
+        if df is None:
+            df__=self.df
+        else:
+            df__=df.copy()
+            
+        
+        #df__.loc[0].ppv=1.0
+        #df__.loc[1].ppv=0.0
+        arr=df__.ppv.values
+        a_=[]
+        for i in np.arange(len(arr)-1):
+            if arr[i+1]&gt;arr[i]:
+                a_.append(1.05*arr[i+1])
+            else:
+                a_.append(arr[i])
+        a_.append(arr[-1])
+
+        
+        df__.ppv=a_
+        #df__.loc[0].ppv=1.0
+        #df__.loc[1].ppv=0.0
+        
+        
+        return df__
+
+
+    def scoretoprobability(self, score, regen=True, **kwargs):
+        &#39;&#39;&#39;
+        Map computed score to probability of sample being in the positive class.
+        This is simply the PPV corresponding to the threshold which equals the score.
+        Now supports both single scores and lists/numpy arrays of scores.
+
+        Args:
+            score (float or list or numpy.ndarray): computed score(s)
+            regen (bool): if True, regenerate roc curve
+            kwargs (dict): values passed for regeneration of smoothed roc
+
+        Return:
+            float or numpy.ndarray representing probability of being in positive cohort
+        &#39;&#39;&#39;
+
+        if regen:
+            STEP = 0.01
+            precision = 3
+            interpolate = True
+
+            STEP = kwargs.get(&#39;STEP&#39;, STEP)
+            precision = kwargs.get(&#39;precision&#39;, precision)
+            interpolate = kwargs.get(&#39;interpolate&#39;, interpolate)
+
+            self.smooth(STEP=STEP)
+            self.allmeasures(interpolate=interpolate)
+            self.usample(precision=precision)
+
+        df = self.get()
+        if &#39;threshold&#39; not in df.columns:
+            raise ValueError(&#39;Threshold not in columns or index&#39;)
+        if &#39;ppv&#39; not in df.columns:
+            raise ValueError(&#39;PPV not in columns or index&#39;)
+
+        def compute_val(score):
+            if score &gt; df.threshold.max():
+                val = df.ppv.values.max()
+            else:
+                val = df[df.threshold &gt; score].ppv.tail(1).values[0]
+            return (val - df.ppv.values.min()) / (df.ppv.values.max() - df.ppv.values.min())
+
+        if isinstance(score, (list, np.ndarray)):
+            return np.array([compute_val(s) for s in score])
+        else:
+            return compute_val(score)
 
     
     def usample(self,
@@ -1353,325 +1649,6 @@ Now supports both single scores and lists/numpy arrays of scores.</p>
 
         return rf,txt,resdf</code></pre>
 </details>
-</dd>
-</dl>
-</section>
-<section>
-<h2 class="section-title" id="header-classes">Classes</h2>
-<dl>
-<dt id="zedstat.zedstat.processRoc"><code class="flex name class">
-<span>class <span class="ident">processRoc</span></span>
-<span>(</span><span>df=None, fprcol='fpr', tprcol='tpr', thresholdcol='threshold', prevalence=None, order=2, total_samples=None, positive_samples=None, alpha=0.05)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>process ROC datafile</p>
-<p>Initialization</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>df</code></strong> :&ensp;<code>pandas.DataFrame</code></dt>
-<dd>dataframe with columns tabulating fpr, tpr, and optionally threshold values</dd>
-<dt><strong><code>fprcol</code></strong> :&ensp;<code>str</code></dt>
-<dd>string name of fpr column</dd>
-<dt><strong><code>tprcol</code></strong> :&ensp;<code>str</code></dt>
-<dd>string name of tpr column</dd>
-<dt><strong><code>thresholdcol</code></strong> :&ensp;<code>str</code></dt>
-<dd>string name of threshold column</dd>
-<dt><strong><code>prevalence</code></strong> :&ensp;<code>float</code></dt>
-<dd>prevalence of positive cases in population (need not be the data ratio)</dd>
-<dt><strong><code>order</code></strong> :&ensp;<code>int</code></dt>
-<dd>order of polynomial/spline for smoothing</dd>
-<dt><strong><code>total_samples</code></strong> :&ensp;<code>int</code></dt>
-<dd>total number of samples in the original data</dd>
-<dt>positive samples (int): number of positive cases in the original data</dt>
-<dt><strong><code>alpha</code></strong> :&ensp;<code>float</code></dt>
-<dd>significance level e.g. 0.05</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class processRoc(object):
-    &#34;&#34;&#34;process ROC datafile&#34;&#34;&#34;
-
-    def __init__(self,
-                 df=None,
-                 fprcol=&#39;fpr&#39;,
-                 tprcol=&#39;tpr&#39;,
-                 thresholdcol=&#39;threshold&#39;,
-                 prevalence=None,
-                 order=2,
-                 total_samples=None,
-                 positive_samples=None,
-                 alpha=0.05):
-
-        &#34;&#34;&#34;Initialization
-
-        Args:
-            df (pandas.DataFrame): dataframe with columns tabulating fpr, tpr, and optionally threshold values
-            fprcol (str): string name of fpr column
-            tprcol (str): string name of tpr column
-            thresholdcol (str): string name of threshold column
-            prevalence (float): prevalence of positive cases in population (need not be the data ratio)
-            order (int): order of polynomial/spline for smoothing
-            total_samples (int): total number of samples in the original data
-            positive samples (int): number of positive cases in the original data
-            alpha (float): significance level e.g. 0.05
-        &#34;&#34;&#34;
-        
-        #print(&#39;local version 1&#39;)
-        
-        if df.index.name==fprcol:
-            self.df=df.copy()
-        else:
-            if fprcol in df.columns:
-                self.df=df.set_index(fprcol).copy()
-            else:
-                raise(&#39;fpr not in columns or index&#39;)
-        self.thresholdcol = thresholdcol
-            
-        if thresholdcol not in self.df.columns:
-            self.thresholdcol=None
-
-        self.df = self.df.sort_values(&#39;fpr&#39;)
-            
-        self.fprcol = fprcol
-        self.tprcol = tprcol
-        self.raw_df = self.df.copy()
-        self.prevalence = prevalence
-        self.order = order
-        self.df_lim = {}
-        self._auc = {&#39;U&#39;:[],&#39;L&#39;:[]}
-        self.total_samples = total_samples
-        self.positive_samples = positive_samples
-        self.alpha = alpha
-        
-        self.df=self.df.groupby(self.fprcol).max().reset_index()
-
-        
-    def get(self):
-        &#39;&#39;&#39;
-        return dataframe currently in class
-
-        Returns:
-            pandas.DataFrame 
-        &#39;&#39;&#39;
-        return self.df.copy()
-    
-
-    def nominal_auc(self):
-        &#39;&#39;&#39;
-        calculate nominal auc
-        &#39;&#39;&#39;
-        from sklearn.metrics import auc
-        self._auc[&#39;nominal&#39;]=auc(self.df.index.values,self.df.tpr.values)
-        return
-
-    
-    def auc(self,
-            total_samples=None,
-            positive_samples=None,
-            alpha=None):
-        &#39;&#39;&#39;
-        calculate auc with confidence bounds. As default, the arguments are read from class initializtion.
-
-        Args:
-            total_samples (int): total number fo samples, default None
-            positive_samples (int): number fo positive samples, default None
-            alpha (float): significance level, default None
-
-        Returns:
-            float: nominal auc
-            float: upper bound
-            float: lower bound
-        
-        &#39;&#39;&#39;
-        self.nominal_auc()
-        self._auc[&#39;U&#39;]=[]
-        self._auc[&#39;L&#39;]=[]
-        
-        self.getBounds(total_samples=total_samples,
-                positive_samples=positive_samples,
-                alpha=alpha)
-        self.__auc_cb2(total_samples=total_samples,
-                positive_samples=positive_samples,
-                alpha=alpha)
-        return self._auc[&#39;nominal&#39;], self._auc[&#39;U&#39;].min(), self._auc[&#39;L&#39;].max()
-
-    
-    def __convexify(self):
-        &#39;&#39;&#39;
-        compute convex hull of the roc curve
-        &#39;&#39;&#39;
-        #print(self.df)
-        from scipy.spatial import ConvexHull
-        if self.df.index.name==self.fprcol:
-            rf=self.df
-        else:
-            if self.fprcol in self.df.columns:
-                rf=self.df.set_index(self.fprcol)#.drop(&#39;threshold&#39;,axis=1)
-            else:
-                raise(&#39;fpr not in columns or index&#39;)
-
-        rf = rf.reset_index()
-        rf=pd.concat([rf,pd.DataFrame({self.fprcol:0, self.tprcol:0},index=[0])])
-        rf=pd.concat([rf,pd.DataFrame({self.fprcol:1, self.tprcol:0},index=[0])])
-        rf=pd.concat([rf,pd.DataFrame({self.fprcol:1, self.tprcol:1},index=[0])])
-        
-        rf=rf.drop_duplicates()
-        rf=rf.sort_values(self.fprcol)
-        rf=rf.sort_values(self.tprcol)
-
-        pts=rf[[self.fprcol,self.tprcol]].values
-
-        #print(pts)
-        
-        if len(pts)&lt;3:
-            rf_=rf.copy()
-            rf_.columns=[self.tprcol,self.fprcol]
-            rf_=rf_.sort_values(self.fprcol)
-            rf_=rf_.sort_values(self.tprcol)
-            self.df=rf_.set_index(self.fprcol).copy()
-            return #self.df
-        
-        hull = ConvexHull(pts)
-        rf_=pd.DataFrame(pts[hull.vertices, 0], pts[hull.vertices, 1]).reset_index()
-        rf_.columns=[self.tprcol,self.fprcol]
-        rf_ = rf_.set_index(self.fprcol)
-        
-        rf_ = rf_.drop(1.0).sort_index()
-        rf_.loc[1.0]=1.0
-        
-        self.df=rf_.copy()
-        return 
-
-
-    def smooth(self,
-               STEP=0.0001,
-               interpolate=True,
-               convexify=True):
-        &#39;&#39;&#39;
-        smooth roc curves and update processRoc.df which is accessible using processRoc.get()
-
-        Args:
-            STEP (float): smooting step, default 0.0001
-            interpolate (bool): if True, interpolate missing values, default True
-            convexify (bool): if True, replace ROC with convex hull, default True
-        &#39;&#39;&#39;
-        self.df=self.raw_df.copy()
-        VAR=self.fprcol
-        df_=self.df.reset_index()
-        DF=pd.concat([pd.DataFrame(
-            df_[df_[VAR].between(i,i+STEP)].max()).transpose()
-                      for i in np.arange(0,1,STEP)]).set_index(VAR)
-        DF=DF.dropna()
-        DF.loc[0]=pd.Series([],dtype=float) 
-        DF.loc[1]=pd.Series([],dtype=float) 
-        DF.loc[0,&#39;tpr&#39;]=0
-        DF.loc[1,&#39;tpr&#39;]=1
-        
-        DF=DF.sort_index()
-        if interpolate:
-            DF=DF.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,order=self.order)
-            DF[DF &lt; 0] = 0
-            self.df=DF
-        if convexify:
-            self.__convexify()
-        return 
-
-    
-    def allmeasures(self,prevalence=None,interpolate=False):
-        &#39;&#39;&#39;
-        compute accuracy, PPV, NPV, positive and negative likelihood ratios, and update processRoc.df, which can be accessed using processRoc.get()
-
-        Args:
-            prevalence (float): prevalence od positive cases in population
-            interpolate (bool): if True interpolate missing values, default False
-        &#39;&#39;&#39;
-        if prevalence is not None:
-            p=prevalence
-            self.prevalence=p
-        else:
-            p=self.prevalence
-        if p is None:
-            raise(&#39;prevalence undefined&#39;)
-        df__=self.df.copy()
-        if self.fprcol == df__.index.name:
-            df__=df__.reset_index()
-            df__[&#39;ppv&#39;]=1/(1+((df__.fpr/df__.tpr)*((1/p)-1)))
-            df__[&#39;acc&#39;]=p*df__.tpr + (1-p)*(1-df__.fpr)
-            df__[&#39;npv&#39;]=1/(1+((1-df__.tpr)/(1-df__.fpr))*(1/((1/p)-1)))
-            df__[&#39;LR+&#39;]=(df__.tpr)/(df__.fpr)
-            df__[&#39;LR-&#39;]=(1-df__.tpr)/(1-df__.fpr)
-        else:
-            assert(&#39;set fpr as index&#39;)
-            
-            
-        df__=df__.set_index(self.fprcol)
-
-        #display(df__)
-        df__=df__.replace(np.inf,np.nan)
-        #display(df__)
-
-
-        
-        if interpolate:
-            try:
-                df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,order=self.order)
-            except:
-                print(&#39;interpolation failed&#39;)
-
- 
-        #display(df__)
-        
-        if self.thresholdcol is not None:
-            if self.thresholdcol not in df__.columns:
-                df__=df__.join(self.raw_df[self.thresholdcol])
-        self.df=df__
-        self.__correctPPV()
-        self.df[self.df &lt; 0] = 0
-
-
-        self.df=self.df.reset_index().groupby(&#39;fpr&#39;).max()
-        self.df.ppv=UnivariateSpline(self.df.index.values,self.df.ppv.values,k=1,s=None)(self.df.index.values)
-        self.df[self.df &lt; 0] = 0
-
-        #display(self.df)
-        
-        return #self.df
-
-
-    def __correctPPV(self,df=None):
-        &#39;&#39;&#39;
-        make ppv monotonic
-        &#39;&#39;&#39;
-        if &#39;ppv&#39; not in self.df.columns:
-            return
-
-        if df is None:
-            df__=self.df
-        else:
-            df__=df.copy()
-            
-        
-        #df__.loc[0].ppv=1.0
-        #df__.loc[1].ppv=0.0
-        arr=df__.ppv.values
-        a_=[]
-        for i in np.arange(len(arr)-1):
-            if arr[i+1]&gt;arr[i]:
-                a_.append(1.05*arr[i+1])
-            else:
-                a_.append(arr[i])
-        a_.append(arr[-1])
-
-        
-        df__.ppv=a_
-        #df__.loc[0].ppv=1.0
-        #df__.loc[1].ppv=0.0
-        
-        
-        return df__</code></pre>
-</details>
 <h3>Methods</h3>
 <dl>
 <dt id="zedstat.zedstat.processRoc.allmeasures"><code class="name flex">
@@ -1830,6 +1807,193 @@ Now supports both single scores and lists/numpy arrays of scores.</p>
     return self.df.copy()</code></pre>
 </details>
 </dd>
+<dt id="zedstat.zedstat.processRoc.getBounds"><code class="name flex">
+<span>def <span class="ident">getBounds</span></span>(<span>self, total_samples=None, positive_samples=None, alpha=None, prevalence=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>compute confidence bounds on performance measures</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>total_samples</code></strong> :&ensp;<code>int</code></dt>
+<dd>total number fo samples, default None</dd>
+<dt><strong><code>positive_samples</code></strong> :&ensp;<code>int</code></dt>
+<dd>number fo positive samples, default None</dd>
+<dt><strong><code>alpha</code></strong> :&ensp;<code>float</code></dt>
+<dd>significance level, default None</dd>
+<dt><strong><code>prevalence</code></strong> :&ensp;<code>float</code></dt>
+<dd>prevalence of positive cases in population, default None</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getBounds(self,
+              total_samples=None,
+              positive_samples=None,
+              alpha=None,
+              prevalence=None):
+    &#39;&#39;&#39;
+    compute confidence bounds on performance measures
+
+    Args:
+        total_samples (int): total number fo samples, default None
+        positive_samples (int): number fo positive samples, default None
+        alpha (float): significance level, default None
+        prevalence (float): prevalence of positive cases in population, default None
+
+    &#39;&#39;&#39;
+    self.__getDelta(total_samples=total_samples,
+             positive_samples=positive_samples,
+                  alpha=alpha)
+
+    if prevalence is None:
+        p=self.prevalence
+    else:
+        p=prevalence
+    
+    if p is None:
+        raise(&#39;prevalence undefined&#39;)
+
+    for direction in [&#39;U&#39;,&#39;L&#39;]:
+        df__=self.df.copy().reset_index()
+
+        if direction==&#39;U&#39;:
+            df__.tpr=df__.tpr+self.delta_.tprdel
+            #df__.fpr=df__.fpr-self.delta_.fprdel
+        else:
+            df__.tpr=df__.tpr-self.delta_.tprdel
+            #df__.fpr=df__.fpr+self.delta_.fprdel
+            
+        df__[&#39;ppv&#39;]=1/(1+((df__.fpr/df__.tpr)*((1/p)-1)))
+        df__[&#39;acc&#39;]=p*df__.tpr + (1-p)*(1-df__.fpr)
+        df__[&#39;npv&#39;]=1/(1+((1-df__.tpr)/(1-df__.fpr))*(1/((1/p)-1)))
+        df__[&#39;LR+&#39;]=(df__.tpr)/(df__.fpr)
+        df__[&#39;LR-&#39;]=(1-df__.tpr)/(1-df__.fpr)
+
+        df__=df__.replace(np.inf,np.nan)
+
+        
+        df__=df__.interpolate(limit_direction=&#39;both&#39;,method=&#39;spline&#39;,
+                              order=self.order).set_index(self.fprcol)
+        df__[df__ &lt; 0] = 0
+
+        self.df_lim[direction]=self.__correctPPV(df__)
+        
+        if direction==&#39;U&#39;:
+            self._auc[direction]=np.array([np.append(self._auc[direction],
+                                            auc(df__.index.values,
+                                                df__.tpr.values)).min()])
+        if direction==&#39;L&#39;:
+            self._auc[direction]=np.array([np.append(self._auc[direction],
+                                            auc(df__.index.values,
+                                                df__.tpr.values)).max()])
+
+
+        # adjust datframe to cneter of upper and lowwr bounds    
+    #self.df=(self.df_lim[&#39;U&#39;]+ self.df_lim[&#39;L&#39;] )/2
+    #self.__correctvalues()
+    return </code></pre>
+</details>
+</dd>
+<dt id="zedstat.zedstat.processRoc.interpret"><code class="name flex">
+<span>def <span class="ident">interpret</span></span>(<span>self, fpr=0.01, number_of_positives=10, five_yr_survival=None, factor=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>generate simple interpretation of inferred model, based on a number of positive cases</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>fpr</code></strong> :&ensp;<code>float</code></dt>
+<dd>the false psotive rate or 1-specificity of the operating point</dd>
+<dt><strong><code>number_of_positives</code></strong> :&ensp;<code>int</code></dt>
+<dd>interpret assuming this many positive cases, default 10</dd>
+<dt><strong><code>five_yr_survival</code></strong> :&ensp;<code>float</code></dt>
+<dd>fraction not experiencing severe event after 5 years (default: None)</dd>
+<dt><strong><code>factor</code></strong> :&ensp;<code>float</code></dt>
+<dd>fraction of TP who avert the severe outcome due to correct screen</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    def interpret(self,
+                  fpr=0.01,
+                  number_of_positives=10,
+                  five_yr_survival=None,
+                  factor=1):
+        &#39;&#39;&#39;
+        generate simple interpretation of inferred model, based on a number of positive cases
+
+        Args:
+            fpr (float): the false psotive rate or 1-specificity of the operating point
+            number_of_positives (int): interpret assuming this many positive cases, default 10
+            five_yr_survival (float): fraction not experiencing severe event after 5 years (default: None)
+            factor (float): fraction of TP who avert the severe outcome due to correct screen
+        &#39;&#39;&#39;
+        wf=self.df.copy()
+                
+        wf.loc[fpr]=pd.Series([],dtype=float)
+        wf=wf.sort_index().interpolate(method=&#39;spline&#39;,order=self.order,limit_direction=&#39;both&#39;)
+        
+        row=wf.loc[fpr]
+
+#        POS=number_of_positives
+#        TP=POS*row.tpr
+#        FP = TP*((1/row.ppv) -1)
+#        NEG=FP/fpr
+#        TOTALFLAGS=TP+FP
+#        FN=POS-TP
+#        TN=POS/self.prevalence
+
+        #factor=0.21*(0.95-0.69) + 0.08*(0.95-0.17)
+        #factor=0.33*(0.95-0.17)
+
+        POS=number_of_positives
+        NEG=POS*(1-self.prevalence)*(1/self.prevalence)
+        TP=POS*row.tpr
+        TOTALFLAGS=TP/row.ppv
+        FP=TOTALFLAGS-TP
+        FN=POS-TP
+        TN=NEG-FP
+        if five_yr_survival is not None:
+            NNS=TOTALFLAGS/(TP*factor*(1- five_yr_survival))
+        else:
+            NNS=np.nan
+
+            
+        resdf=pd.DataFrame.from_dict({&#34;POS&#34;:np.round(POS),&#34;TP&#34;:np.round(TP),
+                                      &#34;FP&#34;:np.round(FP),&#34;NEG&#34;:np.round(NEG),
+                                      &#34;FLAGS&#34;:np.round(TOTALFLAGS),&#34;FN&#34;:np.round(FN),
+                                      &#34;TN&#34;:np.round(TN),
+                                      &#34;NNS&#34;:np.round(NNS),
+                                      &#34;FLAGGED_FRACTION&#34;:np.round(TOTALFLAGS/(POS+NEG),
+                                                                  2)},orient=&#39;index&#39;,columns=[&#39;estimates&#39;])
+        
+        rf=pd.DataFrame({&#39;pos&#39;:np.round(POS),
+                      &#39;flags&#39;:int(np.round(TOTALFLAGS)),
+                      &#39;tp&#39;:int(np.round(TP)),
+                      &#39;fp&#39;:int(np.round(FP)),
+                      &#39;fn&#39;:int(np.round(FN)),
+                      &#39;tn&#39;:int(np.round(TN))},index=[&#39;numbers&#39;])
+
+        pos=rf.pos.values[0]
+        flags=rf[&#39;flags&#39;].values[0]
+        fp=rf[&#39;fp&#39;].values[0]
+        tp=rf[&#39;tp&#39;].values[0]
+        fn=rf[&#39;fn&#39;].values[0]
+
+        txt=[f&#34;For every {pos} positive instances&#34;,
+             f&#34;we raise {flags} flags,&#34;,
+             f&#34;out of which {tp} are true positives&#34;,
+             f&#34;{fp} are false alarms&#34;,
+             f&#34;{fn} cases are missed&#34;]
+        if five_yr_survival is not None:
+            txt.append(f&#34;Number needed to screen is {NNS}&#34;)
+        
+            
+
+        return rf,txt,resdf</code></pre>
+</details>
+</dd>
 <dt id="zedstat.zedstat.processRoc.nominal_auc"><code class="name flex">
 <span>def <span class="ident">nominal_auc</span></span>(<span>self)</span>
 </code></dt>
@@ -1846,6 +2010,225 @@ Now supports both single scores and lists/numpy arrays of scores.</p>
     from sklearn.metrics import auc
     self._auc[&#39;nominal&#39;]=auc(self.df.index.values,self.df.tpr.values)
     return</code></pre>
+</details>
+</dd>
+<dt id="zedstat.zedstat.processRoc.operating_zone"><code class="name flex">
+<span>def <span class="ident">operating_zone</span></span>(<span>self, n=1, LRplus=10, LRminus=0.6)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>compute the end points of the operating zone,
+one for maximizing precions, and one for maximizing sensitivity</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>n</code></strong> :&ensp;<code>int</code></dt>
+<dd>number of operting points per condition returned, default 1</dd>
+<dt><strong><code>LRplus</code></strong> :&ensp;<code>float</code></dt>
+<dd>lower bound on positive likelihood ratio, default 10.0</dd>
+<dt><strong><code>LRminus</code></strong> :&ensp;<code>float</code></dt>
+<dd>upper bound on negative likelihood ratio, default 0.6</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def operating_zone(self,
+                   n=1,
+                   LRplus=10,
+                   LRminus=0.6):
+    &#39;&#39;&#39;
+    compute the end points of the operating zone, 
+    one for maximizing precions, and one for maximizing sensitivity
+
+    Args:
+        n (int): number of operting points per condition returned, default 1
+        LRplus (float): lower bound on positive likelihood ratio, default 10.0
+        LRminus (float): upper bound on negative likelihood ratio, default 0.6
+
+    &#39;&#39;&#39;
+    wf=self.df.copy()
+    
+    opf=pd.concat([wf[(wf[&#39;LR+&#39;]&gt;LRplus)
+                      &amp; (wf[&#39;LR-&#39;]&lt;LRminus) ]\
+                   .sort_values(&#39;ppv&#39;,ascending=False).head(n),
+                   wf[(wf[&#39;LR+&#39;]&gt;LRplus)
+                      &amp; (wf[&#39;LR-&#39;]&lt;LRminus) ]\
+                   .sort_values(&#39;tpr&#39;,ascending=False).head(n)])
+
+    if opf.empty:
+        self._operating_zone=opf.copy()
+        return #self._operating_zone.copy()
+    self._operating_zone=opf.reset_index()
+    self._operating_zone.index=[&#39;high precision&#39;]*n + [&#39;high sensitivity&#39;]*n
+    return #self._operating_zone.copy()</code></pre>
+</details>
+</dd>
+<dt id="zedstat.zedstat.processRoc.pvalue"><code class="name flex">
+<span>def <span class="ident">pvalue</span></span>(<span>self, delta_auc=0.1, twosided=True)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>compute p-value for given auc bounds</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>delta_auc</code></strong> :&ensp;<code>float</code></dt>
+<dd>maximum perturbation from estimated auc, default 0.1</dd>
+<dt><strong><code>twosided</code></strong> :&ensp;<code>bool</code></dt>
+<dd>one sided or twosided confidence bounds</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>pvalue for the null hypothesis that estimated nominal auc is lower by more than delta_auc</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pvalue(self,
+           delta_auc=0.1,
+           twosided=True):
+    &#39;&#39;&#39;
+    compute p-value for given auc bounds
+
+    Args:
+        delta_auc (float): maximum perturbation from estimated auc, default 0.1
+        twosided (bool): one sided or twosided confidence bounds
+
+    Returns:
+        float: pvalue for the null hypothesis that estimated nominal auc is lower by more than delta_auc
+    &#39;&#39;&#39;
+    if &#39;nominal&#39; not in self._auc.keys():
+        self.auc()
+    auc=self._auc[&#39;nominal&#39;]
+        
+    import scipy.stats as stats
+    z=np.sqrt(self.positive_samples/(auc*(1-auc)/(delta_auc*delta_auc)) )
+    pvalue=stats.norm.sf(abs(z))
+
+    if twosided:
+        pvalue=2*pvalue
+    return pvalue</code></pre>
+</details>
+</dd>
+<dt id="zedstat.zedstat.processRoc.samplesize"><code class="name flex">
+<span>def <span class="ident">samplesize</span></span>(<span>self, delta_auc=0.1, target_auc=None, alpha=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>estimate sample size for atataing auc bound under given significance level</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>delta_auc</code></strong> :&ensp;<code>float</code></dt>
+<dd>maximum perturbation from estimated auc, default 0.1</dd>
+<dt><strong><code>target_auc</code></strong> :&ensp;<code>float</code></dt>
+<dd>if None, using estimate current nominal auc</dd>
+<dt><strong><code>alpha</code></strong> :&ensp;<code>float</code></dt>
+<dd>significanec level. If None use processRoc.alpha</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>minimum sample size</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def samplesize(self,
+               delta_auc=0.1,
+               target_auc=None,
+               alpha=None):
+    &#39;&#39;&#39;
+    estimate sample size for atataing auc bound under given significance level
+
+    Args:
+        delta_auc (float): maximum perturbation from estimated auc, default 0.1
+        target_auc (float): if None, using estimate current nominal auc
+        alpha (float): significanec level. If None use processRoc.alpha
+
+    Returns:
+        float: minimum sample size
+    &#39;&#39;&#39;
+    if alpha is None:
+        alpha=self.alpha
+
+    if target_auc is None:
+        if &#39;nominal&#39; not in self._auc.keys():
+            self.auc()
+        target_auc=self._auc[&#39;nominal&#39;]
+        
+    import scipy.stats as stats
+    z=stats. norm. ppf(1 - (alpha/2))
+    required_npos = (z*z)*target_auc*(1-target_auc)/(delta_auc*delta_auc)
+
+    return required_npos</code></pre>
+</details>
+</dd>
+<dt id="zedstat.zedstat.processRoc.scoretoprobability"><code class="name flex">
+<span>def <span class="ident">scoretoprobability</span></span>(<span>self, score, regen=True, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Map computed score to probability of sample being in the positive class.
+This is simply the PPV corresponding to the threshold which equals the score.
+Now supports both single scores and lists/numpy arrays of scores.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>score</code></strong> :&ensp;<code>float</code> or <code>list</code> or <code>numpy.ndarray</code></dt>
+<dd>computed score(s)</dd>
+<dt><strong><code>regen</code></strong> :&ensp;<code>bool</code></dt>
+<dd>if True, regenerate roc curve</dd>
+<dt><strong><code>kwargs</code></strong> :&ensp;<code>dict</code></dt>
+<dd>values passed for regeneration of smoothed roc</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>float or numpy.ndarray representing probability of being in positive cohort</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def scoretoprobability(self, score, regen=True, **kwargs):
+    &#39;&#39;&#39;
+    Map computed score to probability of sample being in the positive class.
+    This is simply the PPV corresponding to the threshold which equals the score.
+    Now supports both single scores and lists/numpy arrays of scores.
+
+    Args:
+        score (float or list or numpy.ndarray): computed score(s)
+        regen (bool): if True, regenerate roc curve
+        kwargs (dict): values passed for regeneration of smoothed roc
+
+    Return:
+        float or numpy.ndarray representing probability of being in positive cohort
+    &#39;&#39;&#39;
+
+    if regen:
+        STEP = 0.01
+        precision = 3
+        interpolate = True
+
+        STEP = kwargs.get(&#39;STEP&#39;, STEP)
+        precision = kwargs.get(&#39;precision&#39;, precision)
+        interpolate = kwargs.get(&#39;interpolate&#39;, interpolate)
+
+        self.smooth(STEP=STEP)
+        self.allmeasures(interpolate=interpolate)
+        self.usample(precision=precision)
+
+    df = self.get()
+    if &#39;threshold&#39; not in df.columns:
+        raise ValueError(&#39;Threshold not in columns or index&#39;)
+    if &#39;ppv&#39; not in df.columns:
+        raise ValueError(&#39;PPV not in columns or index&#39;)
+
+    def compute_val(score):
+        if score &gt; df.threshold.max():
+            val = df.ppv.values.max()
+        else:
+            val = df[df.threshold &gt; score].ppv.tail(1).values[0]
+        return (val - df.ppv.values.min()) / (df.ppv.values.max() - df.ppv.values.min())
+
+    if isinstance(score, (list, np.ndarray)):
+        return np.array([compute_val(s) for s in score])
+    else:
+        return compute_val(score)</code></pre>
 </details>
 </dd>
 <dt id="zedstat.zedstat.processRoc.smooth"><code class="name flex">
@@ -1900,6 +2283,63 @@ Now supports both single scores and lists/numpy arrays of scores.</p>
     return </code></pre>
 </details>
 </dd>
+<dt id="zedstat.zedstat.processRoc.usample"><code class="name flex">
+<span>def <span class="ident">usample</span></span>(<span>self, df=None, precision=3)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>make performance measures estimated at regular intervals of false positive rate</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>df</code></strong> :&ensp;<code>pandas.DataFrame</code></dt>
+<dd>dataframe woth performance values, fpr as index. default: None, when the dataframe entered at initialization is used</dd>
+<dt><strong><code>precision</code></strong> :&ensp;<code>int</code></dt>
+<dd>number of digits after decismal point used to sample fpr range</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pandas.DataFrame</code></dt>
+<dd>uniformly sampled performance dataframe</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def usample(self,
+            df=None,
+            precision=3):
+    &#39;&#39;&#39;
+    make performance measures estimated at regular intervals of false positive rate
+
+    Args:
+        df (pandas.DataFrame): dataframe woth performance values, fpr as index. default: None, when the dataframe entered at initialization is used
+        precision (int): number of digits after decismal point used to sample fpr range
+    
+    Returns:
+        pandas.DataFrame: uniformly sampled performance dataframe
+    &#39;&#39;&#39;
+    step=10**(-precision)
+    fpr=[np.round(x,precision) for x in np.arange(0,1+step,step)]
+    if df is None:        
+        fpr_=[x for x in fpr if x not in self.df.index]
+    else:
+        fpr_=[x for x in fpr if x not in df.index]
+
+    if df is None:
+        df___=self.df.copy()
+    else:
+        df___=df.copy()
+        
+    for x in fpr_:
+        df___.loc[x]=pd.Series([],dtype=float) 
+    df___=df___.sort_index().interpolate()
+    
+    df___=df___.loc[fpr]        
+    if df is None:
+        self.df=df___
+
+    return df___</code></pre>
+</details>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -1921,19 +2361,25 @@ Now supports both single scores and lists/numpy arrays of scores.</p>
 <ul class="">
 <li><code><a title="zedstat.zedstat.genroc" href="#zedstat.zedstat.genroc">genroc</a></code></li>
 <li><code><a title="zedstat.zedstat.pipeline" href="#zedstat.zedstat.pipeline">pipeline</a></code></li>
-<li><code><a title="zedstat.zedstat.scoretoprobability" href="#zedstat.zedstat.scoretoprobability">scoretoprobability</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
 <h4><code><a title="zedstat.zedstat.processRoc" href="#zedstat.zedstat.processRoc">processRoc</a></code></h4>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="zedstat.zedstat.processRoc.allmeasures" href="#zedstat.zedstat.processRoc.allmeasures">allmeasures</a></code></li>
 <li><code><a title="zedstat.zedstat.processRoc.auc" href="#zedstat.zedstat.processRoc.auc">auc</a></code></li>
 <li><code><a title="zedstat.zedstat.processRoc.get" href="#zedstat.zedstat.processRoc.get">get</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.getBounds" href="#zedstat.zedstat.processRoc.getBounds">getBounds</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.interpret" href="#zedstat.zedstat.processRoc.interpret">interpret</a></code></li>
 <li><code><a title="zedstat.zedstat.processRoc.nominal_auc" href="#zedstat.zedstat.processRoc.nominal_auc">nominal_auc</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.operating_zone" href="#zedstat.zedstat.processRoc.operating_zone">operating_zone</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.pvalue" href="#zedstat.zedstat.processRoc.pvalue">pvalue</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.samplesize" href="#zedstat.zedstat.processRoc.samplesize">samplesize</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.scoretoprobability" href="#zedstat.zedstat.processRoc.scoretoprobability">scoretoprobability</a></code></li>
 <li><code><a title="zedstat.zedstat.processRoc.smooth" href="#zedstat.zedstat.processRoc.smooth">smooth</a></code></li>
+<li><code><a title="zedstat.zedstat.processRoc.usample" href="#zedstat.zedstat.processRoc.usample">usample</a></code></li>
 </ul>
 </li>
 </ul>

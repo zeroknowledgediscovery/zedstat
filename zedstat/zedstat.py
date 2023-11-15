@@ -285,53 +285,52 @@ class processRoc(object):
         
         return df__
 
-import numpy as np
 
-def scoretoprobability(self, score, regen=True, **kwargs):
-    '''
-    Map computed score to probability of sample being in the positive class.
-    This is simply the PPV corresponding to the threshold which equals the score.
-    Now supports both single scores and lists/numpy arrays of scores.
+    def scoretoprobability(self, score, regen=True, **kwargs):
+        '''
+        Map computed score to probability of sample being in the positive class.
+        This is simply the PPV corresponding to the threshold which equals the score.
+        Now supports both single scores and lists/numpy arrays of scores.
 
-    Args:
-        score (float or list or numpy.ndarray): computed score(s)
-        regen (bool): if True, regenerate roc curve
-        kwargs (dict): values passed for regeneration of smoothed roc
+        Args:
+            score (float or list or numpy.ndarray): computed score(s)
+            regen (bool): if True, regenerate roc curve
+            kwargs (dict): values passed for regeneration of smoothed roc
 
-    Return:
-        float or numpy.ndarray representing probability of being in positive cohort
-    '''
+        Return:
+            float or numpy.ndarray representing probability of being in positive cohort
+        '''
 
-    if regen:
-        STEP = 0.01
-        precision = 3
-        interpolate = True
+        if regen:
+            STEP = 0.01
+            precision = 3
+            interpolate = True
 
-        STEP = kwargs.get('STEP', STEP)
-        precision = kwargs.get('precision', precision)
-        interpolate = kwargs.get('interpolate', interpolate)
+            STEP = kwargs.get('STEP', STEP)
+            precision = kwargs.get('precision', precision)
+            interpolate = kwargs.get('interpolate', interpolate)
 
-        self.smooth(STEP=STEP)
-        self.allmeasures(interpolate=interpolate)
-        self.usample(precision=precision)
-        
-    df = self.get()
-    if 'threshold' not in df.columns:
-        raise ValueError('Threshold not in columns or index')
-    if 'ppv' not in df.columns:
-        raise ValueError('PPV not in columns or index')
+            self.smooth(STEP=STEP)
+            self.allmeasures(interpolate=interpolate)
+            self.usample(precision=precision)
 
-    def compute_val(score):
-        if score > df.threshold.max():
-            val = df.ppv.values.max()
+        df = self.get()
+        if 'threshold' not in df.columns:
+            raise ValueError('Threshold not in columns or index')
+        if 'ppv' not in df.columns:
+            raise ValueError('PPV not in columns or index')
+
+        def compute_val(score):
+            if score > df.threshold.max():
+                val = df.ppv.values.max()
+            else:
+                val = df[df.threshold > score].ppv.tail(1).values[0]
+            return (val - df.ppv.values.min()) / (df.ppv.values.max() - df.ppv.values.min())
+
+        if isinstance(score, (list, np.ndarray)):
+            return np.array([compute_val(s) for s in score])
         else:
-            val = df[df.threshold > score].ppv.tail(1).values[0]
-        return (val - df.ppv.values.min()) / (df.ppv.values.max() - df.ppv.values.min())
-
-    if isinstance(score, (list, np.ndarray)):
-        return np.array([compute_val(s) for s in score])
-    else:
-        return compute_val(score)
+            return compute_val(score)
 
     
     def usample(self,
