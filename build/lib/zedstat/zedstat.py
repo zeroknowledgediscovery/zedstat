@@ -301,6 +301,9 @@ class processRoc(object):
             float or numpy.ndarray representing probability of being in positive cohort
         '''
 
+        if score is None:
+            return None
+
         if regen:
             STEP = 0.01
             precision = 3
