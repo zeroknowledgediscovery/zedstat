@@ -324,6 +324,8 @@ class processRoc(object):
             raise ValueError('PPV not in columns or index')
 
         def compute_val(score):
+            if score is None:
+                return None
             if score > df.threshold.max():
                 val = df.ppv.values.max()
             else:

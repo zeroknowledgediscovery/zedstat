@@ -353,6 +353,8 @@ class processRoc(object):
             raise ValueError(&#39;PPV not in columns or index&#39;)
 
         def compute_val(score):
+            if score is None:
+                return None
             if score &gt; df.threshold.max():
                 val = df.ppv.values.max()
             else:
@@ -1290,6 +1292,8 @@ def pipeline(df,
             raise ValueError(&#39;PPV not in columns or index&#39;)
 
         def compute_val(score):
+            if score is None:
+                return None
             if score &gt; df.threshold.max():
                 val = df.ppv.values.max()
             else:
@@ -2228,6 +2232,8 @@ Now supports both single scores and lists/numpy arrays of scores.</p>
         raise ValueError(&#39;PPV not in columns or index&#39;)
 
     def compute_val(score):
+        if score is None:
+            return None
         if score &gt; df.threshold.max():
             val = df.ppv.values.max()
         else:
