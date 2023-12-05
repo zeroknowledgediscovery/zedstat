@@ -776,3 +776,31 @@ def pipeline(df,
     return df_,zt.auc()
 
 
+def score_to_probability(scores,df,
+                  prevalence,
+                  total_samples,
+                  positive_samples,
+                  alpha=0.05):
+    '''
+    returns score to probability and upper and lower bound fast 
+    and robust, standalone.
+    implements: Statist. Med. 2007; 26:3258–3273
+    DOI: 10.1002/sim.2812
+    Prevalence-dependent diagnostic accuracy measures
+    Jialiang Li, Jason P. Fine and Nasia Safdar
+    '''
+    
+    z = norm.ppf(1 - alpha / 2)
+    se=df.tpr
+    sp=1-df.fpr
+    var_se = se * (1 - se) / positive_samples
+    var_sp = sp * (1 - sp) / (total_samples - positive_samples)
+    df['g1']= (1 - sp) / se
+    sigma_1 = np.sqrt(total_samples * (1 - sp)**2 * var_se / (se**4) + total_samples * var_sp / (se**2))
+    df['ci_g1'] =  z * (sigma_1 / np.sqrt(total_samples))
+    df['ppv'] = se * prevalence / (se * prevalence + (1 - sp) * (1 - prevalence))
+    df['ppv_lower'] = 1/(1+ ((1-prevalence)/prevalence)*(df['g1']-df['ci_g1']))
+    df['ppv_upper'] = 1/(1+ ((1-prevalence)/prevalence)*(df['g1']+df['ci_g1']))
+    df=df.dropna().drop(['g1','ci_g1'],axis=1)
+    
+    return [df[df.threshold>=score].tail(1)[['ppv','ppv_upper','ppv_lower']].round(2).values[0] for score in scores]

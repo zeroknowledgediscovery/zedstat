@@ -802,7 +802,37 @@ def pipeline(df,
     if outfile is not None:
         df_.to_csv(outfile)
 
-    return df_,zt.auc()</code></pre>
+    return df_,zt.auc()
+
+
+def score_to_probability(scores,df,
+                  prevalence,
+                  total_samples,
+                  positive_samples,
+                  alpha=0.05):
+    &#39;&#39;&#39;
+    returns score to probability and upper and lower bound fast 
+    and robust, standalone.
+    implements: Statist. Med. 2007; 26:3258–3273
+    DOI: 10.1002/sim.2812
+    Prevalence-dependent diagnostic accuracy measures
+    Jialiang Li, Jason P. Fine and Nasia Safdar
+    &#39;&#39;&#39;
+    
+    z = norm.ppf(1 - alpha / 2)
+    se=df.tpr
+    sp=1-df.fpr
+    var_se = se * (1 - se) / positive_samples
+    var_sp = sp * (1 - sp) / (total_samples - positive_samples)
+    df[&#39;g1&#39;]= (1 - sp) / se
+    sigma_1 = np.sqrt(total_samples * (1 - sp)**2 * var_se / (se**4) + total_samples * var_sp / (se**2))
+    df[&#39;ci_g1&#39;] =  z * (sigma_1 / np.sqrt(total_samples))
+    df[&#39;ppv&#39;] = se * prevalence / (se * prevalence + (1 - sp) * (1 - prevalence))
+    df[&#39;ppv_lower&#39;] = 1/(1+ ((1-prevalence)/prevalence)*(df[&#39;g1&#39;]-df[&#39;ci_g1&#39;]))
+    df[&#39;ppv_upper&#39;] = 1/(1+ ((1-prevalence)/prevalence)*(df[&#39;g1&#39;]+df[&#39;ci_g1&#39;]))
+    df=df.dropna().drop([&#39;g1&#39;,&#39;ci_g1&#39;],axis=1)
+    
+    return [df[df.threshold&gt;=score].tail(1)[[&#39;ppv&#39;,&#39;ppv_upper&#39;,&#39;ppv_lower&#39;]].round(2).values[0] for score in scores]</code></pre>
 </details>
 </section>
 <section>
@@ -933,6 +963,50 @@ def pipeline(df,
         df_.to_csv(outfile)
 
     return df_,zt.auc()</code></pre>
+</details>
+</dd>
+<dt id="zedstat.zedstat.score_to_probability"><code class="name flex">
+<span>def <span class="ident">score_to_probability</span></span>(<span>scores, df, prevalence, total_samples, positive_samples, alpha=0.05)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>returns score to probability and upper and lower bound fast
+and robust, standalone.
+implements: Statist. Med. 2007; 26:3258–3273
+DOI: 10.1002/sim.2812
+Prevalence-dependent diagnostic accuracy measures
+Jialiang Li, Jason P. Fine and Nasia Safdar</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def score_to_probability(scores,df,
+                  prevalence,
+                  total_samples,
+                  positive_samples,
+                  alpha=0.05):
+    &#39;&#39;&#39;
+    returns score to probability and upper and lower bound fast 
+    and robust, standalone.
+    implements: Statist. Med. 2007; 26:3258–3273
+    DOI: 10.1002/sim.2812
+    Prevalence-dependent diagnostic accuracy measures
+    Jialiang Li, Jason P. Fine and Nasia Safdar
+    &#39;&#39;&#39;
+    
+    z = norm.ppf(1 - alpha / 2)
+    se=df.tpr
+    sp=1-df.fpr
+    var_se = se * (1 - se) / positive_samples
+    var_sp = sp * (1 - sp) / (total_samples - positive_samples)
+    df[&#39;g1&#39;]= (1 - sp) / se
+    sigma_1 = np.sqrt(total_samples * (1 - sp)**2 * var_se / (se**4) + total_samples * var_sp / (se**2))
+    df[&#39;ci_g1&#39;] =  z * (sigma_1 / np.sqrt(total_samples))
+    df[&#39;ppv&#39;] = se * prevalence / (se * prevalence + (1 - sp) * (1 - prevalence))
+    df[&#39;ppv_lower&#39;] = 1/(1+ ((1-prevalence)/prevalence)*(df[&#39;g1&#39;]-df[&#39;ci_g1&#39;]))
+    df[&#39;ppv_upper&#39;] = 1/(1+ ((1-prevalence)/prevalence)*(df[&#39;g1&#39;]+df[&#39;ci_g1&#39;]))
+    df=df.dropna().drop([&#39;g1&#39;,&#39;ci_g1&#39;],axis=1)
+    
+    return [df[df.threshold&gt;=score].tail(1)[[&#39;ppv&#39;,&#39;ppv_upper&#39;,&#39;ppv_lower&#39;]].round(2).values[0] for score in scores]</code></pre>
 </details>
 </dd>
 </dl>
@@ -2376,6 +2450,7 @@ Now supports both single scores and lists/numpy arrays of scores.</p>
 <ul class="">
 <li><code><a title="zedstat.zedstat.genroc" href="#zedstat.zedstat.genroc">genroc</a></code></li>
 <li><code><a title="zedstat.zedstat.pipeline" href="#zedstat.zedstat.pipeline">pipeline</a></code></li>
+<li><code><a title="zedstat.zedstat.score_to_probability" href="#zedstat.zedstat.score_to_probability">score_to_probability</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
