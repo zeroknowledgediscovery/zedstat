@@ -789,7 +789,7 @@ def score_to_probability(scores,df,
     Prevalence-dependent diagnostic accuracy measures
     Jialiang Li, Jason P. Fine and Nasia Safdar
     '''
-    
+    from scipy.stats import norm
     z = norm.ppf(1 - alpha / 2)
     se=df.tpr
     sp=1-df.fpr
