@@ -34,10 +34,12 @@ def textable(df,tabname='tmp.tex',
     #          sep='&',quotechar=' ',index=None,mode='a')
 
     hf=pd.DataFrame(columns=df.columns)
-    csv_string1 = df.to_csv(sep='&', quotechar=' ', index=False, float_format=FORMAT)
+    csv_string1 = hf.to_csv(sep='&', quotechar=' ', index=False, float_format=FORMAT)
     csv_string1 = csv_string1.replace('\n','\\\\\\hline\n' )
     
-    
+    with open(tabname,'w') as f:
+        f.write(csv_string1)
+
     # Convert DataFrame to CSV string
     csv_string = df.to_csv(sep='&', header=None,quotechar=' ', index=False, float_format=FORMAT)
     
