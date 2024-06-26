@@ -33,8 +33,13 @@ def textable(df,tabname='tmp.tex',
     #          line_terminator=LNTERM,
     #          sep='&',quotechar=' ',index=None,mode='a')
 
+    hf=pd.DataFrame(columns=df.columns)
+    csv_string1 = df.to_csv(sep='&', quotechar=' ', index=False, float_format=FORMAT)
+    csv_string1 = csv_string1.replace('\n','\\\\\\hline\n' )
+    
+    
     # Convert DataFrame to CSV string
-    csv_string = df.to_csv(sep='&', quotechar=' ', index=False, float_format=FORMAT)
+    csv_string = df.to_csv(sep='&', header=None,quotechar=' ', index=False, float_format=FORMAT)
     
     # Replace newline character with your desired line terminator
     csv_string = csv_string.replace('\n', LNTERM)
