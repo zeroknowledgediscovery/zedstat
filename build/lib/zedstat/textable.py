@@ -54,14 +54,12 @@ def textable(df,tabname='tmp.tex',
     #          sep='&',quotechar=' ',index=None,mode='a')
 
     hf=pd.DataFrame(columns=df.columns)
-    print(hf)
     csv_string1 = hf.to_csv(sep='&', quotechar=' ', index=False, float_format=FORMAT)
     csv_string1 = csv_string1.replace('\n','\\\\\\hline\n' )
     if HEADERCOLOR is not None:
         csv_string1 = HEADERCOLOR + csv_string1
-    print(csv_string1)
     
-    with open(tabname,'w') as f:
+    with open(tabname,'a') as f:
         f.write(csv_string1)
 
     # Convert DataFrame to CSV string
