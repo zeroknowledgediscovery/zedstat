@@ -6,9 +6,29 @@ def textable(df,tabname='tmp.tex',
              INDEX=True,DUMMY=False,
              USE_l=False,
              TABFORMAT=None,
+             HEADERCOLOR=None,
              LNTERM='\\\\\\hline\n'):
     '''
-        write latex table
+    Write a pandas DataFrame to a LaTeX formatted table. This function allows customization of the table format, including the inclusion of indices, column formatting, header color, and LaTeX table format specifications.
+
+    Parameters:
+        df (pandas.DataFrame): DataFrame containing the data to be written to the LaTeX table.
+        tabname (str, optional): Name of the output LaTeX file. Defaults to 'tmp.tex'.
+        FORMAT (str, optional): String format for floating point numbers. Defaults to '%1.2f'.
+        INDEX (bool, optional): Whether to include the DataFrame index as a column in the table. Defaults to True.
+        DUMMY (bool, optional): If True, the function returns immediately without writing anything. Useful for debugging. Defaults to False.
+        USE_l (bool, optional): If True, uses 'l' (left-align) for all columns. Defaults to False.
+        TABFORMAT (str, optional): Custom LaTeX tabular format string. If not specified, defaults based on other parameters.
+        HEADERCOLOR (str, optional): LaTeX code for coloring the header row. Defaults to None.
+        LNTERM (str, optional): String to use as a line terminator in the LaTeX table. Defaults to '\\\\hline\n'.
+
+    Returns:
+        None: The output is written directly to a file specified by `tabname`.
+
+    Example:
+        >>> df = pd.DataFrame({'A': [1, 2], 'B': [3, 4]})
+        >>> textable(df, 'example.tex', FORMAT='%.2f', INDEX=False)
+        This will write the DataFrame to 'example.tex' without the index and formatted floating points.
     '''
     if DUMMY:
         return
@@ -34,8 +54,12 @@ def textable(df,tabname='tmp.tex',
     #          sep='&',quotechar=' ',index=None,mode='a')
 
     hf=pd.DataFrame(columns=df.columns)
+    print(hf)
     csv_string1 = hf.to_csv(sep='&', quotechar=' ', index=False, float_format=FORMAT)
     csv_string1 = csv_string1.replace('\n','\\\\\\hline\n' )
+    if HEADERCOLOR is not None:
+        csv_string1 = HEADERCOLOR + csv_string1
+    print(csv_string1)
     
     with open(tabname,'w') as f:
         f.write(csv_string1)
@@ -69,7 +93,23 @@ def tablewithbounds(df,
                     thresholdcolname='threshold',
                     width=5):
     '''
-    get dataframe with bounds displayed
+    Create a new DataFrame that includes confidence bounds for each entry. This function is useful for preparing data that needs to display error margins or confidence intervals.
+
+    Parameters:
+        df (pandas.DataFrame): The base DataFrame with central values.
+        df_upper (pandas.DataFrame, optional): DataFrame containing the upper bounds. Must not be used together with df_delta.
+        df_lower (pandas.DataFrame, optional): DataFrame containing the lower bounds. Must not be used together with df_delta.
+        df_delta (pandas.DataFrame, optional): DataFrame containing half the interval of the bounds around the central values. Must not be used with df_upper or df_lower.
+        thresholdcolname (str, optional): Column name in `df` that should not have bounds applied. Defaults to 'threshold'.
+        width (int, optional): Unused parameter in the current function version.
+
+    Returns:
+        pandas.DataFrame: A new DataFrame with the bounds formatted as strings in LaTeX math mode.
+
+    Example:
+        >>> df = pd.DataFrame({'value': [10, 20], 'error': [1, 2]})
+        >>> df_bounds = tablewithbounds(df, df_delta=df['error'])
+        This will create a DataFrame where each 'value' is shown with its error as a LaTeX-formatted string.
     '''
 
     dfthis=df.copy()
