@@ -5,9 +5,11 @@ setup.py
 version.py
 zedstat/__init__.py
 zedstat/ci.py
+zedstat/example_combine.py
 zedstat/mwauc.py
 zedstat/rrci.py
 zedstat/textable.py
+zedstat/zcombine.py
 zedstat/zedstat.py
 zedstat.egg-info/PKG-INFO
 zedstat.egg-info/SOURCES.txt
