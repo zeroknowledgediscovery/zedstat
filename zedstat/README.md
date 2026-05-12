@@ -1,0 +1,430 @@
+# zedstat
+
+<p align="center">
+  <img src="https://zed.uchicago.edu/logo/logo_zedstat.png" height="150" alt="zedstat logo" />
+</p>
+
+[![DOI](https://zenodo.org/badge/529991779.svg)](https://zenodo.org/badge/latestdoi/529991779)
+
+**Author:** ZeD@UChicago <zed.uchicago.edu>  
+**Description:** Tools for ML statistics  
+**Documentation:** https://zeroknowledgediscovery.github.io/zedstat/  
+**Example:** https://github.com/zeroknowledgediscovery/zedstat/blob/master/examples/example1.ipynb
+
+## Usage
+
+```python
+from zedstat import zedstat
+
+zt = zedstat.processRoc(
+    df=pd.read_csv('roc.csv'),
+    order=3,
+    total_samples=100000,
+    positive_samples=100,
+    alpha=0.01,
+    prevalence=.002,
+)
+
+zt.smooth(STEP=0.001)
+zt.allmeasures(interpolate=True)
+zt.usample(precision=3)
+zt.getBounds()
+
+print(zt.auc())
+
+# find the high precision and high sensitivity operating points
+zt.operating_zone(LRminus=.65)
+rf0, txt0, _ = zt.interpret(fpr=zt._operating_zone.fpr.values[0], number_of_positives=10)
+rf1, txt1, _ = zt.interpret(fpr=zt._operating_zone.fpr.values[1], number_of_positives=10)
+display(zt._operating_zone)
+print('high precision operation:\n', '\n '.join(txt0))
+print('high recall operation:\n', '\n '.join(txt1))
+```
+
+## Additional usage examples
+
+### 1. Export operating characteristics at a chosen prevalence
+
+```python
+import pandas as pd
+from zedstat import zedstat
+
+roc_df = pd.read_csv("roc.csv")
+
+zt = zedstat.processRoc(
+    df=roc_df,
+    order=3,
+    total_samples=100000,
+    positive_samples=100,
+    alpha=0.01,
+    prevalence=0.002,
+)
+
+zt.smooth(STEP=0.001)
+zt.allmeasures(interpolate=True)
+zt.usample(precision=3)
+zt.getBounds()
+
+out = zt.get().join(zt.df_lim["U"], rsuffix="_upper").join(zt.df_lim["L"], rsuffix="_lower")
+out.to_csv("roc_operating_characteristics.csv")
+```
+
+### 2. Retrieve threshold-level PPV from a score
+
+```python
+example_scores = [0.10, 0.20, 0.30]
+
+ppv_at_threshold = zt.score_to_threshold_ppv(
+    example_scores,
+    regen=True,
+    STEP=0.001,
+    precision=3,
+    interpolate=True,
+    convexify=False,
+)
+
+threshold_ppv_df = pd.DataFrame({
+    "score": example_scores,
+    "threshold_ppv": ppv_at_threshold,
+})
+
+display(threshold_ppv_df)
+```
+
+### 3. Held-out calibration with isotonic regression
+
+```python
+from zedstat import calibration
+
+res = calibration.heldout_isotonic_calibration_with_bootstrap(
+    df,
+    score_col="predicted_risk",
+    label_col="target",
+    test_size=0.25,
+    random_state=4,
+    lower_score_is_risk=False,
+    target_prevalence=None,
+    n_bins=100,
+    n_boot=1000,
+    calibration_df_path="calibration_df_SISA.csv",
+    plot="calibration_SISA.pdf",
+)
+
+print(res["summary"])
+display(res["calibration_table"])
+```
+
+### 4. Convert raw scores to calibrated probabilities
+
+```python
+import numpy as np
+import pandas as pd
+
+example_scores = [0.10, 0.20, 0.30]
+example_scores_arr = np.asarray(example_scores, dtype=float)
+
+calibrated_probs = res["iso_model"].predict(example_scores_arr)
+
+calibrated_df = pd.DataFrame({
+    "score": example_scores,
+    "calibrated_probability": np.asarray(calibrated_probs, dtype=float),
+})
+
+display(calibrated_df)
+```
+
+### 5. Format calibration summary for a manuscript table
+
+```python
+def format_calibration_summary_df(summary):
+    import numpy as np
+    import pandas as pd
+
+    summary = pd.Series(summary)
+
+    ci_map = {
+        "auc_raw_test": ("auc_raw_ci_low", "auc_raw_ci_high"),
+        "auc_calibrated_test": ("auc_calibrated_ci_low", "auc_calibrated_ci_high"),
+        "brier_raw_test": ("brier_raw_ci_low", "brier_raw_ci_high"),
+        "brier_calibrated_test": ("brier_calibrated_ci_low", "brier_calibrated_ci_high"),
+        "calibration_intercept_test": ("calibration_intercept_ci_low", "calibration_intercept_ci_high"),
+        "calibration_slope_test": ("calibration_slope_ci_low", "calibration_slope_ci_high"),
+    }
+
+    skip_keys = {
+        "auc_raw_ci_low", "auc_raw_ci_high",
+        "auc_calibrated_ci_low", "auc_calibrated_ci_high",
+        "brier_raw_ci_low", "brier_raw_ci_high",
+        "brier_calibrated_ci_low", "brier_calibrated_ci_high",
+        "calibration_intercept_ci_low", "calibration_intercept_ci_high",
+        "calibration_slope_ci_low", "calibration_slope_ci_high",
+    }
+
+    rows = []
+    for key, val in summary.items():
+        if key in skip_keys:
+            continue
+
+        value_str = "" if pd.isna(val) else f"{float(val):.3f}"
+
+        if key in ci_map:
+            lo_key, hi_key = ci_map[key]
+            lo = summary.get(lo_key, np.nan)
+            hi = summary.get(hi_key, np.nan)
+            if pd.notna(lo) and pd.notna(hi):
+                value_str = f"{float(val):.3f} ({float(lo):.3f}, {float(hi):.3f})"
+
+        rows.append({"variable": str(key), "value": value_str})
+
+    return pd.DataFrame(rows, columns=["variable", "value"])
+
+summary_df = format_calibration_summary_df(res["summary"])
+display(summary_df)
+```
+
+## Feature explanations
+
+### `processRoc`
+
+`processRoc` is the main ROC post-processing class. It takes an empirical ROC curve with false positive rate and true positive rate, augments it with operating metrics, and allows interpolation, confidence bounds, and interpretation at chosen operating points.
+
+### `smooth(STEP, interpolate, convexify)`
+
+This function regularizes the empirical ROC curve. If `convexify=True`, the upper ROC hull is computed so that dominated operating points are removed. If `interpolate=True`, the curve is resampled on a uniform false positive rate grid.
+
+Let the ROC curve be represented as points
+
+$$
+\{(f_i, t_i)\}_{i=1}^m
+$$
+
+where $f_i$ is the false positive rate and $t_i$ is the true positive rate. After optional convexification and interpolation, these are resampled onto a uniform grid in $f$.
+
+### `allmeasures(prevalence)`
+
+This computes threshold-level operating measures from sensitivity, specificity, and prevalence.
+
+Let
+
+$$
+\mathrm{TPR}(t) = P(\hat Y_t = 1 \mid Y=1), \qquad
+\mathrm{FPR}(t) = P(\hat Y_t = 1 \mid Y=0),
+$$
+
+and let prevalence be
+
+$$
+\pi = P(Y=1).
+$$
+
+Then
+
+$$
+\mathrm{Specificity}(t) = 1 - \mathrm{FPR}(t)
+$$
+
+$$
+\mathrm{PPV}(t) =
+\frac{\mathrm{TPR}(t)\pi}
+     {\mathrm{TPR}(t)\pi + \mathrm{FPR}(t)(1-\pi)}
+$$
+
+$$
+\mathrm{NPV}(t) =
+\frac{(1-\mathrm{FPR}(t))(1-\pi)}
+     {(1-\mathrm{FPR}(t))(1-\pi) + (1-\mathrm{TPR}(t))\pi}
+$$
+
+$$
+\mathrm{Accuracy}(t) =
+\pi \, \mathrm{TPR}(t) + (1-\pi)(1-\mathrm{FPR}(t))
+$$
+
+$$
+\mathrm{LR}^+(t) = \frac{\mathrm{TPR}(t)}{\mathrm{FPR}(t)}
+$$
+
+$$
+\mathrm{LR}^-(t) = \frac{1-\mathrm{TPR}(t)}{1-\mathrm{FPR}(t)}
+$$
+
+These are threshold-level decision quantities. They describe the performance of classifying everyone whose score crosses the threshold.
+
+### `usample(precision)`
+
+This resamples the metric tables on a uniform false positive rate grid, typically for downstream lookup and plotting. The grid spacing is controlled by the decimal precision.
+
+### `getBounds(total_samples, positive_samples, alpha)`
+
+This computes pointwise confidence bounds for the operating measures using Wilson intervals for sensitivity and specificity, then propagates these to PPV, NPV, accuracy, and likelihood ratios.
+
+If $n_1$ is the number of positive cases and $n_0$ is the number of negative cases, then Wilson intervals are first computed for
+
+$$
+\mathrm{TPR}(t) \quad \text{using } n_1
+$$
+
+and for
+
+$$
+\mathrm{Specificity}(t) = 1-\mathrm{FPR}(t) \quad \text{using } n_0.
+$$
+
+The derived measures are then bounded by substituting lower and upper values of sensitivity and specificity into the formulas above.
+
+### `auc()`
+
+The area under the ROC curve is
+
+$$
+\mathrm{AUC} = \int_0^1 \mathrm{TPR}(f)\, df
+$$
+
+where $f$ is false positive rate. Numerically this is computed by trapezoidal integration over the processed ROC curve. Confidence intervals can be estimated either analytically or by bootstrap when raw scores and labels are available.
+
+### `operating_zone(LRplus, LRminus)`
+
+This identifies practically useful threshold regions subject to likelihood-ratio constraints, for example high precision or high sensitivity operating points. Internally, the method searches the set of thresholds satisfying
+
+$$
+\mathrm{LR}^+(t) > c_1, \qquad \mathrm{LR}^-(t) < c_2
+$$
+
+for user-specified constants $c_1$ and $c_2$.
+
+### `interpret(fpr, number_of_positives, five_yr_survival, factor)`
+
+This converts operating characteristics into expected counts for an interpretable hypothetical population.
+
+If $P$ is the chosen number of true positives in the target population and prevalence is $\pi$, then the implied number of negatives is
+
+$$
+N = P \frac{1-\pi}{\pi}.
+$$
+
+Given sensitivity and PPV at the selected operating point, the method estimates true positives, false positives, false negatives, total flags, and number needed to screen.
+
+## Calibration
+
+The calibration utilities are provided in `zedstat.calibration`.
+
+### Held-out isotonic calibration
+
+Given a score $S$ and binary label $Y \in \{0,1\}$, the calibration routine splits the data into train and test subsets. On the training subset, isotonic regression fits a monotone mapping
+
+$$
+g(s) \approx P(Y=1 \mid S=s).
+$$
+
+The fitted function $g$ is then applied to the held-out test scores to obtain calibrated probabilities.
+
+### Calibrated probability
+
+The calibrated probability at score $s$ is the local conditional event probability
+
+$$
+m(s) = P(Y=1 \mid S=s).
+$$
+
+For continuous scores this can be interpreted as
+
+$$
+m(s) = \frac{f_{S,Y=1}(s)}{f_S(s)} = \frac{\pi f_{S \mid Y=1}(s)}{f_S(s)}.
+$$
+
+This is a local score-level quantity.
+
+### Threshold PPV versus calibrated probability
+
+These are different objects.
+
+Threshold PPV at threshold $t$ is
+
+$$
+\mathrm{PPV}(t) = P(Y=1 \mid S \ge t)
+$$
+
+when higher scores indicate higher risk. This is a tail-average quantity:
+
+$$
+\mathrm{PPV}(t)
+=
+\frac{\int_t^\infty m(s) f_S(s)\, ds}
+     {\int_t^\infty f_S(s)\, ds}
+=
+E[m(S)\mid S\ge t].
+$$
+
+Thus, calibrated probability is local, while threshold PPV is cumulative over all subjects beyond the threshold.
+
+### Brier score
+
+The Brier score evaluates probability accuracy:
+
+$$
+\mathrm{Brier} = \frac{1}{n}\sum_{i=1}^n (p_i - y_i)^2
+$$
+
+where $p_i$ is the predicted probability and $y_i$ is the observed binary outcome. Lower is better, with 0 indicating perfect probabilistic prediction.
+
+### Calibration intercept and slope
+
+A well-calibrated model should satisfy
+
+$$
+P(Y=1 \mid \hat p = p) = p.
+$$
+
+A practical assessment regresses the observed outcome on the logit of the predicted probability:
+
+$$
+\logit P(Y=1) = a + b \, \logit(\hat p).
+$$
+
+Here:
+
+- $a$ is the calibration intercept. Ideal value is 0.
+- $b$ is the calibration slope. Ideal value is 1.
+
+An intercept above 0 indicates underprediction on average. An intercept below 0 indicates overprediction on average. A slope below 1 indicates overly extreme predictions; a slope above 1 indicates predictions compressed toward the center.
+
+### Calibration table and reliability diagram
+
+Predicted probabilities are grouped into bins, and for each bin the observed event rate is estimated. If a bin contains $k$ events among $n$ subjects, the observed rate is
+
+$$
+\hat p_{\mathrm{obs}} = \frac{k}{n}.
+$$
+
+Wilson confidence intervals are computed for each bin and displayed as vertical error bars in the reliability diagram.
+
+## Sample size planning
+
+The sample size utilities in `zedstat` use AUC-based approximations. Let the target AUC be $A$. Define
+
+$$
+Q_1 = \frac{A}{2-A}, \qquad Q_2 = \frac{2A^2}{1+A}.
+$$
+
+In the balanced-design approximation, the required sample size per class for resolving an AUC tolerance $\delta$ at confidence level $1-\alpha$ is
+
+$$
+n \approx \frac{z_{1-\alpha/2}^2 \, c}{\delta^2},
+$$
+
+where
+
+$$
+c = A(1-A) - A^2 + Q_1 + Q_2.
+$$
+
+When prevalence is specified, the code uses a prevalence-aware total sample size formula derived from the Hanley-McNeil variance approximation.
+
+## Remarks
+
+`zedstat` separates two different but complementary notions of risk:
+
+- threshold-level decision utility, such as PPV, NPV, and likelihood ratios, derived from the ROC curve and prevalence;
+- score-level probability interpretation, obtained through calibration.
+
+The first is useful for screening policy and operating-point selection. The second is useful when the score must be interpreted as an individual event probability.
