@@ -4,6 +4,7 @@ README.rst
 setup.py
 version.py
 zedstat/__init__.py
+zedstat/calibration.py
 zedstat/ci.py
 zedstat/example_combine.py
 zedstat/mwauc.py

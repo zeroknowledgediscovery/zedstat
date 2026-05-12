@@ -105,63 +105,6 @@ def _choose_n_splits(y, requested):
         raise ValueError('Need at least 2 samples in each class for cross-fitted calibration.')
     return n_splits
 
-
-def _nice_axis_limit(max_val):
-    candidates = np.array([0.01, 0.02, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.40, 0.50, 0.60, 0.80, 1.00])
-    target = max(0.05, min(1.0, float(max_val) * 1.08))
-    idx = np.searchsorted(candidates, target, side='left')
-    return 1.0 if idx >= len(candidates) else float(candidates[idx])
-
-
-# -----------------------------------------------------------------------------
-# calibration helpers
-# -----------------------------------------------------------------------------
-
-def crossfit_isotonic_probabilities(df, score_col, label_col, target_prevalence=None, n_splits=5, random_state=42):
-    scores = pd.to_numeric(df[score_col], errors='coerce').to_numpy(dtype=float)
-    y = _ensure_binary_labels(df[label_col]).to_numpy(dtype=int)
-    valid = np.isfinite(scores)
-    scores = scores[valid]
-    y = y[valid]
-    out = np.full(len(df), np.nan, dtype=float)
-    actual = _choose_n_splits(y, n_splits)
-
-    skf = StratifiedKFold(n_splits=actual, shuffle=True, random_state=random_state)
-    valid_idx = np.flatnonzero(valid)
-    for train_idx, val_idx in skf.split(scores, y):
-        x_train = scores[train_idx]
-        y_train = y[train_idx]
-        x_val = scores[val_idx]
-        w_train = _make_prevalence_weights(y_train, target_prevalence)
-        iso = IsotonicRegression(y_min=0.0, y_max=1.0, out_of_bounds='clip')
-        iso.fit(x_train, y_train, sample_weight=w_train)
-        out[valid_idx[val_idx]] = iso.predict(x_val)
-    return pd.Series(out, index=df.index, name='calibrated_prob_oof')
-
-
-def calibration_curve_table(df, prob_col, label_col, target_prevalence=None, n_bins=10):
-    d = df[[prob_col, label_col]].dropna().copy()
-    d[label_col] = _ensure_binary_labels(d[label_col])
-    d['weight'] = _make_prevalence_weights(d[label_col].to_numpy(), target_prevalence)
-    n_bins = min(int(n_bins), len(d))
-    if n_bins < 2:
-        raise ValueError('Not enough rows to build a calibration curve.')
-
-    d['bin'] = pd.qcut(d[prob_col].rank(method='first'), q=n_bins, labels=False, duplicates='drop')
-    rows = []
-    for b, g in d.groupby('bin', sort=True):
-        rows.append({
-            'bin': int(b),
-            'n': int(len(g)),
-            'cases_unweighted': int(g[label_col].sum()),
-            'mean_pred': _weighted_mean(g[prob_col].to_numpy(), g['weight'].to_numpy()),
-            'obs_rate': _weighted_mean(g[label_col].to_numpy(), g['weight'].to_numpy()),
-            'prob_min': float(g[prob_col].min()),
-            'prob_max': float(g[prob_col].max()),
-        })
-    return pd.DataFrame(rows).sort_values('mean_pred').reset_index(drop=True)
-
-
 # -----------------------------------------------------------------------------
 # roc helpers
 # -----------------------------------------------------------------------------
