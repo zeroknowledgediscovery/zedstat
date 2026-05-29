@@ -51,6 +51,118 @@ def _wilson_interval_from_proportion(p, n, alpha=0.05):
     return _clip01(center - radius), _clip01(center + radius)
 
 
+def _wilson_interval_from_proportion_variable_n(p, n, alpha=0.05):
+    """Vectorized Wilson interval allowing a different effective n per point.
+
+    Parameters
+    ----------
+    p : array-like
+        Proportion estimate(s).
+    n : array-like
+        Effective denominator(s). Can be non-integer for prevalence-standardized
+        operating-characteristic displays.
+    alpha : float
+        Significance level.
+    """
+    p = _clip01(p)
+    n = np.asarray(n, dtype=float)
+    p, n = np.broadcast_arrays(p, n)
+
+    lo = np.full(p.shape, np.nan, dtype=float)
+    hi = np.full(p.shape, np.nan, dtype=float)
+
+    mask = np.isfinite(p) & np.isfinite(n) & (n > 0)
+    if not np.any(mask):
+        return lo, hi
+
+    z = norm.ppf(1 - alpha / 2.0)
+    z2 = z * z
+    denom = 1.0 + z2 / n[mask]
+    center = (p[mask] + z2 / (2.0 * n[mask])) / denom
+    radius = z * np.sqrt((p[mask] * (1.0 - p[mask]) / n[mask]) + (z2 / (4.0 * n[mask] * n[mask]))) / denom
+
+    lo[mask] = center - radius
+    hi[mask] = center + radius
+    return _clip01(lo), _clip01(hi)
+
+
+def _direct_ppv_bounds_from_expected_flags(fpr, tpr, prevalence, total_samples, alpha=0.05, min_expected_flags=1.0):
+    """Direct Wilson interval for PPV among the expected flagged set.
+
+    The older propagated interval combines independent Wilson intervals for TPR
+    and specificity. At the degenerate origin, this can produce ppv_upper=1
+    even when the classifier flags no one. This function treats PPV directly as
+    the event fraction among flagged subjects under the target prevalence.
+
+    flagged fraction = prevalence * TPR + (1 - prevalence) * FPR
+    PPV = prevalence * TPR / flagged fraction
+
+    If total_samples is available, the effective denominator is
+    total_samples * flagged fraction. Rows with fewer than min_expected_flags
+    expected flags are undefined for PPV and are returned as NaN.
+    """
+    fpr = _clip01(fpr)
+    tpr = _clip01(tpr)
+    p = float(prevalence)
+    flagged_fraction = p * tpr + (1.0 - p) * fpr
+    ppv = _safe_divide(p * tpr, flagged_fraction)
+
+    if total_samples is None or not np.isfinite(total_samples) or total_samples <= 0:
+        nan = np.full_like(ppv, np.nan, dtype=float)
+        return nan, nan
+
+    n_eff = float(total_samples) * flagged_fraction
+    lo, hi = _wilson_interval_from_proportion_variable_n(ppv, n_eff, alpha=alpha)
+
+    invalid = (~np.isfinite(ppv)) | (~np.isfinite(n_eff)) | (n_eff < float(min_expected_flags)) | (flagged_fraction <= 0)
+    lo[invalid] = np.nan
+    hi[invalid] = np.nan
+    return lo, hi
+
+
+def _enforce_bounds_around_nominal(nominal, lower, upper, cols=None, clip01_cols=('tpr', 'ppv', 'acc', 'npv')):
+    """Ensure lower <= nominal <= upper for displayed pointwise bounds.
+
+    This is a display/post-processing consistency step. It is especially useful
+    when the nominal curve is monotone-corrected but the pointwise analytic
+    bounds are computed before that correction.
+    """
+    nominal = nominal.copy()
+    lower = lower.copy()
+    upper = upper.copy()
+
+    if cols is None:
+        cols = [c for c in nominal.columns if c in lower.columns and c in upper.columns]
+
+    for col in cols:
+        n = pd.to_numeric(nominal[col], errors='coerce').to_numpy(dtype=float)
+        lo = pd.to_numeric(lower[col], errors='coerce').to_numpy(dtype=float)
+        hi = pd.to_numeric(upper[col], errors='coerce').to_numpy(dtype=float)
+
+        finite_n = np.isfinite(n)
+        finite_all = finite_n & np.isfinite(lo) & np.isfinite(hi)
+
+        lo2 = lo.copy()
+        hi2 = hi.copy()
+        lo2[finite_all] = np.minimum.reduce([lo[finite_all], hi[finite_all], n[finite_all]])
+        hi2[finite_all] = np.maximum.reduce([lo[finite_all], hi[finite_all], n[finite_all]])
+
+        # If the nominal value is undefined, the corresponding bounds should not
+        # be plotted or interpreted. This fixes rows such as fpr=0,tpr=0 where
+        # PPV is undefined but a propagated upper bound may otherwise be 1.
+        lo2[~finite_n] = np.nan
+        hi2[~finite_n] = np.nan
+
+        if col in clip01_cols:
+            lo2 = _clip01(lo2)
+            hi2 = _clip01(hi2)
+
+        lower[col] = lo2
+        upper[col] = hi2
+
+    return lower, upper
+
+
 def _hanley_mcneil_auc_ci(auc_value, n_pos, n_neg, alpha=0.05):
     if n_pos is None or n_neg is None or n_pos <= 0 or n_neg <= 0:
         return np.nan, np.nan
@@ -227,20 +339,43 @@ def _numeric_interp_frame_to_target_index(df, target_index, index_name='fpr'):
     return out
 
 
-def _apply_lr_floor(df, lr_fpr_floor, fprcol='fpr'):
+def _apply_lr_floor(df, lr_fpr_floor, fprcol='fpr', lr_sp_floor=None):
+    """
+    Mask numerically unstable likelihood-ratio regions.
+
+    LR+ = TPR / FPR is unstable when FPR is close to zero.
+    LR- = (1 - TPR) / specificity is unstable when specificity = 1-FPR
+    is close to zero.
+
+    The old implementation masked both LR+ and LR- at low FPR. That created
+    odd LR- behavior and did not remove the high-FPR endpoint where LR- is
+    undefined or dominated by numerical extrapolation.
+    """
     work = df.copy()
+    if lr_sp_floor is None:
+        lr_sp_floor = lr_fpr_floor
+
     if work.index.name == fprcol:
         fpr_vals = work.index.to_numpy(dtype=float)
     else:
         fpr_vals = pd.to_numeric(work[fprcol], errors='coerce').to_numpy(dtype=float)
-    bad = fpr_vals < float(lr_fpr_floor)
-    for col in ['LR+', 'LR-', 'LR+_raw', 'LR-_raw']:
+
+    fpr_vals = np.asarray(fpr_vals, dtype=float)
+    sp_vals = 1.0 - fpr_vals
+
+    bad_lr_plus = (~np.isfinite(fpr_vals)) | (fpr_vals <= float(lr_fpr_floor))
+    bad_lr_minus = (~np.isfinite(sp_vals)) | (sp_vals <= float(lr_sp_floor))
+
+    for col in ['LR+', 'LR+_raw']:
         if col in work.columns:
-            work.loc[bad, col] = np.nan
+            work.loc[bad_lr_plus, col] = np.nan
+    for col in ['LR-', 'LR-_raw']:
+        if col in work.columns:
+            work.loc[bad_lr_minus, col] = np.nan
     return work
 
 
-def _compute_measures_from_arrays(fpr, tpr, prevalence, lr_fpr_floor=0.001):
+def _compute_measures_from_arrays(fpr, tpr, prevalence, lr_fpr_floor=0.001, lr_sp_floor=None):
     fpr = _clip01(fpr)
     tpr = _clip01(tpr)
     sp = 1.0 - fpr
@@ -262,11 +397,11 @@ def _compute_measures_from_arrays(fpr, tpr, prevalence, lr_fpr_floor=0.001):
         'LR-': lr_minus,
     })
     frame = frame.replace([np.inf, -np.inf], np.nan)
-    frame = _apply_lr_floor(frame, lr_fpr_floor=lr_fpr_floor, fprcol='fpr')
+    frame = _apply_lr_floor(frame, lr_fpr_floor=lr_fpr_floor, lr_sp_floor=lr_sp_floor, fprcol='fpr')
     return frame
 
 
-def _compute_pointwise_measure_frames(df, prevalence, alpha, total_samples, positive_samples, thresholdcol='threshold', fprcol='fpr', tprcol='tpr', lr_fpr_floor=0.001):
+def _compute_pointwise_measure_frames(df, prevalence, alpha, total_samples, positive_samples, thresholdcol='threshold', fprcol='fpr', tprcol='tpr', lr_fpr_floor=0.001, lr_sp_floor=None, ppv_ci_method='direct', min_expected_flags=1.0):
     work, thresholdcol = _prepare_roc_dataframe(df, fprcol=fprcol, tprcol=tprcol, thresholdcol=thresholdcol)
     work = _add_endpoints(work, fprcol=fprcol, tprcol=tprcol, thresholdcol=thresholdcol)
 
@@ -282,15 +417,34 @@ def _compute_pointwise_measure_frames(df, prevalence, alpha, total_samples, posi
     fpr_low = 1.0 - sp_high
     fpr_high = 1.0 - sp_low
 
-    nominal = _compute_measures_from_arrays(fpr, tpr, prevalence=prevalence, lr_fpr_floor=lr_fpr_floor)
+    nominal = _compute_measures_from_arrays(fpr, tpr, prevalence=prevalence, lr_fpr_floor=lr_fpr_floor, lr_sp_floor=lr_sp_floor)
     lower = pd.DataFrame({'fpr': fpr})
     upper = pd.DataFrame({'fpr': fpr})
 
     lower['tpr'] = tpr_low
     upper['tpr'] = tpr_high
 
-    lower['ppv'] = _safe_divide(tpr_low * prevalence, tpr_low * prevalence + fpr_high * (1.0 - prevalence))
-    upper['ppv'] = _safe_divide(tpr_high * prevalence, tpr_high * prevalence + fpr_low * (1.0 - prevalence))
+    if ppv_ci_method == 'direct':
+        # Direct PPV interval among the expected flagged set. This avoids the
+        # pathological ppv_upper=1 at thresholds where no one is flagged.
+        ppv_low, ppv_high = _direct_ppv_bounds_from_expected_flags(
+            fpr=fpr,
+            tpr=tpr,
+            prevalence=prevalence,
+            total_samples=total_samples,
+            alpha=alpha,
+            min_expected_flags=min_expected_flags,
+        )
+        lower['ppv'] = ppv_low
+        upper['ppv'] = ppv_high
+    elif ppv_ci_method == 'propagated':
+        # Conservative propagated interval from independent TPR and specificity
+        # Wilson intervals. This is retained for backward compatibility but can
+        # be visually unstable near fpr=0.
+        lower['ppv'] = _safe_divide(tpr_low * prevalence, tpr_low * prevalence + fpr_high * (1.0 - prevalence))
+        upper['ppv'] = _safe_divide(tpr_high * prevalence, tpr_high * prevalence + fpr_low * (1.0 - prevalence))
+    else:
+        raise ValueError("ppv_ci_method must be 'direct' or 'propagated'")
 
     lower['acc'] = prevalence * tpr_low + (1.0 - prevalence) * (1.0 - fpr_high)
     upper['acc'] = prevalence * tpr_high + (1.0 - prevalence) * (1.0 - fpr_low)
@@ -310,10 +464,18 @@ def _compute_pointwise_measure_frames(df, prevalence, alpha, total_samples, posi
             frame[thresholdcol] = work[thresholdcol].to_numpy(dtype=float)
         frame.index = work[fprcol].to_numpy(dtype=float)
         frame.index.name = fprcol
-        frame = _apply_lr_floor(frame, lr_fpr_floor=lr_fpr_floor, fprcol=fprcol)
-    nominal = _apply_lr_floor(nominal, lr_fpr_floor=lr_fpr_floor, fprcol=fprcol)
-    lower = _apply_lr_floor(lower, lr_fpr_floor=lr_fpr_floor, fprcol=fprcol)
-    upper = _apply_lr_floor(upper, lr_fpr_floor=lr_fpr_floor, fprcol=fprcol)
+
+    # Do this after the threshold/index is attached.
+    nominal = _apply_lr_floor(nominal, lr_fpr_floor=lr_fpr_floor, lr_sp_floor=lr_sp_floor, fprcol=fprcol)
+    lower = _apply_lr_floor(lower, lr_fpr_floor=lr_fpr_floor, lr_sp_floor=lr_sp_floor, fprcol=fprcol)
+    upper = _apply_lr_floor(upper, lr_fpr_floor=lr_fpr_floor, lr_sp_floor=lr_sp_floor, fprcol=fprcol)
+
+    lower, upper = _enforce_bounds_around_nominal(
+        nominal,
+        lower,
+        upper,
+        cols=['tpr', 'ppv', 'acc', 'npv', 'LR+', 'LR-'],
+    )
     return nominal, lower, upper
 
 
@@ -381,6 +543,7 @@ class processRoc(object):
         self.positive_samples = positive_samples
         self.alpha = alpha
         self.lr_fpr_floor = float(lr_fpr_floor)
+        self.lr_sp_floor = float(lr_fpr_floor)
 
         work, thresholdcol = _prepare_roc_dataframe(df=df, fprcol=fprcol, tprcol=tprcol, thresholdcol=thresholdcol)
         self.thresholdcol = thresholdcol
@@ -396,6 +559,10 @@ class processRoc(object):
 
     def set_lr_fpr_floor(self, lr_fpr_floor):
         self.lr_fpr_floor = float(lr_fpr_floor)
+        return self
+
+    def set_lr_sp_floor(self, lr_sp_floor):
+        self.lr_sp_floor = float(lr_sp_floor)
         return self
 
     def set_auc_bootstrap_data(self, df, score_col, label_col, lower_score_is_risk=False):
@@ -595,7 +762,7 @@ class processRoc(object):
         self.df = self._compute_measures(work, prevalence=self.prevalence, apply_ppv_isotonic=True)
         return
 
-    def usample(self, df=None, precision=3):
+    def usample(self, df=None, precision=3, recompute_measures=True):
         step = 10 ** (-precision)
         grid = np.round(np.arange(0.0, 1.0 + step, step), precision)
         grid[-1] = 1.0
@@ -603,6 +770,7 @@ class processRoc(object):
         if source.index.name == self.fprcol:
             source = source.reset_index()
         source = source.sort_values(self.fprcol).reset_index(drop=True)
+
         out = pd.DataFrame({self.fprcol: grid})
         x = pd.to_numeric(source[self.fprcol], errors='coerce').to_numpy(dtype=float)
         for col in source.columns:
@@ -616,17 +784,40 @@ class processRoc(object):
                 out[col] = vals[mask][0]
             else:
                 out[col] = np.nan
+
         if self.tprcol in out.columns:
             out[self.tprcol] = _clip01(np.maximum.accumulate(out[self.tprcol].values))
+
+        # Important: do not interpolate derived ratios such as LR+ and LR-.
+        # Interpolating them extrapolates finite values into endpoint rows
+        # where the ratio is undefined, producing the spurious LR curve branch.
+        # Instead, interpolate only the ROC coordinates and recompute all
+        # prevalence-derived measures from the resampled FPR/TPR curve.
+        if recompute_measures and self.prevalence is not None and self.tprcol in out.columns:
+            recomputed = _compute_measures_from_arrays(
+                out[self.fprcol].to_numpy(dtype=float),
+                out[self.tprcol].to_numpy(dtype=float),
+                prevalence=self.prevalence,
+                lr_fpr_floor=self.lr_fpr_floor,
+                lr_sp_floor=getattr(self, 'lr_sp_floor', self.lr_fpr_floor),
+            )
+            for col in ['ppv', 'acc', 'npv', 'LR+', 'LR-']:
+                out[col] = recomputed[col].to_numpy(dtype=float)
+
         out = out.set_index(self.fprcol)
         if 'ppv' in out.columns:
             out = self.__correctPPV(out)
-        out = _apply_lr_floor(out, lr_fpr_floor=self.lr_fpr_floor, fprcol=self.fprcol)
+        out = _apply_lr_floor(
+            out,
+            lr_fpr_floor=self.lr_fpr_floor,
+            lr_sp_floor=getattr(self, 'lr_sp_floor', self.lr_fpr_floor),
+            fprcol=self.fprcol,
+        )
         if df is None:
             self.df = out
         return out
 
-    def getBounds(self, total_samples=None, positive_samples=None, alpha=None, prevalence=None):
+    def getBounds(self, total_samples=None, positive_samples=None, alpha=None, prevalence=None, ppv_ci_method='direct', min_expected_flags=1.0, enforce_bounds=True):
         if total_samples is None:
             total_samples = self.total_samples
         if positive_samples is None:
@@ -649,21 +840,30 @@ class processRoc(object):
             fprcol=self.fprcol,
             tprcol=self.tprcol,
             lr_fpr_floor=self.lr_fpr_floor,
+            lr_sp_floor=getattr(self, 'lr_sp_floor', self.lr_fpr_floor),
+            ppv_ci_method=ppv_ci_method,
+            min_expected_flags=min_expected_flags,
         )
+        # Only the displayed nominal PPV is monotone-corrected.
+        # Bounds are not isotonic-corrected independently; doing so can make
+        # the nominal curve and bounds inconsistent. Bounds are enforced below.
         nominal_emp = self.__correctPPV(nominal_emp)
-        lower_emp = self.__correctPPV(lower_emp)
-        upper_emp = self.__correctPPV(upper_emp)
 
         target_index = self.df.index.values.astype(float) if self.df.index.name == self.fprcol else self.df[self.fprcol].values.astype(float)
         nominal = _numeric_interp_frame_to_target_index(nominal_emp, target_index, index_name=self.fprcol)
         lower = _numeric_interp_frame_to_target_index(lower_emp, target_index, index_name=self.fprcol)
         upper = _numeric_interp_frame_to_target_index(upper_emp, target_index, index_name=self.fprcol)
         nominal = self.__correctPPV(nominal)
-        lower = self.__correctPPV(lower)
-        upper = self.__correctPPV(upper)
-        nominal = _apply_lr_floor(nominal, lr_fpr_floor=self.lr_fpr_floor, fprcol=self.fprcol)
-        lower = _apply_lr_floor(lower, lr_fpr_floor=self.lr_fpr_floor, fprcol=self.fprcol)
-        upper = _apply_lr_floor(upper, lr_fpr_floor=self.lr_fpr_floor, fprcol=self.fprcol)
+        if enforce_bounds:
+            lower, upper = _enforce_bounds_around_nominal(
+                nominal,
+                lower,
+                upper,
+                cols=['tpr', 'ppv', 'acc', 'npv', 'LR+', 'LR-'],
+            )
+        nominal = _apply_lr_floor(nominal, lr_fpr_floor=self.lr_fpr_floor, lr_sp_floor=getattr(self, 'lr_sp_floor', self.lr_fpr_floor), fprcol=self.fprcol)
+        lower = _apply_lr_floor(lower, lr_fpr_floor=self.lr_fpr_floor, lr_sp_floor=getattr(self, 'lr_sp_floor', self.lr_fpr_floor), fprcol=self.fprcol)
+        upper = _apply_lr_floor(upper, lr_fpr_floor=self.lr_fpr_floor, lr_sp_floor=getattr(self, 'lr_sp_floor', self.lr_fpr_floor), fprcol=self.fprcol)
 
         self.df_lim['L'] = lower
         self.df_lim['U'] = upper
@@ -675,6 +875,9 @@ class processRoc(object):
             'L_display': lower,
             'U_display': upper,
             'kind': 'analytic_pointwise',
+            'ppv_ci_method': ppv_ci_method,
+            'min_expected_flags': min_expected_flags,
+            'enforce_bounds': enforce_bounds,
             'lr_fpr_floor': self.lr_fpr_floor,
         }
         return
@@ -1083,3 +1286,463 @@ def score_to_probability(scores, df, score_col, label_col, target_prevalence=Non
         return probs
     cal_df = calibration_curve_table(work, prob_col='calibrated_prob_oof', label_col=label_col, target_prevalence=target_prevalence, n_bins=n_bins)
     return probs, cal_df
+
+
+# =============================================================================
+# Additional fixed bounds/calculation layer
+# =============================================================================
+# This block intentionally overrides processRoc.usample and processRoc.getBounds
+# without changing the public construction/API pattern.  It fixes three issues:
+#   1. derived ratios are recomputed from resampled FPR/TPR rather than
+#      interpolated directly;
+#   2. PPV confidence bounds are direct Wilson bounds on the expected flagged
+#      population, optionally monotone-smoothed and forced to bracket the point
+#      estimate;
+#   3. likelihood-ratio quantities are masked in unstable/dominated endpoint
+#      regions, with a helper that returns the nondominated LR frontier.
+
+
+def _isotonic_monotone_array(y, increasing=False, sample_weight=None, clip01=False):
+    y = np.asarray(y, dtype=float)
+    out = y.copy()
+    valid = np.isfinite(y)
+    if valid.sum() < 2:
+        return _clip01(out) if clip01 else out
+
+    x = np.arange(valid.sum(), dtype=float)
+    if sample_weight is None:
+        w = np.ones(valid.sum(), dtype=float)
+    else:
+        w_all = np.asarray(sample_weight, dtype=float)
+        w = w_all[valid]
+        w = np.where(np.isfinite(w) & (w > 0), w, 1.0)
+
+    iso = IsotonicRegression(increasing=increasing, out_of_bounds='clip')
+    out[valid] = iso.fit_transform(x, y[valid], sample_weight=w)
+    return _clip01(out) if clip01 else out
+
+
+def _smooth_ppv_bounds_if_requested(lower, upper, nominal, prevalence=None, total_samples=None, smooth_bounds=True):
+    if not smooth_bounds:
+        return lower, upper
+
+    lower = lower.copy()
+    upper = upper.copy()
+    nominal = nominal.copy()
+
+    if 'ppv' not in lower.columns or 'ppv' not in upper.columns:
+        return lower, upper
+
+    if lower.index.name == 'fpr':
+        fpr = lower.index.to_numpy(dtype=float)
+    elif 'fpr' in lower.columns:
+        fpr = pd.to_numeric(lower['fpr'], errors='coerce').to_numpy(dtype=float)
+    else:
+        fpr = np.arange(len(lower), dtype=float)
+
+    if prevalence is not None and total_samples is not None and 'tpr' in nominal.columns:
+        tpr = pd.to_numeric(nominal['tpr'], errors='coerce').to_numpy(dtype=float)
+        ff = float(prevalence) * _clip01(tpr) + (1.0 - float(prevalence)) * _clip01(fpr)
+        weights = np.maximum(float(total_samples) * ff, 1.0)
+    else:
+        weights = np.ones(len(lower), dtype=float)
+
+    lower['ppv'] = _isotonic_monotone_array(lower['ppv'].to_numpy(dtype=float), increasing=False, sample_weight=weights, clip01=True)
+    upper['ppv'] = _isotonic_monotone_array(upper['ppv'].to_numpy(dtype=float), increasing=False, sample_weight=weights, clip01=True)
+    return lower, upper
+
+
+def _lr_nondominated_mask_from_arrays(lr_minus, lr_plus, min_lrplus=1.0, max_lrminus=None, tol=1e-12):
+    """Return mask for nondominated LR operating points.
+
+    In LR space, smaller LR- and larger LR+ are preferred. A point is dominated
+    if another point has LR- <= current LR- and LR+ >= current LR+.
+
+    min_lrplus removes the no-rule-in branch near LR+ = 1. max_lrminus may be
+    used to restrict to rule-out-relevant thresholds.
+    """
+    lr_minus = np.asarray(lr_minus, dtype=float)
+    lr_plus = np.asarray(lr_plus, dtype=float)
+    keep = np.zeros(lr_minus.shape, dtype=bool)
+
+    cand = np.isfinite(lr_minus) & np.isfinite(lr_plus) & (lr_minus > 0) & (lr_plus > float(min_lrplus))
+    if max_lrminus is not None:
+        cand &= lr_minus < float(max_lrminus)
+    if not np.any(cand):
+        return keep
+
+    idx = np.flatnonzero(cand)
+    order = np.lexsort((-lr_plus[idx], lr_minus[idx]))
+    idx = idx[order]
+
+    best_lrplus = -np.inf
+    for i in idx:
+        if lr_plus[i] > best_lrplus + tol:
+            keep[i] = True
+            best_lrplus = lr_plus[i]
+    return keep
+
+
+def _apply_lr_frontier_mask_to_frames(nominal, lower, upper, min_lrplus=1.0, max_lrminus=None):
+    nominal = nominal.copy()
+    lower = lower.copy()
+    upper = upper.copy()
+
+    if 'LR-' not in nominal.columns or 'LR+' not in nominal.columns:
+        return nominal, lower, upper
+
+    mask = _lr_nondominated_mask_from_arrays(
+        nominal['LR-'].to_numpy(dtype=float),
+        nominal['LR+'].to_numpy(dtype=float),
+        min_lrplus=min_lrplus,
+        max_lrminus=max_lrminus,
+    )
+    bad = ~mask
+    for frame in [nominal, lower, upper]:
+        for col in ['LR+', 'LR-']:
+            if col in frame.columns:
+                frame.loc[bad, col] = np.nan
+    return nominal, lower, upper
+
+
+def lr_nondominated_frontier(perf_df, min_lrplus=1.0, max_lrminus=None):
+    """Return the nondominated LR frontier from a performance dataframe.
+
+    The input can be a zedstat output table with FPR as either the index or a
+    column. The returned rows are thresholds for which no other threshold has
+    both a lower/equal LR- and a higher/equal LR+.
+    """
+    pf = perf_df.reset_index().copy()
+    if 'fpr' not in pf.columns:
+        pf = pf.rename(columns={pf.columns[0]: 'fpr'})
+    pf = pf.replace([np.inf, -np.inf], np.nan)
+    if 'LR-' not in pf.columns or 'LR+' not in pf.columns:
+        raise ValueError("perf_df must contain 'LR-' and 'LR+' columns")
+    mask = _lr_nondominated_mask_from_arrays(
+        pf['LR-'].to_numpy(dtype=float),
+        pf['LR+'].to_numpy(dtype=float),
+        min_lrplus=min_lrplus,
+        max_lrminus=max_lrminus,
+    )
+    return pf.loc[mask].sort_values('LR-').reset_index(drop=True)
+
+
+def _compute_pointwise_measure_frames_fixed(
+    df,
+    prevalence,
+    alpha,
+    total_samples,
+    positive_samples,
+    thresholdcol='threshold',
+    fprcol='fpr',
+    tprcol='tpr',
+    lr_fpr_floor=0.001,
+    lr_sp_floor=None,
+    ppv_ci_method='direct',
+    min_expected_flags=10.0,
+    min_expected_fp=5.0,
+    min_expected_tn=5.0,
+):
+    work, thresholdcol = _prepare_roc_dataframe(df, fprcol=fprcol, tprcol=tprcol, thresholdcol=thresholdcol)
+    work = _add_endpoints(work, fprcol=fprcol, tprcol=tprcol, thresholdcol=thresholdcol)
+
+    fpr = _clip01(work[fprcol].to_numpy(dtype=float))
+    tpr = _clip01(work[tprcol].to_numpy(dtype=float))
+    sp = 1.0 - fpr
+
+    n_pos = positive_samples
+    n_neg = None if total_samples is None or positive_samples is None else int(total_samples - positive_samples)
+
+    tpr_low, tpr_high = _wilson_interval_from_proportion(tpr, n_pos, alpha=alpha)
+    sp_low, sp_high = _wilson_interval_from_proportion(sp, n_neg, alpha=alpha)
+    fpr_low = 1.0 - sp_high
+    fpr_high = 1.0 - sp_low
+
+    nominal = _compute_measures_from_arrays(
+        fpr,
+        tpr,
+        prevalence=prevalence,
+        lr_fpr_floor=lr_fpr_floor,
+        lr_sp_floor=lr_sp_floor,
+    )
+    lower = pd.DataFrame({'fpr': fpr})
+    upper = pd.DataFrame({'fpr': fpr})
+
+    lower['tpr'] = tpr_low
+    upper['tpr'] = tpr_high
+
+    if ppv_ci_method == 'direct':
+        ppv_low, ppv_high = _direct_ppv_bounds_from_expected_flags(
+            fpr=fpr,
+            tpr=tpr,
+            prevalence=prevalence,
+            total_samples=total_samples,
+            alpha=alpha,
+            min_expected_flags=min_expected_flags,
+        )
+        lower['ppv'] = ppv_low
+        upper['ppv'] = ppv_high
+    elif ppv_ci_method == 'propagated':
+        lower['ppv'] = _safe_divide(tpr_low * prevalence, tpr_low * prevalence + fpr_high * (1.0 - prevalence))
+        upper['ppv'] = _safe_divide(tpr_high * prevalence, tpr_high * prevalence + fpr_low * (1.0 - prevalence))
+    else:
+        raise ValueError("ppv_ci_method must be 'direct' or 'propagated'")
+
+    lower['acc'] = prevalence * tpr_low + (1.0 - prevalence) * (1.0 - fpr_high)
+    upper['acc'] = prevalence * tpr_high + (1.0 - prevalence) * (1.0 - fpr_low)
+
+    lower['npv'] = _safe_divide((1.0 - fpr_low) * (1.0 - prevalence), (1.0 - fpr_low) * (1.0 - prevalence) + (1.0 - tpr_high) * prevalence)
+    upper['npv'] = _safe_divide((1.0 - fpr_high) * (1.0 - prevalence), (1.0 - fpr_high) * (1.0 - prevalence) + (1.0 - tpr_low) * prevalence)
+
+    lower['LR+'] = _safe_divide(tpr_low, fpr_high)
+    upper['LR+'] = _safe_divide(tpr_high, fpr_low)
+
+    lower['LR-'] = _safe_divide(1.0 - tpr_high, 1.0 - fpr_low)
+    upper['LR-'] = _safe_divide(1.0 - tpr_low, 1.0 - fpr_high)
+
+    # Expected-count masks for unstable LR regions.
+    if total_samples is not None and n_neg is not None:
+        expected_fp = float(n_neg) * fpr
+        expected_tn = float(n_neg) * sp
+    else:
+        expected_fp = np.full_like(fpr, np.nan, dtype=float)
+        expected_tn = np.full_like(fpr, np.nan, dtype=float)
+
+    lr_plus_bad = (
+        (fpr <= float(lr_fpr_floor)) |
+        (fpr_low <= 0) |
+        (~np.isfinite(expected_fp)) |
+        (expected_fp < float(min_expected_fp))
+    )
+    if lr_sp_floor is None:
+        lr_sp_floor = lr_fpr_floor
+    lr_minus_bad = (
+        (sp <= float(lr_sp_floor)) |
+        (sp_low <= 0) |
+        (~np.isfinite(expected_tn)) |
+        (expected_tn < float(min_expected_tn))
+    )
+
+    for frame in [nominal, lower, upper]:
+        frame.replace([np.inf, -np.inf], np.nan, inplace=True)
+        if thresholdcol is not None and thresholdcol in work.columns:
+            frame[thresholdcol] = work[thresholdcol].to_numpy(dtype=float)
+        frame.index = work[fprcol].to_numpy(dtype=float)
+        frame.index.name = fprcol
+        frame['expected_fp'] = expected_fp
+        frame['expected_tn'] = expected_tn
+        p = float(prevalence)
+        frame['expected_flags'] = float(total_samples) * (p * tpr + (1.0 - p) * fpr) if total_samples is not None else np.nan
+        if 'LR+' in frame.columns:
+            frame.loc[lr_plus_bad, 'LR+'] = np.nan
+        if 'LR-' in frame.columns:
+            frame.loc[lr_minus_bad, 'LR-'] = np.nan
+
+    nominal = _apply_lr_floor(nominal, lr_fpr_floor=lr_fpr_floor, lr_sp_floor=lr_sp_floor, fprcol=fprcol)
+    lower = _apply_lr_floor(lower, lr_fpr_floor=lr_fpr_floor, lr_sp_floor=lr_sp_floor, fprcol=fprcol)
+    upper = _apply_lr_floor(upper, lr_fpr_floor=lr_fpr_floor, lr_sp_floor=lr_sp_floor, fprcol=fprcol)
+
+    lower, upper = _enforce_bounds_around_nominal(
+        nominal,
+        lower,
+        upper,
+        cols=['tpr', 'ppv', 'acc', 'npv', 'LR+', 'LR-'],
+    )
+    return nominal, lower, upper
+
+
+def _processRoc_usample_fixed(self, df=None, precision=3, recompute_measures=True):
+    step = 10 ** (-precision)
+    grid = np.round(np.arange(0.0, 1.0 + step, step), precision)
+    grid[-1] = 1.0
+    source = self.df.copy() if df is None else df.copy()
+    if source.index.name == self.fprcol:
+        source = source.reset_index()
+    source = source.sort_values(self.fprcol).reset_index(drop=True)
+
+    out = pd.DataFrame({self.fprcol: grid})
+    x = pd.to_numeric(source[self.fprcol], errors='coerce').to_numpy(dtype=float)
+
+    # Interpolate only primary coordinates and threshold-like quantities.
+    # Derived operating measures are recomputed below.
+    skip_if_recompute = {'ppv', 'acc', 'npv', 'LR+', 'LR-'}
+    for col in source.columns:
+        if col == self.fprcol:
+            continue
+        if recompute_measures and col in skip_if_recompute:
+            continue
+        vals = pd.to_numeric(source[col], errors='coerce').to_numpy(dtype=float)
+        mask = np.isfinite(x) & np.isfinite(vals)
+        if mask.sum() >= 2:
+            out[col] = np.interp(grid, x[mask], vals[mask])
+        elif mask.sum() == 1:
+            out[col] = vals[mask][0]
+        else:
+            out[col] = np.nan
+
+    if self.tprcol in out.columns:
+        out[self.tprcol] = _clip01(np.maximum.accumulate(out[self.tprcol].values))
+
+    if recompute_measures and self.prevalence is not None and self.tprcol in out.columns:
+        recomputed = _compute_measures_from_arrays(
+            out[self.fprcol].to_numpy(dtype=float),
+            out[self.tprcol].to_numpy(dtype=float),
+            prevalence=self.prevalence,
+            lr_fpr_floor=self.lr_fpr_floor,
+            lr_sp_floor=getattr(self, 'lr_sp_floor', self.lr_fpr_floor),
+        )
+        for col in ['ppv', 'acc', 'npv', 'LR+', 'LR-']:
+            out[col] = recomputed[col].to_numpy(dtype=float)
+
+    out = out.set_index(self.fprcol)
+    if 'ppv' in out.columns:
+        out = self._processRoc__correctPPV(out)
+    out = _apply_lr_floor(
+        out,
+        lr_fpr_floor=self.lr_fpr_floor,
+        lr_sp_floor=getattr(self, 'lr_sp_floor', self.lr_fpr_floor),
+        fprcol=self.fprcol,
+    )
+    if df is None:
+        self.df = out
+    return out
+
+
+def _processRoc_getBounds_fixed(
+    self,
+    total_samples=None,
+    positive_samples=None,
+    alpha=None,
+    prevalence=None,
+    ppv_ci_method='direct',
+    min_expected_flags=10.0,
+    min_expected_fp=5.0,
+    min_expected_tn=5.0,
+    enforce_bounds=True,
+    smooth_ppv_bounds=True,
+    mask_dominated_lr=True,
+    lr_min_plus=1.001,
+    lr_max_minus=None,
+):
+    if total_samples is None:
+        total_samples = self.total_samples
+    if positive_samples is None:
+        positive_samples = self.positive_samples
+    if alpha is None:
+        alpha = self.alpha
+    if prevalence is None:
+        prevalence = self.prevalence
+    if prevalence is None:
+        raise ValueError('prevalence undefined')
+
+    empirical = self.raw_df.reset_index().copy()
+    nominal_emp, lower_emp, upper_emp = _compute_pointwise_measure_frames_fixed(
+        empirical,
+        prevalence=float(prevalence),
+        alpha=alpha,
+        total_samples=total_samples,
+        positive_samples=positive_samples,
+        thresholdcol=self.thresholdcol,
+        fprcol=self.fprcol,
+        tprcol=self.tprcol,
+        lr_fpr_floor=self.lr_fpr_floor,
+        lr_sp_floor=getattr(self, 'lr_sp_floor', self.lr_fpr_floor),
+        ppv_ci_method=ppv_ci_method,
+        min_expected_flags=min_expected_flags,
+        min_expected_fp=min_expected_fp,
+        min_expected_tn=min_expected_tn,
+    )
+
+    nominal_emp = self._processRoc__correctPPV(nominal_emp)
+    lower_emp, upper_emp = _smooth_ppv_bounds_if_requested(
+        lower_emp,
+        upper_emp,
+        nominal_emp,
+        prevalence=prevalence,
+        total_samples=total_samples,
+        smooth_bounds=smooth_ppv_bounds,
+    )
+    if enforce_bounds:
+        lower_emp, upper_emp = _enforce_bounds_around_nominal(
+            nominal_emp,
+            lower_emp,
+            upper_emp,
+            cols=['tpr', 'ppv', 'acc', 'npv', 'LR+', 'LR-'],
+        )
+
+    target_index = self.df.index.values.astype(float) if self.df.index.name == self.fprcol else self.df[self.fprcol].values.astype(float)
+    nominal = _numeric_interp_frame_to_target_index(nominal_emp, target_index, index_name=self.fprcol)
+    lower = _numeric_interp_frame_to_target_index(lower_emp, target_index, index_name=self.fprcol)
+    upper = _numeric_interp_frame_to_target_index(upper_emp, target_index, index_name=self.fprcol)
+
+    nominal = self._processRoc__correctPPV(nominal)
+    lower, upper = _smooth_ppv_bounds_if_requested(
+        lower,
+        upper,
+        nominal,
+        prevalence=prevalence,
+        total_samples=total_samples,
+        smooth_bounds=smooth_ppv_bounds,
+    )
+    if enforce_bounds:
+        lower, upper = _enforce_bounds_around_nominal(
+            nominal,
+            lower,
+            upper,
+            cols=['tpr', 'ppv', 'acc', 'npv', 'LR+', 'LR-'],
+        )
+
+    nominal = _apply_lr_floor(nominal, lr_fpr_floor=self.lr_fpr_floor, lr_sp_floor=getattr(self, 'lr_sp_floor', self.lr_fpr_floor), fprcol=self.fprcol)
+    lower = _apply_lr_floor(lower, lr_fpr_floor=self.lr_fpr_floor, lr_sp_floor=getattr(self, 'lr_sp_floor', self.lr_fpr_floor), fprcol=self.fprcol)
+    upper = _apply_lr_floor(upper, lr_fpr_floor=self.lr_fpr_floor, lr_sp_floor=getattr(self, 'lr_sp_floor', self.lr_fpr_floor), fprcol=self.fprcol)
+
+    if mask_dominated_lr:
+        nominal, lower, upper = _apply_lr_frontier_mask_to_frames(
+            nominal,
+            lower,
+            upper,
+            min_lrplus=lr_min_plus,
+            max_lrminus=lr_max_minus,
+        )
+
+    # Ensure zt.get() returns the same repaired nominal calculations that are
+    # used to define the displayed bounds.
+    self.df = nominal.copy()
+    self.df_lim['L'] = lower
+    self.df_lim['U'] = upper
+    self.df_measure_bounds_ = {
+        'nominal_empirical': nominal_emp,
+        'L_empirical': lower_emp,
+        'U_empirical': upper_emp,
+        'nominal_display': nominal,
+        'L_display': lower,
+        'U_display': upper,
+        'kind': 'analytic_pointwise_fixed',
+        'ppv_ci_method': ppv_ci_method,
+        'min_expected_flags': min_expected_flags,
+        'min_expected_fp': min_expected_fp,
+        'min_expected_tn': min_expected_tn,
+        'enforce_bounds': enforce_bounds,
+        'smooth_ppv_bounds': smooth_ppv_bounds,
+        'mask_dominated_lr': mask_dominated_lr,
+        'lr_min_plus': lr_min_plus,
+        'lr_max_minus': lr_max_minus,
+        'lr_fpr_floor': self.lr_fpr_floor,
+        'lr_sp_floor': getattr(self, 'lr_sp_floor', self.lr_fpr_floor),
+    }
+    return
+
+
+def _processRoc_lr_frontier(self, min_lrplus=1.0, max_lrminus=None):
+    return lr_nondominated_frontier(self.get(), min_lrplus=min_lrplus, max_lrminus=max_lrminus)
+
+
+# Override processRoc methods with the fixed versions.
+processRoc.usample = _processRoc_usample_fixed
+processRoc.getBounds = _processRoc_getBounds_fixed
+processRoc.lr_frontier = _processRoc_lr_frontier
+
+try:
+    __all__.append('lr_nondominated_frontier')
+except Exception:
+    pass

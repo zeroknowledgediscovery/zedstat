@@ -1,5 +1,5 @@
-scikit-learn
-scipy
 numpy
 pandas
+scikit-learn
+scipy
 scipy
