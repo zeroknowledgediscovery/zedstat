@@ -1746,3 +1746,175 @@ try:
     __all__.append('lr_nondominated_frontier')
 except Exception:
     pass
+
+
+# =============================================================================
+# NaN-safe final output accessor
+# =============================================================================
+# This accessor keeps the old behavior for zt.get(): nominal table only, no
+# interpolation.  It adds two explicit final-output modes:
+#   zt.get(bounds=True, interpolate=True)
+#       returns nominal + upper/lower bounds and interpolates display gaps;
+#   zt.get(0)
+#       shorthand for the same NaN-safe final table.  The 0 is not used as a
+#       numerical fill value; residual all-NaN columns remain NaN unless fillna
+#       is supplied explicitly.
+
+_PROBABILITY_BASE_COLUMNS = {'tpr', 'ppv', 'acc', 'npv'}
+
+
+def _base_metric_name(col):
+    col = str(col)
+    for suffix in ('_upper', '_lower'):
+        if col.endswith(suffix):
+            return col[:-len(suffix)]
+    return col
+
+
+def _clip_probability_like_columns(frame):
+    out = frame.copy()
+    for col in out.columns:
+        if _base_metric_name(col) in _PROBABILITY_BASE_COLUMNS:
+            vals = pd.to_numeric(out[col], errors='coerce').to_numpy(dtype=float)
+            out[col] = np.clip(vals, 0.0, 1.0)
+    return out
+
+
+def _interpolate_numeric_frame_for_display(frame, interpolate=True, fillna=None, limit_direction='both'):
+    """Interpolate numeric display gaps in a final performance table.
+
+    This is intentionally a final accessor/post-processing step.  It does not
+    change the stored analytic bounds unless the caller assigns the returned
+    dataframe.  The main use is to prevent visualization breaks from NaNs that
+    arise after endpoint masking, sparse empirical ROC rows, or frontier masking.
+    """
+    out = frame.copy().replace([np.inf, -np.inf], np.nan)
+
+    if interpolate:
+        numeric_cols = [c for c in out.columns if pd.api.types.is_numeric_dtype(out[c])]
+        if numeric_cols:
+            idx_numeric = np.issubdtype(out.index.dtype, np.number)
+            method = 'index' if idx_numeric else 'linear'
+            out[numeric_cols] = out[numeric_cols].interpolate(
+                method=method,
+                limit_direction=limit_direction,
+                axis=0,
+            )
+
+    if fillna is not None:
+        out = out.fillna(fillna)
+
+    out = _clip_probability_like_columns(out)
+    return out
+
+
+def _enforce_joined_bounds_for_display(frame):
+    """Ensure joined *_lower and *_upper columns bracket nominal columns."""
+    out = frame.copy()
+    for base in ['tpr', 'ppv', 'acc', 'npv', 'LR+', 'LR-']:
+        lo_col = f'{base}_lower'
+        hi_col = f'{base}_upper'
+        if base not in out.columns or lo_col not in out.columns or hi_col not in out.columns:
+            continue
+
+        n = pd.to_numeric(out[base], errors='coerce').to_numpy(dtype=float)
+        lo = pd.to_numeric(out[lo_col], errors='coerce').to_numpy(dtype=float)
+        hi = pd.to_numeric(out[hi_col], errors='coerce').to_numpy(dtype=float)
+        finite = np.isfinite(n) & np.isfinite(lo) & np.isfinite(hi)
+        if not np.any(finite):
+            continue
+
+        lo2 = lo.copy()
+        hi2 = hi.copy()
+        lo2[finite] = np.minimum.reduce([lo[finite], hi[finite], n[finite]])
+        hi2[finite] = np.maximum.reduce([lo[finite], hi[finite], n[finite]])
+
+        if base in _PROBABILITY_BASE_COLUMNS:
+            lo2 = np.clip(lo2, 0.0, 1.0)
+            hi2 = np.clip(hi2, 0.0, 1.0)
+
+        out[lo_col] = lo2
+        out[hi_col] = hi2
+    return out
+
+
+def _processRoc_get_nan_safe(
+    self,
+    interpolate=False,
+    bounds=False,
+    fillna=None,
+    limit_direction='both',
+    enforce_bounds=True,
+):
+    """Return the processed ROC table, optionally as a NaN-safe final table.
+
+    Parameters
+    ----------
+    interpolate : bool or numeric, default False
+        False preserves the historical zt.get() behavior.  True interpolates
+        numeric gaps in the returned display table.  Passing 0 is supported as a
+        compact shorthand for zt.get(bounds=True, interpolate=True).
+    bounds : bool, default False
+        If True, join self.df_lim['U'] and self.df_lim['L'] using _upper and
+        _lower suffixes before optional interpolation.
+    fillna : scalar or None, default None
+        Optional final fill for columns that remain NaN after interpolation.
+        Leave as None to avoid inventing values for all-NaN columns.
+    limit_direction : str, default 'both'
+        Passed to pandas interpolate.  'both' fills endpoint display gaps using
+        nearest finite values.
+    enforce_bounds : bool, default True
+        After interpolation, force lower <= nominal <= upper for joined bounds.
+    """
+    numeric_shorthand = isinstance(interpolate, (int, float, np.integer, np.floating)) and not isinstance(interpolate, (bool, np.bool_))
+    if numeric_shorthand:
+        # zt.get(0) means: return the final joined, interpolated display table.
+        # The zero is not treated as a fill value because LR+ at FPR=0 should not
+        # be replaced by zero.  Use fillna=0 explicitly if that is actually wanted.
+        if float(interpolate) != 0.0 and fillna is None:
+            fillna = float(interpolate)
+        interpolate = True
+        bounds = True
+
+    out = self.df.copy()
+
+    if bounds:
+        if 'U' not in self.df_lim or 'L' not in self.df_lim:
+            raise ValueError("Bounds requested, but getBounds() has not been run yet.")
+        out = (
+            out
+            .join(self.df_lim['U'], rsuffix='_upper')
+            .join(self.df_lim['L'], rsuffix='_lower')
+        )
+
+    if interpolate or fillna is not None:
+        out = _interpolate_numeric_frame_for_display(
+            out,
+            interpolate=bool(interpolate),
+            fillna=fillna,
+            limit_direction=limit_direction,
+        )
+        if bounds and enforce_bounds:
+            out = _enforce_joined_bounds_for_display(out)
+
+    return out.copy()
+
+
+def _processRoc_get_full(self, interpolate=True, fillna=None, limit_direction='both', enforce_bounds=True):
+    """Convenience wrapper for the final nominal + bounds table."""
+    return self.get(
+        bounds=True,
+        interpolate=interpolate,
+        fillna=fillna,
+        limit_direction=limit_direction,
+        enforce_bounds=enforce_bounds,
+    )
+
+
+processRoc.get = _processRoc_get_nan_safe
+processRoc.get_full = _processRoc_get_full
+
+try:
+    __all__.append('lr_nondominated_frontier')
+except Exception:
+    pass
