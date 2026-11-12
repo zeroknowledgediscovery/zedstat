@@ -2,7 +2,7 @@
 zedstat
 ===============
 
-.. image:: https://zed.uchicago.edu/logo/logo_zedstat.png
+.. image:: https://raw.githubusercontent.com/zeroknowledgediscovery/zedstat/master/docs/logo_zedstat.png
    :height: 150px
    :align: center 
 
@@ -11,7 +11,9 @@ zedstat
 
 .. class:: no-web no-pdf
 
-:Author: ZeD@UChicago <zed.uchicago.edu>
+:Author: Ishanu Chattopadhyay
+:Affiliation: University of Kentucky
+:Contact: ishanu.chattopadhyay@gmail.com
 :Description: Tools for ML statistics 
 :Documentation: https://zeroknowledgediscovery.github.io/zedstat/
 :Example: https://github.com/zeroknowledgediscovery/zedstat/blob/master/examples/example1.ipynb

@@ -21,8 +21,10 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name=package_name,
-    author='zed.uchicago.edu',
-    author_email='ishanu@uchicago.edu',
+    author='Ishanu Chattopadhyay',
+    author_email='ishanu.chattopadhyay@gmail.com',
+    maintainer='Ishanu Chattopadhyay',
+    maintainer_email='ishanu.chattopadhyay@gmail.com',
     version = str(version['__version__']),
     packages=find_packages(),
     scripts=[],
