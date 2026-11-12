@@ -41,7 +41,7 @@ setup(
         "numpy",  
         "pandas",
         "lifelines>=0.27",
-        "scipy"],
+        "matplotlib>=3.5"],
     python_requires='>=3.6',
     classifiers=[
         'Development Status :: 4 - Beta',
