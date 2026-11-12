@@ -4,6 +4,7 @@ README.rst
 setup.py
 version.py
 tests/test_ci_logratio.py
+tests/test_curveplots_api.py
 tests/test_getbounds_current_geometry.py
 tests/test_getbounds_preserves_nominal.py
 tests/test_lr_ci.py
@@ -13,6 +14,7 @@ zedstat/__init__.py
 zedstat/calibration.py
 zedstat/ci.py
 zedstat/ci_logratio.py
+zedstat/curveplots.py
 zedstat/example_combine.py
 zedstat/lr_ci.py
 zedstat/mwauc.py

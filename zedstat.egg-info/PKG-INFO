@@ -1,9 +1,9 @@
 Metadata-Version: 2.4
 Name: zedstat
-Version: 0.2.6
+Version: 0.2.7
 Summary: Statistics tools for ML models and deployment
 Home-page: https://github.com/zeroknowledgediscovery/zedstat
-Download-URL: https://github.com/zeroknowledgediscovery/zedstat/archive/0.2.6.tar.gz
+Download-URL: https://github.com/zeroknowledgediscovery/zedstat/archive/0.2.7.tar.gz
 Author: Ishanu Chattopadhyay
 Author-email: ishanu.chattopadhyay@gmail.com
 Maintainer: Ishanu Chattopadhyay
