@@ -1918,3 +1918,14 @@ try:
     __all__.append('lr_nondominated_frontier')
 except Exception:
     pass
+
+# Raw-score-based, pointwise LR confidence intervals; separate from the
+# historical analytic getBounds() API and its ROC interpolation.
+from .lr_ci import lr_curve_ci_from_scores, plot_lr_ci_fill
+try:
+    __all__.extend(('lr_curve_ci_from_scores', 'plot_lr_ci_fill'))
+except Exception:
+    pass
+
+# Score-based CI extensions (pointwise; display smoothing is non-inferential)
+from .pr_ci import precision_recall_ci_from_scores, plot_precision_recall_ci_fill
