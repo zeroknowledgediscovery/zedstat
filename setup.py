@@ -40,6 +40,7 @@ setup(
         "scipy", 
         "numpy",  
         "pandas",
+        "lifelines>=0.27",
         "scipy"],
     python_requires='>=3.6',
     classifiers=[
