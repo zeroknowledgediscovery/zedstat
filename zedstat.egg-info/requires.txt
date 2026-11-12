@@ -3,4 +3,4 @@ scipy
 numpy
 pandas
 lifelines>=0.27
-scipy
+matplotlib>=3.5

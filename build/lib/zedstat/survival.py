@@ -971,117 +971,320 @@ def export_joined_survival_summary_table(
         print(LATEX, end="")
     return output_path
 
+# Generic, DataFrame-based survival plots and exports (no project paths).
 
-# -----------------------------------------------------------------------------
-# One-call, reproducible workflow for the original ILD KM publication figures.
-# Relocates notebook file loading, summaries and plot orchestration into zedstat.
-# -----------------------------------------------------------------------------
-def run_ild_survival_publication(
-    root='.',
-    *,
-    ukhc_training_tag='50',
-    specificity='0975',
-    max_week=24,
-    max_followup_weeks=26,
-    landmark_weeks=(1, 2, 4, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26),
-    dpi=600,
-    show=True,
-    print_latex=True,
-):
-    """Regenerate the two original joined ILD survival plot families.
+_DEFAULT_SURVIVAL_COLORS = {1: '#569D3E', 0: '#BE3D30'}
+_DEFAULT_METRIC_COLORS = {
+    'P_event_within_k_given_crossed': '#4675AF',
+    'P_no_event_within_k_given_never_crossed': '#E88833',
+    'P_crossed_given_event_within_k': '#569D3E',
+    'P_never_crossed_given_no_event_within_k': '#BE3D30',
+}
+_DEFAULT_METRIC_LABELS = {
+    'P_event_within_k_given_crossed': r'$P(event \leq k \mid crossed)$',
+    'P_no_event_within_k_given_never_crossed': r'$P(no\ event \leq k \mid never\ crossed)$',
+    'P_crossed_given_event_within_k': r'$P(crossed \mid event \leq k)$',
+    'P_never_crossed_given_no_event_within_k': r'$P(never\ crossed \mid no\ event \leq k)$',
+}
 
-    Preserves original KM_PLOTS(1).ipynb processing, including its original
-    duration <= 24 pre-selection, cohort grouping, CI estimates, and outputs.
-    Root points at the ILD analysis directory containing PAPER_DATA_* folders.
 
-    Returns a dictionary containing output_paths, summary, and input provenance.
-    No modeling or metric recomputation: reads existing saved patient/metric CSVs.
-    """
-    root = Path(root).expanduser().resolve()
-    output_dir = root / 'PUBLICATION_FILES' / 'survival_JOINED'
-    models = ('ILD-AFSTDPULMO', 'ILD-AFSTDOXYGEN', 'ILD-AFSTDARDS')
-    targets = {
-        'ILD-AFSTDPULMO': 'Pulmonary_Hypertension',
-        'ILD-AFSTDOXYGEN': 'Oxygen_Dependence',
-        'ILD-AFSTDARDS': 'ARDS',
-    }
-    sources = {
-        'MarketScan': root / 'PAPER_DATA_MARKETSCAN' / 'survival_MARKETSCAN',
-        'UKHC': root / f'PAPER_DATA_UKHC_{ukhc_training_tag}TRAINING' / 'survival_UKHC',
-    }
-    spec = str(specificity)
-    colors = {'blue':'#4675AF', 'orange':'#E88833',
-              'green':'#569D3E', 'red':'#BE3D30'}
-    linestyles = {'MarketScan':'-', 'UKHC':'--'}
-
-    # Preflight every required input *before* writing any results.
-    required_paths = []
-    for source_dir in sources.values():
-        required_paths.append(source_dir / 'SUMMARY.csv')
-        for model in models:
-            required_paths.append(source_dir / f'km_full_cohort_{model}_{spec}.csv')
-            required_paths.append(source_dir / f'dynamic_metrics_full_cohort_{model}_{spec}.csv')
-    missing = [str(p) for p in required_paths if not p.is_file()]
+def _plot_order(frames, cohort_order):
+    if not frames:
+        raise ValueError('At least one cohort DataFrame is required')
+    order = tuple(frames) if cohort_order is None else tuple(cohort_order)
+    if not order:
+        raise ValueError('cohort_order must not be empty')
+    missing = [cohort for cohort in order if cohort not in frames]
     if missing:
-        raise FileNotFoundError('Missing survival input files:\n  ' + '\n  '.join(missing))
+        raise KeyError(f'No DataFrame supplied for cohort(s): {missing}')
+    return order
 
-    summary_parts = []
-    patients_by_model = {model: {} for model in models}
-    metrics_by_model = {model: {} for model in models}
-    for source, source_dir in sources.items():
-        source_summary = pd.read_csv(source_dir / 'SUMMARY.csv', dtype={'SPEC': str})
-        source_summary = source_summary.loc[
-            source_summary['SPEC'].str.zfill(len(spec)).eq(spec)
-            & source_summary['M'].isin(targets.values())
-            & source_summary['week'].eq(max_week)
-        ].copy()
-        source_summary['source'] = source
-        summary_parts.append(source_summary)
-        for model in models:
-            patients_by_model[model][source] = pd.read_csv(
-                source_dir / f'km_full_cohort_{model}_{spec}.csv'
-            )
-            metrics_by_model[model][source] = pd.read_csv(
-                source_dir / f'dynamic_metrics_full_cohort_{model}_{spec}.csv'
-            )
 
-    summary = pd.concat(summary_parts, ignore_index=True)
-    expected = {(target, source) for target in targets.values() for source in sources}
-    actual = set(zip(summary['M'], summary['source']))
-    if expected != actual or summary.duplicated(['M','source']).any():
-        raise ValueError('Filtered SUMMARY.csv must contain exactly one row for each outcome/cohort at the selected specificity and week.')
+def _save_show_close(fig, outfile, show, close, dpi):
+    if outfile is not None:
+        target = Path(outfile)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(target, dpi=dpi, bbox_inches='tight', facecolor='white')
+    if show:
+        plt.show()
+    if close:
+        plt.close(fig)
 
-    output_dir.mkdir(parents=True, exist_ok=True)
-    summary_path = output_dir / 'SUMMARY.csv'
-    summary.to_csv(summary_path, index=False)
-    saved = [summary_path]
 
-    for model in models:
-        print(f'{model}: stricter threshold, MarketScan versus UKHC')
-        saved.append(plot_joined_km(
-            patients_by_model[model], model, output_dir,
-            max_week=max_week, colors=colors,
-            source_linestyles=linestyles, linewidth=3.25,
-            legend_fontsize=14, dpi=dpi, show=show,
-        ))
-        saved.append(plot_joined_dynamic_metrics(
-            metrics_by_model[model], model, output_dir,
-            max_week=max_week, max_followup_weeks=max_followup_weeks,
-            landmark_weeks=landmark_weeks, colors=colors,
-            source_linestyles=linestyles, linewidth=3.25,
-            marker_size=6, dpi=dpi, show=show,
-        ))
+def plot_km_comparison(
+    patients_by_cohort,
+    *,
+    max_week=24,
+    cohort_order=None,
+    group_col='crossed_threshold',
+    duration_col='duration',
+    event_col='event_observed',
+    group_order=(1, 0),
+    group_labels=None,
+    group_colors=None,
+    cohort_linestyles=None,
+    risk_set_mode='original_filter',
+    ci_show=True,
+    ci_alpha=0.18,
+    linewidth=3.25,
+    legend_fontsize=14,
+    figsize=(8.2, 5.8),
+    dpi=600,
+    outfile=None,
+    show=False,
+    close=False,
+):
+    """Plot comparable KM curves across arbitrary named cohorts and groups.
 
-    saved.append(export_joined_survival_summary_table(
-        summary, output_dir, max_week=max_week, specificity=spec,
-        print_latex=print_latex,
-    ))
-    return {
-        'output_paths': tuple(Path(p) for p in saved),
-        'summary': summary,
-        'input_dirs': sources,
-        'max_week': max_week,
-        'specificity': spec,
-    }
+    Each cohort is a DataFrame containing duration, event indicator, group.
+    ``risk_set_mode='original_filter'`` reproduces the source notebook:
+    retain only subjects with observed duration <= max_week before fitting.
+    This can bias survival estimates. ``administrative`` retains subjects
+    followed past the horizon and administratively censors them at max_week.
 
-__all__.append('run_ild_survival_publication')
+    Returns ``(figure, axes)``. Fits and confidence bands are unchanged
+    relative to lifelines' KaplanMeierFitter for a given filtered dataset.
+    """
+    order = _plot_order(patients_by_cohort, cohort_order)
+    colors = {**_DEFAULT_SURVIVAL_COLORS, **(group_colors or {})}
+    labels = {1: 'crossed', 0: 'never crossed'}
+    if group_labels:
+        labels.update(group_labels)
+    styles = {cohort: '-' for cohort in order}
+    if cohort_linestyles:
+        styles.update(cohort_linestyles)
+    if risk_set_mode not in ('original_filter', 'administrative'):
+        raise ValueError("risk_set_mode must be 'original_filter' or 'administrative'")
+    if max_week <= 0:
+        raise ValueError('max_week must be positive')
+
+    fig, ax = plt.subplots(figsize=figsize)
+    for group in group_order:
+        if group not in colors:
+            raise ValueError(f'Color unspecified for group {group!r}')
+        for cohort in order:
+            frame = patients_by_cohort[cohort]
+            needed = [group_col, duration_col, event_col]
+            absent = [name for name in needed if name not in frame]
+            if absent:
+                raise ValueError(f'{cohort} missing columns {absent}')
+            subset = frame.loc[frame[group_col] == group, needed].dropna().copy()
+            total = len(subset)
+            if not total:
+                raise ValueError(f'{cohort} group {group} is empty')
+            if risk_set_mode == 'original_filter':
+                fit_frame = subset.loc[subset[duration_col] <= max_week]
+                durations = fit_frame[duration_col]
+                events = fit_frame[event_col]
+            else:
+                durations = subset[duration_col].clip(upper=max_week)
+                events = (subset[event_col].astype(bool) &
+                          (subset[duration_col] <= max_week)).astype(int)
+            if len(durations) == 0:
+                raise ValueError(f'{cohort} group {group} has no eligible durations')
+            fit = KaplanMeierFitter()
+            fit.fit(durations, event_observed=events,
+                    label=f'{cohort}: {labels.get(group, group)} (n={total:,})')
+            fit.plot_survival_function(ax=ax, color=colors[group],
+                                       linestyle=styles[cohort], linewidth=linewidth,
+                                       ci_show=ci_show, ci_alpha=ci_alpha)
+
+    ax.set_xlabel('Weeks since screening', fontsize=18)
+    ax.set_ylabel('Event-free survival probability', fontsize=18)
+    ax.tick_params(axis='both', labelsize=15)
+    ax.grid(True, color='0.68', alpha=0.42, linewidth=0.95)
+    ax.legend(frameon=False, loc='lower left', fontsize=legend_fontsize)
+    _halve_x_margins(ax)
+    fig.tight_layout()
+    _save_show_close(fig, outfile, show, close, dpi)
+    return fig, ax
+
+
+def plot_finite_horizon_comparison(
+    metrics_by_cohort,
+    *,
+    max_week=24,
+    cohort_order=None,
+    cohort_linestyles=None,
+    landmark_weeks=None,
+    metric_colors=None,
+    metric_labels=None,
+    metrics=None,
+    week_col='k_weeks',
+    linewidth=3.25,
+    marker_size=6,
+    legend_fontsize=12,
+    figsize=(8.2, 5.8),
+    dpi=600,
+    outfile=None,
+    show=False,
+    close=False,
+):
+    """Plot finite-horizon metrics in multiple cohorts on a shared axis.
+
+    The metrics are supplied as precomputed DataFrames; this routine neither
+    reconstructs labels nor changes dynamic-metric estimation.
+    """
+    order = _plot_order(metrics_by_cohort, cohort_order)
+    styles = {cohort: '-' for cohort in order}
+    if cohort_linestyles:
+        styles.update(cohort_linestyles)
+    colors = {**_DEFAULT_METRIC_COLORS, **(metric_colors or {})}
+    labels = {**_DEFAULT_METRIC_LABELS, **(metric_labels or {})}
+    selected = tuple(_DEFAULT_METRIC_COLORS) if metrics is None else tuple(metrics)
+    if not selected:
+        raise ValueError('At least one dynamic metric must be selected')
+    fig, ax = plt.subplots(figsize=figsize)
+
+    for cohort in order:
+        frame = metrics_by_cohort[cohort]
+        required = [week_col, *selected]
+        absent = [name for name in required if name not in frame]
+        if absent:
+            raise ValueError(f'{cohort} missing columns {absent}')
+        use = frame.loc[frame[week_col].between(0, max_week)].sort_values(week_col)
+        if landmark_weeks is not None:
+            use = use.loc[use[week_col].isin(landmark_weeks)]
+        for metric in selected:
+            ax.plot(use[week_col], use[metric], color=colors[metric],
+                    linestyle=styles[cohort], marker='o', markersize=marker_size,
+                    linewidth=linewidth)
+
+    handles = [Line2D([0], [0], color='black', linestyle=styles[cohort],
+                      linewidth=linewidth, label=cohort) for cohort in order]
+    handles += [Line2D([0], [0], color=colors[metric], linestyle='-',
+                       linewidth=linewidth, label=labels.get(metric, metric))
+                for metric in selected]
+    ax.set_xlabel('Follow-up window k (weeks)', fontsize=18)
+    ax.set_ylabel('Probability', fontsize=18)
+    ax.tick_params(axis='both', labelsize=15)
+    ax.grid(True, color='0.68', alpha=0.42, linewidth=0.95)
+    ax.legend(handles=handles, frameon=False, loc='lower right',
+              bbox_to_anchor=(1, 0.465), fontsize=legend_fontsize)
+    _halve_x_margins(ax)
+    fig.tight_layout()
+    _save_show_close(fig, outfile, show, close, dpi)
+    return fig, ax
+
+
+def _parse_specificity(value):
+    """Accept 0.975, '0.975', or historical '0975' encoding."""
+    if isinstance(value, str) and value.startswith('0') and '.' not in value and len(value) > 1:
+        result = float('0.' + value[1:])
+    else:
+        result = float(value)
+    if not 0 < result <= 1:
+        raise ValueError('specificity must be in (0,1]')
+    return result
+
+
+def survival_summary_to_latex(
+    summary_df,
+    *,
+    horizon,
+    specificity,
+    targets,
+    cohorts,
+    target_col='M',
+    cohort_col='source',
+    label='table_SURVIVAL',
+    caption=None,
+):
+    """Format the supplied threshold-enrichment summary as a LaTeX table.
+
+    Expects summary_df to contain precomputed quantities. The library does not
+    read project-specific CSVs or select hard-coded targets/cohorts.
+    """
+    target_order = tuple(targets)
+    source_order = tuple(cohorts)
+    if not target_order or not source_order:
+        raise ValueError('targets and cohorts must be nonempty')
+    spec_pct = f'{100 * _parse_specificity(specificity):g}'
+    table_df = summary_df.set_index([target_col, cohort_col], verify_integrity=True)
+    if caption is None:
+        source_names = ' and '.join(source_order)
+        caption = (f'Threshold-based event enrichment in {source_names} at '
+                   f'{horizon} weeks using the {spec_pct}\\%-specificity operating point')
+    metrics = (
+        ('threshold', r'\shortstack{Risk\\threshold}', 'threshold'),
+        ('n_crossed', r'\shortstack{Crossed\\/ total}', 'count'),
+        ('crossing_rate_pct', r'\shortstack{Crossing\\rate}', 'percent'),
+        ('event_probability_crossed_pct', r'\shortstack{Event probability\\if crossed}', 'percent'),
+        ('event_probability_never_crossed_pct', r'\shortstack{Event probability\\if never crossed}', 'percent'),
+        ('risk_ratio', 'RR', 'number'),
+        ('ARD_pp', r'\shortstack{ARD\\(pp)}', 'number'),
+        ('logrank_p', r'\shortstack{Log-rank\\\textit{p}}', 'pvalue'),
+    )
+    headers = ['Event', 'Source', *(item[1] for item in metrics)]
+    lines = [
+        r'\begin{table}[ht!]', r'\centering', rf'\caption{{{caption}}}',
+        rf'\label{{{label}}}', r'\normalfont\fontsize{11}{13}\selectfont', '',
+        r'\resizebox{\textwidth}{!}{%',
+        r'% Reduce horizontal padding to allow larger text within the page width.',
+        r'\setlength{\tabcolsep}{3pt}%',
+        r'% Local vertical padding for this table only.',
+        r'\renewcommand{\arraystretch}{1.25}%',
+        r'\setlength{\extrarowheight}{2pt}%',
+        r'\begin{tabular}{L{0.95in}lrrrrrrrr}', r'\hline',
+        ' &\n'.join(rf'\raisebox{{-0.5\height}}{{\textbf{{{h}}}}}' for h in headers) + r' \\[3pt]',
+        r'\hline',
+    ]
+    for target in target_order:
+        event_name = str(target).replace('_', ' ')
+        lines.append(rf'\multirow{{{len(source_order)}}}{{0.95in}}{{\raggedright {event_name}}}')
+        for cohort in source_order:
+            row = table_df.loc[(target, cohort)]
+            vals = []
+            for column, _, style in metrics:
+                value = row[column]
+                if pd.isna(value):
+                    text = '--'
+                elif style == 'count':
+                    text = f"{int(value):,} / {int(row['n_total']):,}"
+                elif style == 'threshold':
+                    text = f'{value:.4f}'
+                elif style == 'percent':
+                    text = rf'{value:.1f}\%'
+                elif style == 'number':
+                    text = f'{value:.2f}'
+                elif value == 0:
+                    text = r'$<$10\textsuperscript{-300}'
+                else:
+                    mantissa, exponent = f'{value:.2e}'.split('e')
+                    text = rf'{mantissa}\,$\times$\,10\textsuperscript{{{int(exponent)}}}'
+                vals.append(text)
+            lines.append(' & ' + ' & '.join([cohort, *vals]) + r' \\')
+        lines.append(r'\hline')
+
+    zero_p = pd.to_numeric(table_df['logrank_p'], errors='coerce').eq(0)
+    zero_sources = table_df.loc[zero_p].index.get_level_values(cohort_col).unique()
+    p_note = r'\textit{p}: log-rank test p-value.'
+    if len(zero_sources):
+        p_note += (f" {' and '.join(zero_sources)} values that underflowed to zero in the saved output "
+                   r'are reported as $p<10^{-300}$.')
+    lines.extend([
+        r'\end{tabular}%', r'}', '', r'\vskip 1em',
+        r'\normalfont\fontsize{10}{12}\selectfont', r'\raggedright',
+        f'Event probabilities are observed proportions within {horizon} weeks after screening.',
+        rf'Both datasets use their saved operating threshold corresponding to {spec_pct}\% specificity in retrospective validation.',
+        'RR: risk ratio between crossed and never-crossed groups within each source.',
+        'ARD: absolute risk difference; pp: percentage points.',
+        p_note, r'\par', r'\end{table}',
+    ])
+    return '\n'.join(lines) + '\n'
+
+
+def export_survival_summary_table(summary_df, outfile, **kwargs):
+    """Write a general precomputed summary table and return the output path."""
+    text = survival_summary_to_latex(summary_df, **kwargs)
+    path = Path(outfile)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding='utf-8')
+    return path
+
+__all__.extend([
+    'plot_km_comparison',
+    'plot_finite_horizon_comparison',
+    'survival_summary_to_latex',
+    'export_survival_summary_table',
+])
