@@ -1,1 +1,1 @@
-Author: <a href="https://zed.uchicago.edu"> Zero Knowledge Discovery, University of Chicago</a>. Email: ishanu@uchicago.edu
+Maintainer: <a href="https://www.uky.edu/">Ishanu Chattopadhyay, University of Kentucky</a>. Email: <a href="mailto:ishanu.chattopadhyay@gmail.com">ishanu.chattopadhyay@gmail.com</a>

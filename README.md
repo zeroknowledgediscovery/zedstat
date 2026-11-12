@@ -1,12 +1,14 @@
 # zedstat
 
 <p align="center">
-  <img src="https://zed.uchicago.edu/logo/logo_zedstat.png" height="150" alt="zedstat logo" />
+  <img src="https://raw.githubusercontent.com/zeroknowledgediscovery/zedstat/master/docs/logo_zedstat.png" height="150" alt="zedstat logo" />
 </p>
 
 [![DOI](https://zenodo.org/badge/529991779.svg)](https://zenodo.org/badge/latestdoi/529991779)
 
-**Author:** ZeD@UChicago <zed.uchicago.edu>  
+**Author:** Ishanu Chattopadhyay  
+**Affiliation:** University of Kentucky  
+**Contact:** ishanu.chattopadhyay@gmail.com  
 **Description:** Tools for ML statistics  
 **Documentation:** https://zeroknowledgediscovery.github.io/zedstat/  
 **Example:** https://github.com/zeroknowledgediscovery/zedstat/blob/master/examples/example1.ipynb
