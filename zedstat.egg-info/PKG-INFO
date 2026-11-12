@@ -1,11 +1,13 @@
 Metadata-Version: 2.4
 Name: zedstat
-Version: 0.2.4
+Version: 0.2.5
 Summary: Statistics tools for ML models and deployment
 Home-page: https://github.com/zeroknowledgediscovery/zedstat
-Download-URL: https://github.com/zeroknowledgediscovery/zedstat/archive/0.2.4.tar.gz
-Author: zed.uchicago.edu
-Author-email: ishanu@uchicago.edu
+Download-URL: https://github.com/zeroknowledgediscovery/zedstat/archive/0.2.5.tar.gz
+Author: Ishanu Chattopadhyay
+Author-email: ishanu.chattopadhyay@gmail.com
+Maintainer: Ishanu Chattopadhyay
+Maintainer-email: ishanu.chattopadhyay@gmail.com
 License: LICENSE
 Keywords: machine learning,statistics
 Classifier: Development Status :: 4 - Beta
@@ -34,6 +36,8 @@ Dynamic: home-page
 Dynamic: keywords
 Dynamic: license
 Dynamic: license-file
+Dynamic: maintainer
+Dynamic: maintainer-email
 Dynamic: requires-dist
 Dynamic: requires-python
 Dynamic: summary
@@ -42,7 +46,7 @@ Dynamic: summary
 zedstat
 ===============
 
-.. image:: https://zed.uchicago.edu/logo/logo_zedstat.png
+.. image:: https://raw.githubusercontent.com/zeroknowledgediscovery/zedstat/master/docs/logo_zedstat.png
    :height: 150px
    :align: center 
 
@@ -51,7 +55,9 @@ zedstat
 
 .. class:: no-web no-pdf
 
-:Author: ZeD@UChicago <zed.uchicago.edu>
+:Author: Ishanu Chattopadhyay
+:Affiliation: University of Kentucky
+:Contact: ishanu.chattopadhyay@gmail.com
 :Description: Tools for ML statistics 
 :Documentation: https://zeroknowledgediscovery.github.io/zedstat/
 :Example: https://github.com/zeroknowledgediscovery/zedstat/blob/master/examples/example1.ipynb
