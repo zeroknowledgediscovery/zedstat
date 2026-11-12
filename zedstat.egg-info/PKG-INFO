@@ -1,9 +1,9 @@
 Metadata-Version: 2.4
 Name: zedstat
-Version: 0.0.157
+Version: 0.2.2
 Summary: Statistics tools for ML models and deployment
 Home-page: https://github.com/zeroknowledgediscovery/zedstat
-Download-URL: https://github.com/zeroknowledgediscovery/zedstat/archive/0.0.157.tar.gz
+Download-URL: https://github.com/zeroknowledgediscovery/zedstat/archive/0.2.2.tar.gz
 Author: zed.uchicago.edu
 Author-email: ishanu@uchicago.edu
 License: LICENSE
@@ -22,6 +22,7 @@ Requires-Dist: scikit-learn
 Requires-Dist: scipy
 Requires-Dist: numpy
 Requires-Dist: pandas
+Requires-Dist: lifelines>=0.27
 Requires-Dist: scipy
 Dynamic: author
 Dynamic: author-email
