@@ -222,3 +222,9 @@ def _install_getbounds_geometry_guard():
 
 _install_getbounds_geometry_guard()
 del _install_getbounds_geometry_guard
+
+# Pointwise score-level LR confidence intervals and fill-only plot helper.
+from .lr_ci import lr_curve_ci_from_scores, plot_lr_ci_fill
+
+# Score-based CI extensions (pointwise; display smoothing is non-inferential)
+from .pr_ci import precision_recall_ci_from_scores, plot_precision_recall_ci_fill
