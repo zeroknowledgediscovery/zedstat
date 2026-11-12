@@ -114,8 +114,18 @@ class SurvivalApiTests(unittest.TestCase):
         }
         self.assertEqual(set(survival.__all__), expected)
         self.assertFalse(hasattr(survival, 'run_ild_survival_publication'))
-        self.assertFalse(hasattr(survival, 'plot_km_paper'))
-        self.assertFalse(hasattr(survival, 'plot_dynamic_metrics_paper'))
+        # Keep the original plotting functions callable for backward compatibility,
+        # but do not advertise them as part of the new general-purpose API.
+        legacy = (
+            'plot_km_paper',
+            'plot_dynamic_metrics_paper',
+            'plot_joined_km',
+            'plot_joined_dynamic_metrics',
+            'export_joined_survival_summary_table',
+        )
+        for name in legacy:
+            self.assertNotIn(name, survival.__all__)
+            self.assertTrue(callable(getattr(survival, name)))
 
     def test_validates_invalid_inputs(self):
         with self.assertRaises(ValueError):

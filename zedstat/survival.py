@@ -24,11 +24,6 @@ __all__ = [
     'make_patient_level_threshold_dataset',
     'compute_km_statistics',
     'dynamic_threshold_metrics',
-    'plot_km_paper',
-    'plot_dynamic_metrics_paper',
-    'plot_joined_km',
-    'plot_joined_dynamic_metrics',
-    'export_joined_survival_summary_table',
 ]
 
 def _apply_large_paper_fonts(
@@ -1094,7 +1089,7 @@ def plot_km_comparison(
     ax.tick_params(axis='both', labelsize=15)
     ax.grid(True, color='0.68', alpha=0.42, linewidth=0.95)
     ax.legend(frameon=False, loc='lower left', fontsize=legend_fontsize)
-    _halve_x_margins(ax)
+    halve_x_margins(ax)
     fig.tight_layout()
     _save_show_close(fig, outfile, show, close, dpi)
     return fig, ax
@@ -1161,7 +1156,7 @@ def plot_finite_horizon_comparison(
     ax.grid(True, color='0.68', alpha=0.42, linewidth=0.95)
     ax.legend(handles=handles, frameon=False, loc='lower right',
               bbox_to_anchor=(1, 0.465), fontsize=legend_fontsize)
-    _halve_x_margins(ax)
+    halve_x_margins(ax)
     fig.tight_layout()
     _save_show_close(fig, outfile, show, close, dpi)
     return fig, ax
