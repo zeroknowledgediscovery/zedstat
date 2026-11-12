@@ -8,6 +8,7 @@ tests/test_getbounds_current_geometry.py
 tests/test_getbounds_preserves_nominal.py
 tests/test_lr_ci.py
 tests/test_survival_joined.py
+tests/test_survival_publication_runner.py
 zedstat/__init__.py
 zedstat/calibration.py
 zedstat/ci.py

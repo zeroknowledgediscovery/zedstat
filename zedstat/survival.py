@@ -970,3 +970,118 @@ def export_joined_survival_summary_table(
     if print_latex:
         print(LATEX, end="")
     return output_path
+
+
+# -----------------------------------------------------------------------------
+# One-call, reproducible workflow for the original ILD KM publication figures.
+# Relocates notebook file loading, summaries and plot orchestration into zedstat.
+# -----------------------------------------------------------------------------
+def run_ild_survival_publication(
+    root='.',
+    *,
+    ukhc_training_tag='50',
+    specificity='0975',
+    max_week=24,
+    max_followup_weeks=26,
+    landmark_weeks=(1, 2, 4, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26),
+    dpi=600,
+    show=True,
+    print_latex=True,
+):
+    """Regenerate the two original joined ILD survival plot families.
+
+    Preserves original KM_PLOTS(1).ipynb processing, including its original
+    duration <= 24 pre-selection, cohort grouping, CI estimates, and outputs.
+    Root points at the ILD analysis directory containing PAPER_DATA_* folders.
+
+    Returns a dictionary containing output_paths, summary, and input provenance.
+    No modeling or metric recomputation: reads existing saved patient/metric CSVs.
+    """
+    root = Path(root).expanduser().resolve()
+    output_dir = root / 'PUBLICATION_FILES' / 'survival_JOINED'
+    models = ('ILD-AFSTDPULMO', 'ILD-AFSTDOXYGEN', 'ILD-AFSTDARDS')
+    targets = {
+        'ILD-AFSTDPULMO': 'Pulmonary_Hypertension',
+        'ILD-AFSTDOXYGEN': 'Oxygen_Dependence',
+        'ILD-AFSTDARDS': 'ARDS',
+    }
+    sources = {
+        'MarketScan': root / 'PAPER_DATA_MARKETSCAN' / 'survival_MARKETSCAN',
+        'UKHC': root / f'PAPER_DATA_UKHC_{ukhc_training_tag}TRAINING' / 'survival_UKHC',
+    }
+    spec = str(specificity)
+    colors = {'blue':'#4675AF', 'orange':'#E88833',
+              'green':'#569D3E', 'red':'#BE3D30'}
+    linestyles = {'MarketScan':'-', 'UKHC':'--'}
+
+    # Preflight every required input *before* writing any results.
+    required_paths = []
+    for source_dir in sources.values():
+        required_paths.append(source_dir / 'SUMMARY.csv')
+        for model in models:
+            required_paths.append(source_dir / f'km_full_cohort_{model}_{spec}.csv')
+            required_paths.append(source_dir / f'dynamic_metrics_full_cohort_{model}_{spec}.csv')
+    missing = [str(p) for p in required_paths if not p.is_file()]
+    if missing:
+        raise FileNotFoundError('Missing survival input files:\n  ' + '\n  '.join(missing))
+
+    summary_parts = []
+    patients_by_model = {model: {} for model in models}
+    metrics_by_model = {model: {} for model in models}
+    for source, source_dir in sources.items():
+        source_summary = pd.read_csv(source_dir / 'SUMMARY.csv', dtype={'SPEC': str})
+        source_summary = source_summary.loc[
+            source_summary['SPEC'].str.zfill(len(spec)).eq(spec)
+            & source_summary['M'].isin(targets.values())
+            & source_summary['week'].eq(max_week)
+        ].copy()
+        source_summary['source'] = source
+        summary_parts.append(source_summary)
+        for model in models:
+            patients_by_model[model][source] = pd.read_csv(
+                source_dir / f'km_full_cohort_{model}_{spec}.csv'
+            )
+            metrics_by_model[model][source] = pd.read_csv(
+                source_dir / f'dynamic_metrics_full_cohort_{model}_{spec}.csv'
+            )
+
+    summary = pd.concat(summary_parts, ignore_index=True)
+    expected = {(target, source) for target in targets.values() for source in sources}
+    actual = set(zip(summary['M'], summary['source']))
+    if expected != actual or summary.duplicated(['M','source']).any():
+        raise ValueError('Filtered SUMMARY.csv must contain exactly one row for each outcome/cohort at the selected specificity and week.')
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    summary_path = output_dir / 'SUMMARY.csv'
+    summary.to_csv(summary_path, index=False)
+    saved = [summary_path]
+
+    for model in models:
+        print(f'{model}: stricter threshold, MarketScan versus UKHC')
+        saved.append(plot_joined_km(
+            patients_by_model[model], model, output_dir,
+            max_week=max_week, colors=colors,
+            source_linestyles=linestyles, linewidth=3.25,
+            legend_fontsize=14, dpi=dpi, show=show,
+        ))
+        saved.append(plot_joined_dynamic_metrics(
+            metrics_by_model[model], model, output_dir,
+            max_week=max_week, max_followup_weeks=max_followup_weeks,
+            landmark_weeks=landmark_weeks, colors=colors,
+            source_linestyles=linestyles, linewidth=3.25,
+            marker_size=6, dpi=dpi, show=show,
+        ))
+
+    saved.append(export_joined_survival_summary_table(
+        summary, output_dir, max_week=max_week, specificity=spec,
+        print_latex=print_latex,
+    ))
+    return {
+        'output_paths': tuple(Path(p) for p in saved),
+        'summary': summary,
+        'input_dirs': sources,
+        'max_week': max_week,
+        'specificity': spec,
+    }
+
+__all__.append('run_ild_survival_publication')
