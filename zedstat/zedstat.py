@@ -5,17 +5,18 @@ from scipy.stats import norm
 from sklearn.isotonic import IsotonicRegression
 from sklearn.metrics import roc_curve
 from sklearn.metrics import auc as sk_auc
-from sklearn.model_selection import StratifiedKFold
 
 
 __all__ = [
     'processRoc',
     'genroc',
     'pipeline',
-    'score_to_probability',
     'score_to_threshold_ppv',
-    'crossfit_isotonic_probabilities',
-    'calibration_curve_table',
+    'lr_nondominated_frontier',
+    'lr_curve_ci_from_scores',
+    'plot_lr_ci_fill',
+    'precision_recall_ci_from_scores',
+    'plot_precision_recall_ci_fill',
 ]
 
 
@@ -190,32 +191,6 @@ def _ensure_binary_labels(y):
             return y.astype(int)
     raise ValueError('Label column must be binary and coded as 0/1 or bool.')
 
-
-def _make_prevalence_weights(y, target_prev=None):
-    y = np.asarray(y).astype(int)
-    if target_prev is None:
-        return np.ones_like(y, dtype=float)
-    sample_prev = y.mean()
-    if sample_prev <= 0 or sample_prev >= 1:
-        raise ValueError('Sample must contain both cases and controls.')
-    if not (0 < target_prev < 1):
-        raise ValueError('target_prevalence must be between 0 and 1.')
-    return np.where(y == 1, target_prev / sample_prev, (1.0 - target_prev) / (1.0 - sample_prev)).astype(float)
-
-
-def _weighted_mean(x, w):
-    x = np.asarray(x, dtype=float)
-    w = np.asarray(w, dtype=float)
-    return float(np.sum(w * x) / np.sum(w))
-
-
-def _choose_n_splits(y, requested):
-    y = np.asarray(y).astype(int)
-    min_class = min((y == 0).sum(), (y == 1).sum())
-    n_splits = min(int(requested), min_class)
-    if n_splits < 2:
-        raise ValueError('Need at least 2 samples in each class for cross-fitted calibration.')
-    return n_splits
 
 # -----------------------------------------------------------------------------
 # roc helpers
@@ -554,7 +529,6 @@ class processRoc(object):
         self._auc = {'U': np.nan, 'L': np.nan}
         self._operating_zone = pd.DataFrame()
         self.df_measure_bounds_ = {}
-        self._calibration = None
         self._auc_bootstrap_data = None
 
     def set_lr_fpr_floor(self, lr_fpr_floor):
@@ -597,7 +571,7 @@ class processRoc(object):
         nominal = self.nominal_auc()
         if bootstrap:
             if self._auc_bootstrap_data is None:
-                raise ValueError('Bootstrap AUC requested, but no raw score/label data are attached. Use fit_score_calibration(...) or set_auc_bootstrap_data(...).')
+                raise ValueError('Bootstrap AUC requested, but no raw score/label data are attached. Use set_auc_bootstrap_data(...) to attach raw scores and labels.')
             nominal_b, upper_b, lower_b = _bootstrap_auc(
                 self._auc_bootstrap_data['scores'],
                 self._auc_bootstrap_data['labels'],
@@ -882,65 +856,6 @@ class processRoc(object):
         }
         return
 
-    def fit_score_calibration(self, df, score_col, label_col, target_prevalence=None, lower_score_is_risk=False, n_splits=5, random_state=42, n_bins=10):
-        work = df[[score_col, label_col]].dropna().copy()
-        work[label_col] = _ensure_binary_labels(work[label_col])
-        scores = pd.to_numeric(work[score_col], errors='coerce')
-        work = work.loc[np.isfinite(scores)].copy()
-        work[score_col] = scores.loc[work.index].astype(float)
-        work['_score_for_calibration'] = work[score_col] if not lower_score_is_risk else -work[score_col]
-        oof = crossfit_isotonic_probabilities(
-            work.rename(columns={'_score_for_calibration': '__score__'}),
-            score_col='__score__',
-            label_col=label_col,
-            target_prevalence=target_prevalence,
-            n_splits=n_splits,
-            random_state=random_state,
-        )
-        work['calibrated_prob_oof'] = oof
-        weights = _make_prevalence_weights(work[label_col].to_numpy(dtype=int), target_prevalence)
-        iso = IsotonicRegression(y_min=0.0, y_max=1.0, out_of_bounds='clip')
-        iso.fit(work['_score_for_calibration'].to_numpy(dtype=float), work[label_col].to_numpy(dtype=int), sample_weight=weights)
-        cal_df = calibration_curve_table(work, prob_col='calibrated_prob_oof', label_col=label_col, target_prevalence=target_prevalence, n_bins=n_bins)
-        self._calibration = {
-            'iso': iso,
-            'score_col': score_col,
-            'label_col': label_col,
-            'target_prevalence': target_prevalence,
-            'lower_score_is_risk': bool(lower_score_is_risk),
-            'work': work,
-            'curve': cal_df,
-        }
-        self.set_auc_bootstrap_data(work, score_col=score_col, label_col=label_col, lower_score_is_risk=lower_score_is_risk)
-        return self
-
-    def calibration_curve(self):
-        if self._calibration is None:
-            raise ValueError('No fitted calibration found. Run fit_score_calibration(...) first.')
-        return self._calibration['curve'].copy()
-
-    def plot_calibration_curve(self, out_png=None):
-        if self._calibration is None:
-            raise ValueError('No fitted calibration found. Run fit_score_calibration(...) first.')
-        import matplotlib.pyplot as plt
-        cal_df = self._calibration['curve']
-        lim = _nice_axis_limit(max(cal_df['mean_pred'].max(), cal_df['obs_rate'].max()))
-        fig, ax = plt.subplots(figsize=(5.5, 5.5))
-        ax.plot([0, lim], [0, lim], linestyle='--', linewidth=1)
-        ax.plot(cal_df['mean_pred'], cal_df['obs_rate'], marker='o', linewidth=1.5, markersize=4)
-        ax.set_xlabel('Predicted probability')
-        ax.set_ylabel('Observed event rate')
-        ax.set_title('Calibration curve')
-        ax.set_xlim(0, lim)
-        ax.set_ylim(0, lim)
-        ax.grid(alpha=0.3)
-        fig.tight_layout()
-        if out_png is not None:
-            fig.savefig(out_png, dpi=200)
-            plt.close(fig)
-            return out_png
-        return fig, ax
-
     def _lookup_measure_at_score(self, scores, value_cols):
         df = self.get()
         if self.thresholdcol is None or self.thresholdcol not in df.columns:
@@ -978,20 +893,6 @@ class processRoc(object):
         elif 'ppv' not in self.get().columns:
             self.allmeasures(interpolate=kwargs.get('interpolate', False))
         return self._lookup_measure_at_score(score, ['ppv'])
-
-    def scoretoprobability(self, score, regen=True, **kwargs):
-        if self._calibration is None:
-            raise ValueError('No fitted calibration found. Run fit_score_calibration(...) first. For threshold PPV use score_to_threshold_ppv(...).')
-        if score is None:
-            return None
-        iso = self._calibration['iso']
-        lower_score_is_risk = self._calibration['lower_score_is_risk']
-        def one_score(s):
-            x = -float(s) if lower_score_is_risk else float(s)
-            return float(iso.predict([x])[0])
-        if isinstance(score, (list, tuple, np.ndarray, pd.Series)):
-            return np.array([one_score(s) for s in score])
-        return one_score(score)
 
     def operating_zone(self, n=1, LRplus=10, LRminus=0.6):
         wf = self.df.copy()
@@ -1256,36 +1157,6 @@ def score_to_threshold_ppv(scores, df, prevalence, total_samples, positive_sampl
         s = float(np.clip(score, x.min(), x.max()))
         return [float(np.interp(s, x, ppv)), float(np.interp(s, x, ppv_upper)), float(np.interp(s, x, ppv_lower))]
     return [one_score(score) for score in scores]
-
-
-def score_to_probability(scores, df, score_col, label_col, target_prevalence=None, lower_score_is_risk=False, n_splits=5, random_state=42, return_curve=False, n_bins=10):
-    work = df[[score_col, label_col]].dropna().copy()
-    work[label_col] = _ensure_binary_labels(work[label_col])
-    raw_scores = pd.to_numeric(work[score_col], errors='coerce')
-    work = work.loc[np.isfinite(raw_scores)].copy()
-    work[score_col] = raw_scores.loc[work.index].astype(float)
-    greater_is_risk = not bool(lower_score_is_risk)
-    work['_score_for_calibration'] = work[score_col] if greater_is_risk else -work[score_col]
-    oof = crossfit_isotonic_probabilities(
-        work.rename(columns={'_score_for_calibration': '__score__'}),
-        score_col='__score__',
-        label_col=label_col,
-        target_prevalence=target_prevalence,
-        n_splits=n_splits,
-        random_state=random_state,
-    )
-    work['calibrated_prob_oof'] = oof
-    w_full = _make_prevalence_weights(work[label_col].to_numpy(), target_prevalence)
-    iso = IsotonicRegression(y_min=0.0, y_max=1.0, out_of_bounds='clip')
-    iso.fit(work['_score_for_calibration'].to_numpy(dtype=float), work[label_col].to_numpy(dtype=int), sample_weight=w_full)
-    def one_score(score):
-        x = -float(score) if lower_score_is_risk else float(score)
-        return float(iso.predict([x])[0])
-    probs = [one_score(score) for score in scores]
-    if not return_curve:
-        return probs
-    cal_df = calibration_curve_table(work, prob_col='calibrated_prob_oof', label_col=label_col, target_prevalence=target_prevalence, n_bins=n_bins)
-    return probs, cal_df
 
 
 # =============================================================================
@@ -1742,10 +1613,6 @@ processRoc.usample = _processRoc_usample_fixed
 processRoc.getBounds = _processRoc_getBounds_fixed
 processRoc.lr_frontier = _processRoc_lr_frontier
 
-try:
-    __all__.append('lr_nondominated_frontier')
-except Exception:
-    pass
 
 
 # =============================================================================
@@ -1914,18 +1781,10 @@ def _processRoc_get_full(self, interpolate=True, fillna=None, limit_direction='b
 processRoc.get = _processRoc_get_nan_safe
 processRoc.get_full = _processRoc_get_full
 
-try:
-    __all__.append('lr_nondominated_frontier')
-except Exception:
-    pass
 
 # Raw-score-based, pointwise LR confidence intervals; separate from the
 # historical analytic getBounds() API and its ROC interpolation.
 from .lr_ci import lr_curve_ci_from_scores, plot_lr_ci_fill
-try:
-    __all__.extend(('lr_curve_ci_from_scores', 'plot_lr_ci_fill'))
-except Exception:
-    pass
 
 # Score-based CI extensions (pointwise; display smoothing is non-inferential)
 from .pr_ci import precision_recall_ci_from_scores, plot_precision_recall_ci_fill

@@ -43,7 +43,8 @@ setup(
         "numpy",  
         "pandas",
         "lifelines>=0.27",
-        "matplotlib>=3.5"],
+        "matplotlib>=3.5",
+        "tqdm"],
     python_requires='>=3.6',
     classifiers=[
         'Development Status :: 4 - Beta',

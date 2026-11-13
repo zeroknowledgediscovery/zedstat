@@ -33,7 +33,7 @@ __all__ = [
     "bootstrap_test_metrics",
     "plot_reliability_diagram",
     "heldout_isotonic_calibration_with_bootstrap",
-    "interpret_calibration_results",
+    "format_calibration_summary_df",
 ]
 
 
